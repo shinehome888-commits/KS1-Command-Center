@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=4">
 </head>
 <body>
 
@@ -40,7 +40,29 @@
 
         <!-- AI Workforce Dashboard -->
         <section class="section-card">
-            <h3>AI Workforce</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">AI Workforce</h3>
+                <button id="toggleAgentFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Agent</button>
+            </div>
+
+            <!-- Hidden Add Agent Form -->
+            <div id="addAgentForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                <h4 style="color: var(--gold); margin-bottom: 15px;">Deploy New AI Agent</h4>
+                <input type="text" id="newAgentName" placeholder="Agent Name (e.g., KS1 Finance Agent)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <input type="text" id="newAgentRole" placeholder="Role (e.g., Financial Analyst)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <select id="newAgentStatus" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <option value="Online">Online</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Standby">Standby</option>
+                    <option value="Offline">Offline</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <button id="submitAgentBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Deploy Agent</button>
+                    <button id="cancelAgentBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Agents Grid (Live Data will load here) -->
             <div class="grid-layout" id="agents-grid">
                 <!-- Live AI Agent cards will be injected here by JavaScript -->
             </div>
@@ -89,7 +111,7 @@
             </div>
         </section>
 
-        <!-- NEW: Recent Activity Log -->
+        <!-- Recent Activity Log -->
         <section class="section-card">
             <h3>Recent Activity</h3>
             <div id="activity-log-container" style="max-height: 300px; overflow-y: auto;">
@@ -99,6 +121,6 @@
 
     </main>
 
-    <script src="js/app.js?v=3"></script>
+    <script src="js/app.js?v=4"></script>
 </body>
 </html>
