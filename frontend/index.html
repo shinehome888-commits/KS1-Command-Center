@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css">
+    <!-- Cache buster added here -->
+    <link rel="stylesheet" href="css/style.css?v=2">
 </head>
 <body>
 
@@ -84,6 +85,7 @@
                 <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
             </div>
             <div class="chat-input-area">
+                <!-- Cache buster added to script tag below -->
                 <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant...">
                 <button id="sendBtn">Send</button>
             </div>
@@ -91,6 +93,6 @@
 
     </main>
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=2"></script>
 </body>
 </html>
