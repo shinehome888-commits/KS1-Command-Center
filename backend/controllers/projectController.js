@@ -1,5 +1,7 @@
 const Project = require('../models/Project');
 
+// @desc    Get all projects
+// @route   GET /api/projects
 const getProjects = async (req, res) => {
     try {
         const projects = await Project.find();
@@ -9,6 +11,8 @@ const getProjects = async (req, res) => {
     }
 };
 
+// @desc    Create a new project
+// @route   POST /api/projects
 const createProject = async (req, res) => {
     try {
         const project = await Project.create(req.body);
@@ -18,4 +22,20 @@ const createProject = async (req, res) => {
     }
 };
 
-module.exports = { getProjects, createProject };
+// @desc    Delete a project
+// @route   DELETE /api/projects/:id
+const deleteProject = async (req, res) => {
+    try {
+        const project = await Project.findByIdAndDelete(req.params.id);
+        
+        if (!project) {
+            return res.status(404).json({ success: false, message: 'Project not found' });
+        }
+        
+        res.status(200).json({ success: true, message: 'Project deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+module.exports = { getProjects, createProject, deleteProject };
