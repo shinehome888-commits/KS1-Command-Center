@@ -41,44 +41,39 @@
         <!-- AI Workforce Dashboard -->
         <section class="section-card">
             <h3>AI Workforce</h3>
-            <div class="grid-layout">
-                <div class="card agent-card">
-                    <div class="status-indicator online"></div>
-                    <h4>KS1 Operations Agent</h4>
-                    <p class="role">Digital Operations Coordinator</p>
-                    <span class="status-text">Online</span>
-                </div>
-                <div class="card agent-card">
-                    <div class="status-indicator ready"></div>
-                    <h4>KS1 Knowledge Agent</h4>
-                    <p class="role">Digital Librarian</p>
-                    <span class="status-text">Ready</span>
-                </div>
-                <div class="card agent-card">
-                    <div class="status-indicator standby"></div>
-                    <h4>KS1 Builder Agent</h4>
-                    <p class="role">Software Engineer</p>
-                    <span class="status-text">Standby</span>
-                </div>
+            <div class="grid-layout" id="agents-grid">
+                <!-- Live AI Agent cards will be injected here by JavaScript -->
             </div>
         </section>
 
         <!-- Project Dashboard -->
         <section class="section-card">
-            <h3>Active Projects</h3>
-            <div class="grid-layout">
-                <div class="card project-card">
-                    <h4>ShineGPT</h4>
-                    <p class="category">Category: Education</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Active Projects</h3>
+                <button id="toggleProjectFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Project</button>
+            </div>
+
+            <!-- Hidden Add Project Form -->
+            <div id="addProjectForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                <h4 style="color: var(--gold); margin-bottom: 15px;">Create New Project</h4>
+                <input type="text" id="newProjectName" placeholder="Project Name (e.g., KS1 Health)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <input type="text" id="newProjectDesc" placeholder="Description" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <select id="newProjectCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <option value="Education">Education</option>
+                    <option value="Blockchain">Blockchain</option>
+                    <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
+                    <option value="AI">AI</option>
+                    <option value="Other">Other</option>
+                </select>
+                <div style="display: flex; gap: 10px;">
+                    <button id="submitProjectBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Save to Database</button>
+                    <button id="cancelProjectBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
                 </div>
-                <div class="card project-card">
-                    <h4>KS1 Wallet</h4>
-                    <p class="category">Category: Blockchain</p>
-                </div>
-                <div class="card project-card">
-                    <h4>KS1 ALKEBULAN PAY</h4>
-                    <p class="category">Category: Digital Trade Infrastructure</p>
-                </div>
+            </div>
+
+            <!-- Projects Grid (Live Data will load here) -->
+            <div class="grid-layout" id="projects-grid">
+                <!-- Live Project cards will be injected here by JavaScript -->
             </div>
         </section>
 
