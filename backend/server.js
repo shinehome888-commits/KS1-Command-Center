@@ -11,8 +11,14 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// --- BULLETPROOF CORS CONFIGURATION ---
+app.use(cors({
+    origin: ['https://ks1-command-center.pages.dev', 'http://localhost:3000', 'http://localhost:5500', '*'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+// --------------------------------------
+
 app.use(express.json());
 
 // Base Route
@@ -24,9 +30,9 @@ app.get('/', (req, res) => {
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
-app.use('/api/knowledge', require('./routes/knowledgeRoutes')); // NEW: Knowledge Base
+app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 
-// --- TEMPORARY SEED ROUTE (We will remove this after) ---
+// --- TEMPORARY SEED ROUTE ---
 app.get('/api/seed', async (req, res) => {
     try {
         const Project = require('./models/Project');
@@ -52,7 +58,7 @@ app.get('/api/seed', async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 });
-// ---------------------------------------------------------
+// ----------------------------
 
 // Global Error Handler
 app.use((err, req, res, next) => {
