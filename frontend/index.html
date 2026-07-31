@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -62,10 +62,8 @@
                 </div>
             </div>
 
-            <!-- Agents Grid (Live Data will load here) -->
-            <div class="grid-layout" id="agents-grid">
-                <!-- Live AI Agent cards will be injected here by JavaScript -->
-            </div>
+            <!-- Agents Grid -->
+            <div class="grid-layout" id="agents-grid"></div>
         </section>
 
         <!-- Project Dashboard -->
@@ -93,10 +91,39 @@
                 </div>
             </div>
 
-            <!-- Projects Grid (Live Data will load here) -->
-            <div class="grid-layout" id="projects-grid">
-                <!-- Live Project cards will be injected here by JavaScript -->
+            <!-- Projects Grid -->
+            <div class="grid-layout" id="projects-grid"></div>
+        </section>
+
+        <!-- NEW: Knowledge Base Section -->
+        <section class="section-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Knowledge Base</h3>
+                <button id="toggleKnowledgeFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Knowledge Article</button>
             </div>
+
+            <!-- Hidden Add Knowledge Form -->
+            <div id="addKnowledgeForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                <h4 style="color: var(--gold); margin-bottom: 15px;">Add New Knowledge Article</h4>
+                <input type="text" id="newKnowledgeTitle" placeholder="Article Title (e.g., Blockchain Basics)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <select id="newKnowledgeCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <option value="Education">Education</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Blockchain">Blockchain</option>
+                    <option value="AI">AI</option>
+                    <option value="Business">Business</option>
+                    <option value="Research">Research</option>
+                    <option value="Other">Other</option>
+                </select>
+                <textarea id="newKnowledgeContent" placeholder="Article Content (write your knowledge here...)" rows="6" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px; resize: vertical; font-family: inherit;"></textarea>
+                <div style="display: flex; gap: 10px;">
+                    <button id="submitKnowledgeBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Article</button>
+                    <button id="cancelKnowledgeBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                </div>
+            </div>
+
+            <!-- Knowledge Grid -->
+            <div class="grid-layout" id="knowledge-grid"></div>
         </section>
 
         <!-- AI Assistant Placeholder -->
@@ -121,6 +148,6 @@
 
     </main>
 
-    <script src="js/app.js?v=4"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>
