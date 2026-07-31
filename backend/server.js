@@ -24,6 +24,37 @@ app.get('/', (req, res) => {
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 
+// --- TEMPORARY SEED ROUTE (We will remove this after) ---
+app.get('/api/seed', async (req, res) => {
+    try {
+        const Project = require('./models/Project');
+        const Agent = require('./models/Agent');
+
+        // Clear existing data
+        await Project.deleteMany();
+        await Agent.deleteMany();
+
+        // Insert KS1 Projects
+        await Project.insertMany([
+            { name: 'ShineGPT', description: 'AI-powered education platform for humanity.', category: 'Education', status: 'Active' },
+            { name: 'KS1 Wallet', description: 'Secure blockchain digital wallet infrastructure.', category: 'Blockchain', status: 'Planning' },
+            { name: 'KS1 ALKEBULAN PAY', description: 'Digital trade infrastructure empowering Africa.', category: 'Digital Trade Infrastructure', status: 'Active' }
+        ]);
+
+        // Insert KS1 AI Agents
+        await Agent.insertMany([
+            { name: 'KS1 Operations Agent', role: 'Digital Operations Coordinator', status: 'Online' },
+            { name: 'KS1 Knowledge Agent', role: 'Digital Librarian', status: 'Ready' },
+            { name: 'KS1 Builder Agent', role: 'Software Engineer', status: 'Standby' }
+        ]);
+
+        res.json({ success: true, message: "✅ Database successfully seeded with KS1 data!" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+// ---------------------------------------------------------
+
 // Global Error Handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
