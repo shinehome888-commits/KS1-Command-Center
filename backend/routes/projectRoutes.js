@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { getProjects, createProject } = require('../controllers/projectController');
+const { getProjects, createProject, deleteProject } = require('../controllers/projectController');
 
-router.route('/').get(getProjects).post(createProject);
+// Define the paths
+router.route('/')
+    .get(getProjects)      // GET /api/projects
+    .post(createProject);  // POST /api/projects
+
+// Add the delete route with an ID parameter
+router.route('/:id')
+    .delete(deleteProject); // DELETE /api/projects/:id
 
 module.exports = router;
