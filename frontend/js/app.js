@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="category">Category: ${project.category}</p>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                                 <span style="padding: 4px 8px; background: rgba(212, 175, 55, 0.2); color: #D4AF37; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${project.status}</span>
-                                <button onclick="deleteProject('${project._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: all 0.2s;">Delete</button>
+                                <button onclick="deleteProject('${project._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">Delete</button>
                             </div>
                         `;
                         container.appendChild(card);
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="role">${agent.role}</p>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                                 <span class="status-text">${agent.status}</span>
-                                <button onclick="deleteAgent('${agent._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: all 0.2s;">Delete</button>
+                                <button onclick="deleteAgent('${agent._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">Delete</button>
                             </div>
                         `;
                         container.appendChild(card);
@@ -64,7 +64,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 3. Fetch and Render Activity Logs ---
+    // --- 3. Fetch and Render Knowledge Articles ---
+    const loadKnowledge = async () => {
+        try {
+            const response = await fetch(`${API_URL}/knowledge`);
+            const result = await response.json();
+            const container = document.getElementById('knowledge-grid');
+            
+            if (container) {
+                if (result.success && result.data.length > 0) {
+                    container.innerHTML = '';
+                    result.data.forEach(article => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.style.cssText = 'background: var(--black); padding: 20px; border-radius: 8px; border: 1px solid var(--light-grey);';
+                        
+                        const date = new Date(article.createdAt).toLocaleDateString();
+                        
+                        card.innerHTML = `
+                            <h4 style="color: var(--gold); margin-bottom: 8px;">${article.title}</h4>
+                            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px;">Category: ${article.category} • ${date}</p>
+                            <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap;">${article.content}</p>
+                            <button onclick="deleteKnowledge('${article._id}')" style="padding: 6px 12px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">Delete Article</button>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<p style="color: rgba(255,255,255,0.5); grid-column: 1/-1;">No knowledge articles yet. Click "+ Add Knowledge Article" to begin building your knowledge base.</p>';
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error loading knowledge:', error);
+        }
+    };
+
+    // --- 4. Fetch and Render Activity Logs ---
     const loadLogs = async () => {
         try {
             const response = await fetch(`${API_URL}/logs`);
@@ -102,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 4. Add New Project Logic ---
+    // --- 5. Add New Project Logic ---
     const toggleProjectBtn = document.getElementById('toggleProjectFormBtn');
     const projectForm = document.getElementById('addProjectForm');
     const cancelProjectBtn = document.getElementById('cancelProjectBtn');
@@ -162,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. Add New Agent Logic ---
+    // --- 6. Add New Agent Logic ---
     const toggleAgentBtn = document.getElementById('toggleAgentFormBtn');
     const agentForm = document.getElementById('addAgentForm');
     const cancelAgentBtn = document.getElementById('cancelAgentBtn');
@@ -222,7 +256,67 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 6. AI Chat Logic with Activity Logging ---
+    // --- 7. Add New Knowledge Logic ---
+    const toggleKnowledgeBtn = document.getElementById('toggleKnowledgeFormBtn');
+    const knowledgeForm = document.getElementById('addKnowledgeForm');
+    const cancelKnowledgeBtn = document.getElementById('cancelKnowledgeBtn');
+    const submitKnowledgeBtn = document.getElementById('submitKnowledgeBtn');
+
+    if (toggleKnowledgeBtn && knowledgeForm) {
+        toggleKnowledgeBtn.addEventListener('click', () => {
+            knowledgeForm.style.display = knowledgeForm.style.display === 'none' ? 'block' : 'none';
+        });
+
+        cancelKnowledgeBtn.addEventListener('click', () => {
+            knowledgeForm.style.display = 'none';
+            document.getElementById('newKnowledgeTitle').value = '';
+            document.getElementById('newKnowledgeContent').value = '';
+        });
+
+        submitKnowledgeBtn.addEventListener('click', async () => {
+            const title = document.getElementById('newKnowledgeTitle').value.trim();
+            const category = document.getElementById('newKnowledgeCategory').value;
+            const content = document.getElementById('newKnowledgeContent').value.trim();
+
+            if (!title || !content) {
+                alert('Please fill in the article title and content.');
+                return;
+            }
+
+            submitKnowledgeBtn.textContent = 'Saving...';
+            submitKnowledgeBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/knowledge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, category, content })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Knowledge article added successfully!');
+                    knowledgeForm.style.display = 'none';
+                    document.getElementById('newKnowledgeTitle').value = '';
+                    document.getElementById('newKnowledgeContent').value = '';
+                    loadKnowledge();
+                    await createLog('King Solomon', `Added knowledge: ${title}`, 'Success');
+                    loadLogs();
+                } else {
+                    alert('❌ Failed to add knowledge: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+            } finally {
+                submitKnowledgeBtn.textContent = 'Save Article';
+                submitKnowledgeBtn.disabled = false;
+            }
+        });
+    }
+
+    // --- 8. AI Chat Logic with Activity Logging ---
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatWindow = document.getElementById('chatWindow');
@@ -255,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- 7. Helper Function to Create Activity Logs ---
+    // --- 9. Helper Function to Create Activity Logs ---
     const createLog = async (actor, action, status) => {
         try {
             await fetch(`${API_URL}/logs`, {
@@ -268,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 8. GLOBAL DELETE PROJECT FUNCTION ---
+    // --- 10. GLOBAL DELETE PROJECT FUNCTION ---
     window.deleteProject = async (id) => {
         if (!confirm('Are you sure you want to permanently delete this project from the Command Center?')) {
             return;
@@ -295,7 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 9. GLOBAL DELETE AGENT FUNCTION ---
+    // --- 11. GLOBAL DELETE AGENT FUNCTION ---
     window.deleteAgent = async (id) => {
         if (!confirm('Are you sure you want to decommission this AI Agent from the Command Center?')) {
             return;
@@ -322,8 +416,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // --- 12. GLOBAL DELETE KNOWLEDGE FUNCTION ---
+    window.deleteKnowledge = async (id) => {
+        if (!confirm('Are you sure you want to permanently delete this knowledge article?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/knowledge/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Knowledge article deleted successfully!');
+                loadKnowledge();
+                await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
+                loadLogs();
+            } else {
+                alert('❌ Failed to delete: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
     // --- Initialize Dashboard on Load ---
     loadProjects();
     loadAgents();
+    loadKnowledge();
     loadLogs();
 });
