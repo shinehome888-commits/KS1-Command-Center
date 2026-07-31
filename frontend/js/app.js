@@ -10,15 +10,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('projects-grid');
                 if (container) {
-                    container.innerHTML = ''; // Clear existing
+                    container.innerHTML = ''; 
                     result.data.forEach(project => {
                         const card = document.createElement('div');
                         card.className = 'card project-card';
+                        // Added a Delete button with an onclick event
                         card.innerHTML = `
                             <h4>${project.name}</h4>
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 8px;">${project.description}</p>
                             <p class="category">Category: ${project.category}</p>
-                            <span style="display:inline-block; margin-top:10px; padding: 4px 8px; background: rgba(212, 175, 55, 0.2); color: #D4AF37; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${project.status}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                                <span style="padding: 4px 8px; background: rgba(212, 175, 55, 0.2); color: #D4AF37; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">${project.status}</span>
+                                <button onclick="deleteProject('${project._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: all 0.2s;">Delete</button>
+                            </div>
                         `;
                         container.appendChild(card);
                     });
@@ -38,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('agents-grid');
                 if (container) {
-                    container.innerHTML = ''; // Clear existing
+                    container.innerHTML = ''; 
                     result.data.forEach(agent => {
                         const statusClass = agent.status.toLowerCase();
                         const card = document.createElement('div');
@@ -65,19 +69,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submitProjectBtn');
 
     if (toggleBtn && form) {
-        // Show/Hide Form
         toggleBtn.addEventListener('click', () => {
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         });
 
-        // Cancel Button
         cancelBtn.addEventListener('click', () => {
             form.style.display = 'none';
             document.getElementById('newProjectName').value = '';
             document.getElementById('newProjectDesc').value = '';
         });
 
-        // Submit Button (Send to Backend)
         submitBtn.addEventListener('click', async () => {
             const name = document.getElementById('newProjectName').value.trim();
             const description = document.getElementById('newProjectDesc').value.trim();
@@ -88,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Disable button to prevent double clicks
             submitBtn.textContent = 'Saving...';
             submitBtn.disabled = true;
 
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     form.style.display = 'none';
                     document.getElementById('newProjectName').value = '';
                     document.getElementById('newProjectDesc').value = '';
-                    loadProjects(); // Refresh the list immediately
+                    loadProjects(); 
                 } else {
                     alert('❌ Failed to add project: ' + result.message);
                 }
@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 alert('❌ Network error. Please check your connection and try again.');
             } finally {
-                // Re-enable button
                 submitBtn.textContent = 'Save to Database';
                 submitBtn.disabled = false;
             }
@@ -148,6 +147,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // --- 5. GLOBAL DELETE FUNCTION (Called by the HTML button) ---
+    window.deleteProject = async (id) => {
+        if (!confirm('Are you sure you want to permanently delete this project from the Command Center?')) {
+            return; // User cancelled
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/projects/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Project deleted successfully!');
+                loadProjects(); // Refresh the list instantly
+            } else {
+                alert('❌ Failed to delete: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
 
     // --- Initialize Dashboard on Load ---
     loadProjects();
