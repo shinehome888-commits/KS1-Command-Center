@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
+app.use('/api/logs', require('./routes/activityRoutes')); // NEW: Activity Logs
 
 // --- TEMPORARY SEED ROUTE (We will remove this after) ---
 app.get('/api/seed', async (req, res) => {
@@ -30,18 +31,15 @@ app.get('/api/seed', async (req, res) => {
         const Project = require('./models/Project');
         const Agent = require('./models/Agent');
 
-        // Clear existing data
         await Project.deleteMany();
         await Agent.deleteMany();
 
-        // Insert KS1 Projects
         await Project.insertMany([
             { name: 'ShineGPT', description: 'AI-powered education platform for humanity.', category: 'Education', status: 'Active' },
             { name: 'KS1 Wallet', description: 'Secure blockchain digital wallet infrastructure.', category: 'Blockchain', status: 'Planning' },
             { name: 'KS1 ALKEBULAN PAY', description: 'Digital trade infrastructure empowering Africa.', category: 'Digital Trade Infrastructure', status: 'Active' }
         ]);
 
-        // Insert KS1 AI Agents
         await Agent.insertMany([
             { name: 'KS1 Operations Agent', role: 'Digital Operations Coordinator', status: 'Online' },
             { name: 'KS1 Knowledge Agent', role: 'Digital Librarian', status: 'Ready' },
