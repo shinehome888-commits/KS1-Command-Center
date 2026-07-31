@@ -23,7 +23,8 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
-app.use('/api/logs', require('./routes/activityRoutes')); // NEW: Activity Logs
+app.use('/api/logs', require('./routes/activityRoutes'));
+app.use('/api/knowledge', require('./routes/knowledgeRoutes')); // NEW: Knowledge Base
 
 // --- TEMPORARY SEED ROUTE (We will remove this after) ---
 app.get('/api/seed', async (req, res) => {
