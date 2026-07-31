@@ -50,7 +50,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="status-indicator ${statusClass}"></div>
                             <h4>${agent.name}</h4>
                             <p class="role">${agent.role}</p>
-                            <span class="status-text">${agent.status}</span>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                                <span class="status-text">${agent.status}</span>
+                                <button onclick="deleteAgent('${agent._id}')" style="padding: 4px 8px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold; transition: all 0.2s;">Delete</button>
+                            </div>
                         `;
                         container.appendChild(card);
                     });
@@ -100,23 +103,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- 4. Add New Project Logic ---
-    const toggleBtn = document.getElementById('toggleProjectFormBtn');
-    const form = document.getElementById('addProjectForm');
-    const cancelBtn = document.getElementById('cancelProjectBtn');
-    const submitBtn = document.getElementById('submitProjectBtn');
+    const toggleProjectBtn = document.getElementById('toggleProjectFormBtn');
+    const projectForm = document.getElementById('addProjectForm');
+    const cancelProjectBtn = document.getElementById('cancelProjectBtn');
+    const submitProjectBtn = document.getElementById('submitProjectBtn');
 
-    if (toggleBtn && form) {
-        toggleBtn.addEventListener('click', () => {
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (toggleProjectBtn && projectForm) {
+        toggleProjectBtn.addEventListener('click', () => {
+            projectForm.style.display = projectForm.style.display === 'none' ? 'block' : 'none';
         });
 
-        cancelBtn.addEventListener('click', () => {
-            form.style.display = 'none';
+        cancelProjectBtn.addEventListener('click', () => {
+            projectForm.style.display = 'none';
             document.getElementById('newProjectName').value = '';
             document.getElementById('newProjectDesc').value = '';
         });
 
-        submitBtn.addEventListener('click', async () => {
+        submitProjectBtn.addEventListener('click', async () => {
             const name = document.getElementById('newProjectName').value.trim();
             const description = document.getElementById('newProjectDesc').value.trim();
             const category = document.getElementById('newProjectCategory').value;
@@ -126,8 +129,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            submitBtn.textContent = 'Saving...';
-            submitBtn.disabled = true;
+            submitProjectBtn.textContent = 'Saving...';
+            submitProjectBtn.disabled = true;
 
             try {
                 const response = await fetch(`${API_URL}/projects`, {
@@ -140,13 +143,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (result.success) {
                     alert('✅ Project added successfully to the Command Center!');
-                    form.style.display = 'none';
+                    projectForm.style.display = 'none';
                     document.getElementById('newProjectName').value = '';
                     document.getElementById('newProjectDesc').value = '';
                     loadProjects();
-                    
-                    // Log this action
                     await createLog('King Solomon', `Created project: ${name}`, 'Success');
+                    loadLogs();
                 } else {
                     alert('❌ Failed to add project: ' + result.message);
                 }
@@ -154,13 +156,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error:', error);
                 alert('❌ Network error. Please check your connection and try again.');
             } finally {
-                submitBtn.textContent = 'Save to Database';
-                submitBtn.disabled = false;
+                submitProjectBtn.textContent = 'Save to Database';
+                submitProjectBtn.disabled = false;
             }
         });
     }
 
-    // --- 5. AI Chat Logic with Activity Logging ---
+    // --- 5. Add New Agent Logic ---
+    const toggleAgentBtn = document.getElementById('toggleAgentFormBtn');
+    const agentForm = document.getElementById('addAgentForm');
+    const cancelAgentBtn = document.getElementById('cancelAgentBtn');
+    const submitAgentBtn = document.getElementById('submitAgentBtn');
+
+    if (toggleAgentBtn && agentForm) {
+        toggleAgentBtn.addEventListener('click', () => {
+            agentForm.style.display = agentForm.style.display === 'none' ? 'block' : 'none';
+        });
+
+        cancelAgentBtn.addEventListener('click', () => {
+            agentForm.style.display = 'none';
+            document.getElementById('newAgentName').value = '';
+            document.getElementById('newAgentRole').value = '';
+        });
+
+        submitAgentBtn.addEventListener('click', async () => {
+            const name = document.getElementById('newAgentName').value.trim();
+            const role = document.getElementById('newAgentRole').value.trim();
+            const status = document.getElementById('newAgentStatus').value;
+
+            if (!name || !role) {
+                alert('Please fill in the agent name and role.');
+                return;
+            }
+
+            submitAgentBtn.textContent = 'Deploying...';
+            submitAgentBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/agents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, role, status })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✅ ${name} has been deployed to the AI Workforce!`);
+                    agentForm.style.display = 'none';
+                    document.getElementById('newAgentName').value = '';
+                    document.getElementById('newAgentRole').value = '';
+                    loadAgents();
+                    await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
+                    loadLogs();
+                } else {
+                    alert('❌ Failed to deploy agent: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Network error. Please check your connection and try again.');
+            } finally {
+                submitAgentBtn.textContent = 'Deploy Agent';
+                submitAgentBtn.disabled = false;
+            }
+        });
+    }
+
+    // --- 6. AI Chat Logic with Activity Logging ---
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatWindow = document.getElementById('chatWindow');
@@ -176,26 +238,24 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Log this chat command to the database
         await createLog('King Solomon', `Sent command: "${message}"`, 'Success');
 
-        setTimeout(() => {
+        setTimeout(async () => {
             const botDiv = document.createElement('div');
             botDiv.classList.add('chat-message', 'bot');
             botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
             chatWindow.appendChild(botDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
             
-            // Log the bot response
-            createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
-            loadLogs(); // Refresh the activity log display
+            await createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
+            loadLogs();
         }, 800);
     };
 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // --- 6. Helper Function to Create Activity Logs ---
+    // --- 7. Helper Function to Create Activity Logs ---
     const createLog = async (actor, action, status) => {
         try {
             await fetch(`${API_URL}/logs`, {
@@ -208,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 7. GLOBAL DELETE FUNCTION ---
+    // --- 8. GLOBAL DELETE PROJECT FUNCTION ---
     window.deleteProject = async (id) => {
         if (!confirm('Are you sure you want to permanently delete this project from the Command Center?')) {
             return;
@@ -224,10 +284,37 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 alert('✅ Project deleted successfully!');
                 loadProjects();
-                createLog('King Solomon', 'Deleted a project', 'Success');
+                await createLog('King Solomon', 'Deleted a project', 'Success');
                 loadLogs();
             } else {
                 alert('❌ Failed to delete: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
+    // --- 9. GLOBAL DELETE AGENT FUNCTION ---
+    window.deleteAgent = async (id) => {
+        if (!confirm('Are you sure you want to decommission this AI Agent from the Command Center?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/agents/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Agent decommissioned successfully!');
+                loadAgents();
+                await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success');
+                loadLogs();
+            } else {
+                alert('❌ Failed to decommission: ' + result.message);
             }
         } catch (error) {
             console.error('Error:', error);
