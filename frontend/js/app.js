@@ -1,133 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://ks1-command-center-api.onrender.com/api';
-    
-    // --- 1. STRICT AUTHENTICATION CHECK ---
-    const token = localStorage.getItem('ks1_token');
-    const userName = localStorage.getItem('ks1_userName') || 'King Solomon';
-    
-    const authView = document.getElementById('auth-view');
-    const dashboardView = document.getElementById('dashboard-view');
-    const userNameDisplay = document.getElementById('user-name-display');
+    const userName = 'King Solomon';
 
-    if (token) {
-        // User is logged in: Hide auth, show dashboard
-        authView.classList.add('hidden');
-        dashboardView.classList.remove('hidden');
-        userNameDisplay.textContent = userName;
-        initializeDashboard();
-    } else {
-        // User is NOT logged in: Show auth, hide dashboard completely
-        authView.classList.remove('hidden');
-        dashboardView.classList.add('hidden');
-    }
+    // Initialize Dashboard immediately (no login required)
+    loadProjects();
+    loadAgents();
+    loadKnowledge();
+    loadLogs();
 
-    // --- 2. AUTH FORM TOGGLING (Fixed clicking issue) ---
-    const loginForm = document.getElementById('login-form');
-    const registerForm = document.getElementById('register-form');
-    
-    document.getElementById('show-register').addEventListener('click', (e) => {
-        e.preventDefault();
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-    });
-
-    document.getElementById('show-login').addEventListener('click', (e) => {
-        e.preventDefault();
-        registerForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-    });
-
-    // --- 3. HANDLE LOGIN ---
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const btn = document.getElementById('login-btn');
-
-        btn.textContent = 'Signing In...';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                localStorage.setItem('ks1_token', result.data.token);
-                localStorage.setItem('ks1_userName', result.data.name);
-                alert('✅ Welcome back to the Command Center!');
-                window.location.reload(); // Hard reload to cleanly swap views
-            } else {
-                alert('❌ ' + result.message);
-            }
-        } catch (error) {
-            alert('❌ Network error. Please try again.');
-        } finally {
-            btn.textContent = 'Sign In';
-            btn.disabled = false;
-        }
-    });
-
-    // --- 4. HANDLE REGISTER ---
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const btn = document.getElementById('register-btn');
-
-        btn.textContent = 'Creating Account...';
-        btn.disabled = true;
-
-        try {
-            const response = await fetch(`${API_URL}/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password })
-            });
-            const result = await response.json();
-
-            if (result.success) {
-                localStorage.setItem('ks1_token', result.data.token);
-                localStorage.setItem('ks1_userName', result.data.name);
-                alert('✅ Account created successfully! Welcome to the Command Center.');
-                window.location.reload(); // Hard reload to cleanly swap views
-            } else {
-                alert('❌ ' + result.message);
-            }
-        } catch (error) {
-            alert('❌ Network error. Please try again.');
-        } finally {
-            btn.textContent = 'Create Account';
-            btn.disabled = false;
-        }
-    });
-
-    // --- 5. HANDLE LOGOUT (Fixed and styled) ---
-    document.getElementById('logout-btn').addEventListener('click', (e) => {
-        e.preventDefault();
-        if (confirm('Are you sure you want to log out of the Command Center?')) {
-            localStorage.removeItem('ks1_token');
-            localStorage.removeItem('ks1_userName');
-            window.location.reload(); // Returns cleanly to the login screen
-        }
-    });
-
-    // --- DASHBOARD FUNCTIONS ---
-    function initializeDashboard() {
-        loadProjects(); loadAgents(); loadKnowledge(); loadLogs();
-    }
-
+    // --- 1. PROJECTS ---
     const loadProjects = async () => {
         try {
             const res = await fetch(`${API_URL}/projects`);
             const result = await res.json();
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('projects-grid');
-                container.innerHTML = ''; 
+                container.innerHTML = '';
                 result.data.forEach(project => {
                     const card = document.createElement('div');
                     card.className = 'card';
@@ -146,13 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading projects:', error); }
     };
 
+    // --- 2. AGENTS ---
     const loadAgents = async () => {
         try {
             const res = await fetch(`${API_URL}/agents`);
             const result = await res.json();
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('agents-grid');
-                container.innerHTML = ''; 
+                container.innerHTML = '';
                 result.data.forEach(agent => {
                     const statusClass = agent.status.toLowerCase();
                     const card = document.createElement('div');
@@ -172,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading agents:', error); }
     };
 
+    // --- 3. KNOWLEDGE (COLLAPSIBLE) ---
     const loadKnowledge = async () => {
         try {
             const res = await fetch(`${API_URL}/knowledge`);
@@ -216,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading knowledge:', error); }
     };
 
+    // --- 4. ACTIVITY LOGS ---
     const loadLogs = async () => {
         try {
             const res = await fetch(`${API_URL}/logs`);
@@ -243,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading logs:', error); }
     };
 
+    // --- 5. CREATE LOG ---
     const createLog = async (actor, action, status) => {
         try {
             await fetch(`${API_URL}/logs`, {
@@ -253,7 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('Error creating log:', error); }
     };
 
-    // --- GLOBAL DELETE FUNCTIONS ---
+    // --- 6. DELETE FUNCTIONS ---
     window.deleteProject = async (id) => {
         if (!confirm('Delete this project?')) return;
         const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
@@ -273,23 +165,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.success) { loadKnowledge(); createLog(userName, 'Deleted a knowledge article', 'Success'); loadLogs(); }
     };
 
-    // --- FORM SUBMISSION HELPER ---
-    const setupForm = (toggleBtn, form, cancelBtn, submitBtn, endpoint, payloadFn, successMsg, reloadFn) => {
+    // --- 7. FORM SETUP HELPER ---
+    const setupForm = (toggleBtn, form, cancelBtn, submitBtn, endpoint, payloadFn, successMsg, reloadFn, btnLabel) => {
         if (!toggleBtn || !form) return;
         toggleBtn.addEventListener('click', () => form.classList.toggle('hidden'));
-        cancelBtn.addEventListener('click', () => { 
-            form.classList.add('hidden'); 
-            form.querySelectorAll('input, textarea').forEach(i => i.value = ''); 
+        cancelBtn.addEventListener('click', () => {
+            form.classList.add('hidden');
+            form.querySelectorAll('input, textarea').forEach(i => i.value = '');
         });
         submitBtn.addEventListener('click', async () => {
             const payload = payloadFn();
             if (!payload) return;
             submitBtn.textContent = 'Saving...'; submitBtn.disabled = true;
             try {
-                const res = await fetch(`${API_URL}${endpoint}`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
+                const res = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
                 });
                 const result = await res.json();
                 if (result.success) {
@@ -301,10 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadLogs();
                 } else { alert('❌ ' + result.message); }
             } catch (err) { alert('❌ Network error.'); }
-            finally { 
-                submitBtn.textContent = submitBtn.id.includes('Project') ? 'Save to Database' : submitBtn.id.includes('Agent') ? 'Deploy Agent' : 'Save Article'; 
-                submitBtn.disabled = false; 
-            }
+            finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
         });
     };
 
@@ -314,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const c = document.getElementById('newProjectCategory').value;
         if (!n || !d) { alert('Fill name and description'); return null; }
         return { name: n, description: d, category: c, status: 'Planning' };
-    }, 'Project added successfully!', loadProjects);
+    }, 'Project added successfully!', loadProjects, 'Save to Database');
 
     setupForm(document.getElementById('toggleAgentFormBtn'), document.getElementById('addAgentForm'), document.getElementById('cancelAgentBtn'), document.getElementById('submitAgentBtn'), '/agents', () => {
         const n = document.getElementById('newAgentName').value.trim();
@@ -322,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const s = document.getElementById('newAgentStatus').value;
         if (!n || !r) { alert('Fill name and role'); return null; }
         return { name: n, role: r, status: s };
-    }, 'Agent deployed successfully!', loadAgents);
+    }, 'Agent deployed successfully!', loadAgents, 'Deploy Agent');
 
     setupForm(document.getElementById('toggleKnowledgeFormBtn'), document.getElementById('addKnowledgeForm'), document.getElementById('cancelKnowledgeBtn'), document.getElementById('submitKnowledgeBtn'), '/knowledge', () => {
         const t = document.getElementById('newKnowledgeTitle').value.trim();
@@ -330,34 +219,74 @@ document.addEventListener('DOMContentLoaded', () => {
         const cnt = document.getElementById('newKnowledgeContent').value.trim();
         if (!t || !cnt) { alert('Fill title and content'); return null; }
         return { title: t, category: c, content: cnt };
-    }, 'Knowledge article added successfully!', loadKnowledge);
+    }, 'Knowledge article added successfully!', loadKnowledge, 'Save Article');
 
-    // --- CHAT LOGIC ---
+    // --- 8. REAL AI CHAT (DEEPSEEK POWERED) ---
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatWindow = document.getElementById('chatWindow');
-    
+
     const sendMessage = async () => {
         const message = chatInput.value.trim();
         if (!message) return;
+
+        // Show user message
         const userDiv = document.createElement('div');
         userDiv.className = 'chat-message user';
         userDiv.textContent = message;
         chatWindow.appendChild(userDiv);
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
-        
+
+        // Show loading
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'chat-message bot';
+        loadingDiv.textContent = '🤔 KS1 Assistant is thinking...';
+        loadingDiv.id = 'loading-message';
+        chatWindow.appendChild(loadingDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
         await createLog(userName, `Sent command: "${message}"`, 'Success');
-        setTimeout(async () => {
-            const botDiv = document.createElement('div');
-            botDiv.className = 'chat-message bot';
-            botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
-            chatWindow.appendChild(botDiv);
+
+        try {
+            const response = await fetch(`${API_URL}/ai/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            const result = await response.json();
+
+            // Remove loading
+            const loading = document.getElementById('loading-message');
+            if (loading) loading.remove();
+
+            if (result.success) {
+                const botDiv = document.createElement('div');
+                botDiv.className = 'chat-message bot';
+                botDiv.textContent = result.data.aiResponse;
+                chatWindow.appendChild(botDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                await createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
+                loadLogs();
+            } else {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'chat-message bot';
+                errorDiv.textContent = '❌ I encountered an error. Please try again.';
+                chatWindow.appendChild(errorDiv);
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+            }
+        } catch (error) {
+            const loading = document.getElementById('loading-message');
+            if (loading) loading.remove();
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'chat-message bot';
+            errorDiv.textContent = '❌ Network error. Please try again.';
+            chatWindow.appendChild(errorDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-            await createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
-            loadLogs();
-        }, 800);
+        }
     };
+
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 });
