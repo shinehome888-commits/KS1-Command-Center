@@ -14,11 +14,39 @@ body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     background-color: var(--black);
     color: var(--white);
-    display: flex;
     min-height: 100vh;
 }
 
+/* --- AUTHENTICATION STYLES --- */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--black) 0%, var(--deep-blue) 100%);
+    padding: 20px;
+}
+.auth-box {
+    background-color: var(--dark-grey);
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--light-grey);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+.auth-form button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    transition: all 0.2s;
+}
+
 /* --- Sidebar Navigation --- */
+#dashboard-container { display: flex; min-height: 100vh; }
 .sidebar {
     width: 250px;
     background-color: var(--deep-blue);
@@ -26,10 +54,13 @@ body {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--light-grey);
+    position: sticky;
+    top: 0;
+    height: 100vh;
 }
 .logo h2 { color: var(--white); font-size: 1.5rem; margin-bottom: 40px; }
 .logo span { color: var(--gold); }
-.nav-menu { display: flex; flex-direction: column; gap: 10px; }
+.nav-menu { display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .nav-item {
     color: rgba(255,255,255,0.7);
     text-decoration: none;
@@ -69,7 +100,6 @@ body {
     border-bottom: 1px solid var(--light-grey);
     padding-bottom: 10px;
 }
-
 .mission-section p { font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.8); }
 
 .grid-layout {
@@ -95,7 +125,7 @@ body {
 }
 .online { background-color: #10B981; box-shadow: 0 0 8px #10B981; }
 .ready { background-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-.standby { background-color: #6B7280; }
+.standby, .offline { background-color: #6B7280; }
 .status-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 10px; display: block; }
 
 /* --- AI Chat Interface --- */
