@@ -31,6 +31,7 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes')); // NEW: AI Integration
 
 // --- TEMPORARY SEED ROUTE ---
 app.get('/api/seed', async (req, res) => {
