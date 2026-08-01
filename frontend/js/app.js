@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- 3. Fetch and Render Knowledge Articles ---
+    // --- 3. Fetch and Render Knowledge Articles (COLLAPSIBLE) ---
     const loadKnowledge = async () => {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
@@ -77,16 +77,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     result.data.forEach(article => {
                         const card = document.createElement('div');
                         card.className = 'card';
-                        card.style.cssText = 'background: var(--black); padding: 20px; border-radius: 8px; border: 1px solid var(--light-grey);';
+                        card.style.cssText = 'background: var(--black); padding: 20px; border-radius: 8px; border: 1px solid var(--light-grey); cursor: pointer; transition: all 0.3s ease;';
                         
                         const date = new Date(article.createdAt).toLocaleDateString();
                         
                         card.innerHTML = `
-                            <h4 style="color: var(--gold); margin-bottom: 8px;">${article.title}</h4>
-                            <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px;">Category: ${article.category} • ${date}</p>
-                            <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap;">${article.content}</p>
-                            <button onclick="deleteKnowledge('${article._id}')" style="padding: 6px 12px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">Delete Article</button>
+                            <div class="knowledge-header" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: var(--gold); margin-bottom: 4px;">${article.title}</h4>
+                                    <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">Category: ${article.category} • ${date}</p>
+                                </div>
+                                <span class="expand-icon" style="color: var(--gold); font-size: 1.5rem; transition: transform 0.3s;">▼</span>
+                            </div>
+                            <div class="knowledge-content" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--light-grey);">
+                                <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap;">${article.content}</p>
+                                <button onclick="event.stopPropagation(); deleteKnowledge('${article._id}')" style="padding: 6px 12px; background: rgba(255, 50, 50, 0.15); color: #ff4444; border: 1px solid #ff4444; border-radius: 4px; font-size: 0.8rem; cursor: pointer; font-weight: bold;">Delete Article</button>
+                            </div>
                         `;
+                        
+                        card.addEventListener('click', () => {
+                            const content = card.querySelector('.knowledge-content');
+                            const icon = card.querySelector('.expand-icon');
+                            
+                            if (content.style.display === 'none') {
+                                content.style.display = 'block';
+                                icon.style.transform = 'rotate(180deg)';
+                            } else {
+                                content.style.display = 'none';
+                                icon.style.transform = 'rotate(0deg)';
+                            }
+                        });
+                        
                         container.appendChild(card);
                     });
                 } else {
