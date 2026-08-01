@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=8">
+    <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
-    <!-- DASHBOARD (No login screen - direct access) -->
     <div class="dashboard-view">
         
-        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="logo">
                 <h2>KS1 <span>COMMAND</span></h2>
@@ -26,7 +24,6 @@
             </nav>
         </aside>
 
-        <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-header">
                 <h1>Grand Rising King Solomon 👑</h1>
@@ -38,7 +35,6 @@
                 <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
             </section>
 
-            <!-- AI Workforce -->
             <section class="section-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3>AI Workforce</h3>
@@ -61,7 +57,6 @@
                 <div class="grid-layout" id="agents-grid"></div>
             </section>
 
-            <!-- Projects -->
             <section class="section-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3>Active Projects</h3>
@@ -85,7 +80,6 @@
                 <div class="grid-layout" id="projects-grid"></div>
             </section>
 
-            <!-- Knowledge Base -->
             <section class="section-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h3>Knowledge Base</h3>
@@ -109,19 +103,17 @@
                 <div class="grid-layout" id="knowledge-grid"></div>
             </section>
 
-            <!-- AI Assistant (NOW POWERED BY DEEPSEEK) -->
             <section class="section-card">
-                <h3>KS1 Assistant <span style="font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 4px; margin-left: 8px;">🧠 AI Powered</span></h3>
+                <h3>KS1 Assistant</h3>
                 <div class="chat-window" id="chatWindow">
                     <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant anything...">
+                    <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant...">
                     <button id="sendBtn">Send</button>
                 </div>
             </section>
 
-            <!-- Activity Log -->
             <section class="section-card">
                 <h3>Recent Activity</h3>
                 <div id="activity-log-container" class="log-container">
@@ -131,6 +123,6 @@
         </main>
     </div>
 
-    <script src="js/app.js?v=8"></script>
+    <script src="js/app.js?v=9"></script>
 </body>
 </html>
