@@ -4,45 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=7">
+    <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
-    <!-- 1. AUTHENTICATION VIEW (Shown by default if not logged in) -->
-    <div id="auth-view" class="auth-view">
-        <div class="auth-box">
-            <div class="logo" style="text-align: center; margin-bottom: 30px;">
-                <h2>KS1 <span>COMMAND</span></h2>
-                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">Secure Access Portal</p>
-            </div>
-
-            <!-- Login Form -->
-            <form id="login-form" class="auth-form">
-                <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center;">Welcome Back</h3>
-                <input type="email" id="login-email" placeholder="Email Address" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit" id="login-btn">Sign In</button>
-                <p style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.6); font-size: 0.9rem;">
-                    New to KS1? <a href="#" id="show-register">Create an account</a>
-                </p>
-            </form>
-
-            <!-- Register Form (Hidden by default) -->
-            <form id="register-form" class="auth-form hidden">
-                <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center;">Join the Foundation</h3>
-                <input type="text" id="register-name" placeholder="Full Name" required>
-                <input type="email" id="register-email" placeholder="Email Address" required>
-                <input type="password" id="register-password" placeholder="Password (min 6 characters)" required minlength="6">
-                <button type="submit" id="register-btn">Create Account</button>
-                <p style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.6); font-size: 0.9rem;">
-                    Already have an account? <a href="#" id="show-login">Sign In</a>
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- 2. DASHBOARD VIEW (Hidden by default, shown only after login) -->
-    <div id="dashboard-view" class="dashboard-view hidden">
+    <!-- DASHBOARD (No login screen - direct access) -->
+    <div class="dashboard-view">
         
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -56,15 +23,13 @@
                 <a href="#" class="nav-item">Knowledge</a>
                 <a href="#" class="nav-item">Communications</a>
                 <a href="#" class="nav-item">Settings</a>
-                <!-- Logout Button at the bottom -->
-                <a href="#" id="logout-btn" class="nav-item logout-item">🚪 Logout</a>
             </nav>
         </aside>
 
         <!-- Main Content Area -->
         <main class="main-content">
             <header class="top-header">
-                <h1>Grand Rising <span id="user-name-display">King Solomon</span> 👑</h1>
+                <h1>Grand Rising King Solomon 👑</h1>
                 <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
             </header>
 
@@ -144,14 +109,14 @@
                 <div class="grid-layout" id="knowledge-grid"></div>
             </section>
 
-            <!-- AI Assistant -->
+            <!-- AI Assistant (NOW POWERED BY DEEPSEEK) -->
             <section class="section-card">
-                <h3>KS1 Assistant</h3>
+                <h3>KS1 Assistant <span style="font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 4px; margin-left: 8px;">🧠 AI Powered</span></h3>
                 <div class="chat-window" id="chatWindow">
-                    <div class="chat-message bot">System initialized. Awaiting your command.</div>
+                    <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant...">
+                    <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant anything...">
                     <button id="sendBtn">Send</button>
                 </div>
             </section>
@@ -166,6 +131,6 @@
         </main>
     </div>
 
-    <script src="js/app.js?v=7"></script>
+    <script src="js/app.js?v=8"></script>
 </body>
 </html>
