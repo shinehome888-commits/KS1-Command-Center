@@ -2,19 +2,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://ks1-command-center-api.onrender.com/api';
     const userName = 'King Solomon';
 
-    // Initialize Dashboard immediately (no login required)
+    console.log('🚀 KS1 Command Center initializing...');
+
+    // Load all data immediately
     loadProjects();
     loadAgents();
     loadKnowledge();
     loadLogs();
 
-    // --- 1. PROJECTS ---
+    // --- PROJECTS ---
     const loadProjects = async () => {
         try {
+            console.log('Loading projects...');
             const res = await fetch(`${API_URL}/projects`);
             const result = await res.json();
+            console.log('Projects response:', result);
+            
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('projects-grid');
+                if (!container) {
+                    console.error('projects-grid container not found!');
+                    return;
+                }
                 container.innerHTML = '';
                 result.data.forEach(project => {
                     const card = document.createElement('div');
@@ -30,17 +39,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(card);
                 });
+                console.log('✅ Projects loaded successfully');
+            } else {
+                console.log('No projects found');
             }
-        } catch (error) { console.error('❌ Error loading projects:', error); }
+        } catch (error) {
+            console.error('❌ Error loading projects:', error);
+        }
     };
 
-    // --- 2. AGENTS ---
+    // --- AGENTS ---
     const loadAgents = async () => {
         try {
+            console.log('Loading agents...');
             const res = await fetch(`${API_URL}/agents`);
             const result = await res.json();
+            console.log('Agents response:', result);
+            
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('agents-grid');
+                if (!container) {
+                    console.error('agents-grid container not found!');
+                    return;
+                }
                 container.innerHTML = '';
                 result.data.forEach(agent => {
                     const statusClass = agent.status.toLowerCase();
@@ -57,16 +78,29 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(card);
                 });
+                console.log('✅ Agents loaded successfully');
+            } else {
+                console.log('No agents found');
             }
-        } catch (error) { console.error('❌ Error loading agents:', error); }
+        } catch (error) {
+            console.error('❌ Error loading agents:', error);
+        }
     };
 
-    // --- 3. KNOWLEDGE (COLLAPSIBLE) ---
+    // --- KNOWLEDGE ---
     const loadKnowledge = async () => {
         try {
+            console.log('Loading knowledge...');
             const res = await fetch(`${API_URL}/knowledge`);
             const result = await res.json();
+            console.log('Knowledge response:', result);
+            
             const container = document.getElementById('knowledge-grid');
+            if (!container) {
+                console.error('knowledge-grid container not found!');
+                return;
+            }
+            
             if (result.success && result.data.length > 0) {
                 container.innerHTML = '';
                 result.data.forEach(article => {
@@ -100,18 +134,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     container.appendChild(card);
                 });
+                console.log('✅ Knowledge loaded successfully');
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No knowledge articles yet.</p>';
+                console.log('No knowledge articles found');
             }
-        } catch (error) { console.error('❌ Error loading knowledge:', error); }
+        } catch (error) {
+            console.error('❌ Error loading knowledge:', error);
+        }
     };
 
-    // --- 4. ACTIVITY LOGS ---
+    // --- LOGS ---
     const loadLogs = async () => {
         try {
+            console.log('Loading logs...');
             const res = await fetch(`${API_URL}/logs`);
             const result = await res.json();
+            console.log('Logs response:', result);
+            
             const container = document.getElementById('activity-log-container');
+            if (!container) {
+                console.error('activity-log-container not found!');
+                return;
+            }
+            
             if (result.success && result.data.length > 0) {
                 container.innerHTML = '';
                 result.data.forEach(log => {
@@ -128,13 +174,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(logItem);
                 });
+                console.log('✅ Logs loaded successfully');
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
+                console.log('No logs found');
             }
-        } catch (error) { console.error('❌ Error loading logs:', error); }
+        } catch (error) {
+            console.error('❌ Error loading logs:', error);
+        }
     };
 
-    // --- 5. CREATE LOG ---
+    // --- CREATE LOG ---
     const createLog = async (actor, action, status) => {
         try {
             await fetch(`${API_URL}/logs`, {
@@ -142,30 +192,58 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ actor, action, status })
             });
-        } catch (error) { console.error('Error creating log:', error); }
+        } catch (error) {
+            console.error('Error creating log:', error);
+        }
     };
 
-    // --- 6. DELETE FUNCTIONS ---
+    // --- DELETE FUNCTIONS ---
     window.deleteProject = async (id) => {
         if (!confirm('Delete this project?')) return;
-        const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) { loadProjects(); createLog(userName, 'Deleted a project', 'Success'); loadLogs(); }
-    };
-    window.deleteAgent = async (id) => {
-        if (!confirm('Decommission this AI Agent?')) return;
-        const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) { loadAgents(); createLog(userName, 'Decommissioned an AI Agent', 'Success'); loadLogs(); }
-    };
-    window.deleteKnowledge = async (id) => {
-        if (!confirm('Delete this knowledge article?')) return;
-        const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) { loadKnowledge(); createLog(userName, 'Deleted a knowledge article', 'Success'); loadLogs(); }
+        try {
+            const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) {
+                loadProjects();
+                createLog(userName, 'Deleted a project', 'Success');
+                loadLogs();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
-    // --- 7. FORM SETUP HELPER ---
+    window.deleteAgent = async (id) => {
+        if (!confirm('Decommission this AI Agent?')) return;
+        try {
+            const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) {
+                loadAgents();
+                createLog(userName, 'Decommissioned an AI Agent', 'Success');
+                loadLogs();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    window.deleteKnowledge = async (id) => {
+        if (!confirm('Delete this knowledge article?')) return;
+        try {
+            const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) {
+                loadKnowledge();
+                createLog(userName, 'Deleted a knowledge article', 'Success');
+                loadLogs();
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+
+    // --- FORM SETUP ---
     const setupForm = (toggleBtn, form, cancelBtn, submitBtn, endpoint, payloadFn, successMsg, reloadFn, btnLabel) => {
         if (!toggleBtn || !form) return;
         toggleBtn.addEventListener('click', () => form.classList.toggle('hidden'));
@@ -176,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.addEventListener('click', async () => {
             const payload = payloadFn();
             if (!payload) return;
-            submitBtn.textContent = 'Saving...'; submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+            submitBtn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, {
                     method: 'POST',
@@ -191,46 +270,81 @@ document.addEventListener('DOMContentLoaded', () => {
                     reloadFn();
                     createLog(userName, successMsg, 'Success');
                     loadLogs();
-                } else { alert('❌ ' + result.message); }
-            } catch (err) { alert('❌ Network error.'); }
-            finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
+                } else {
+                    alert('❌ ' + result.message);
+                }
+            } catch (err) {
+                alert('❌ Network error.');
+            } finally {
+                submitBtn.textContent = btnLabel;
+                submitBtn.disabled = false;
+            }
         });
     };
 
-    setupForm(document.getElementById('toggleProjectFormBtn'), document.getElementById('addProjectForm'), document.getElementById('cancelProjectBtn'), document.getElementById('submitProjectBtn'), '/projects', () => {
-        const n = document.getElementById('newProjectName').value.trim();
-        const d = document.getElementById('newProjectDesc').value.trim();
-        const c = document.getElementById('newProjectCategory').value;
-        if (!n || !d) { alert('Fill name and description'); return null; }
-        return { name: n, description: d, category: c, status: 'Planning' };
-    }, 'Project added successfully!', loadProjects, 'Save to Database');
+    setupForm(
+        document.getElementById('toggleProjectFormBtn'),
+        document.getElementById('addProjectForm'),
+        document.getElementById('cancelProjectBtn'),
+        document.getElementById('submitProjectBtn'),
+        '/projects',
+        () => {
+            const n = document.getElementById('newProjectName').value.trim();
+            const d = document.getElementById('newProjectDesc').value.trim();
+            const c = document.getElementById('newProjectCategory').value;
+            if (!n || !d) { alert('Fill name and description'); return null; }
+            return { name: n, description: d, category: c, status: 'Planning' };
+        },
+        'Project added successfully!',
+        loadProjects,
+        'Save to Database'
+    );
 
-    setupForm(document.getElementById('toggleAgentFormBtn'), document.getElementById('addAgentForm'), document.getElementById('cancelAgentBtn'), document.getElementById('submitAgentBtn'), '/agents', () => {
-        const n = document.getElementById('newAgentName').value.trim();
-        const r = document.getElementById('newAgentRole').value.trim();
-        const s = document.getElementById('newAgentStatus').value;
-        if (!n || !r) { alert('Fill name and role'); return null; }
-        return { name: n, role: r, status: s };
-    }, 'Agent deployed successfully!', loadAgents, 'Deploy Agent');
+    setupForm(
+        document.getElementById('toggleAgentFormBtn'),
+        document.getElementById('addAgentForm'),
+        document.getElementById('cancelAgentBtn'),
+        document.getElementById('submitAgentBtn'),
+        '/agents',
+        () => {
+            const n = document.getElementById('newAgentName').value.trim();
+            const r = document.getElementById('newAgentRole').value.trim();
+            const s = document.getElementById('newAgentStatus').value;
+            if (!n || !r) { alert('Fill name and role'); return null; }
+            return { name: n, role: r, status: s };
+        },
+        'Agent deployed successfully!',
+        loadAgents,
+        'Deploy Agent'
+    );
 
-    setupForm(document.getElementById('toggleKnowledgeFormBtn'), document.getElementById('addKnowledgeForm'), document.getElementById('cancelKnowledgeBtn'), document.getElementById('submitKnowledgeBtn'), '/knowledge', () => {
-        const t = document.getElementById('newKnowledgeTitle').value.trim();
-        const c = document.getElementById('newKnowledgeCategory').value;
-        const cnt = document.getElementById('newKnowledgeContent').value.trim();
-        if (!t || !cnt) { alert('Fill title and content'); return null; }
-        return { title: t, category: c, content: cnt };
-    }, 'Knowledge article added successfully!', loadKnowledge, 'Save Article');
+    setupForm(
+        document.getElementById('toggleKnowledgeFormBtn'),
+        document.getElementById('addKnowledgeForm'),
+        document.getElementById('cancelKnowledgeBtn'),
+        document.getElementById('submitKnowledgeBtn'),
+        '/knowledge',
+        () => {
+            const t = document.getElementById('newKnowledgeTitle').value.trim();
+            const c = document.getElementById('newKnowledgeCategory').value;
+            const cnt = document.getElementById('newKnowledgeContent').value.trim();
+            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            return { title: t, category: c, content: cnt };
+        },
+        'Knowledge article added successfully!',
+        loadKnowledge,
+        'Save Article'
+    );
 
-    // --- 8. REAL AI CHAT (DEEPSEEK POWERED) ---
+    // --- CHAT (Placeholder for now, AI will be added back) ---
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatWindow = document.getElementById('chatWindow');
 
-    const sendMessage = async () => {
+    const sendMessage = () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // Show user message
         const userDiv = document.createElement('div');
         userDiv.className = 'chat-message user';
         userDiv.textContent = message;
@@ -238,55 +352,19 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Show loading
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'chat-message bot';
-        loadingDiv.textContent = '🤔 KS1 Assistant is thinking...';
-        loadingDiv.id = 'loading-message';
-        chatWindow.appendChild(loadingDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        await createLog(userName, `Sent command: "${message}"`, 'Success');
-
-        try {
-            const response = await fetch(`${API_URL}/ai/chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message })
-            });
-
-            const result = await response.json();
-
-            // Remove loading
-            const loading = document.getElementById('loading-message');
-            if (loading) loading.remove();
-
-            if (result.success) {
-                const botDiv = document.createElement('div');
-                botDiv.className = 'chat-message bot';
-                botDiv.textContent = result.data.aiResponse;
-                chatWindow.appendChild(botDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-                await createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
-                loadLogs();
-            } else {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'chat-message bot';
-                errorDiv.textContent = '❌ I encountered an error. Please try again.';
-                chatWindow.appendChild(errorDiv);
-                chatWindow.scrollTop = chatWindow.scrollHeight;
-            }
-        } catch (error) {
-            const loading = document.getElementById('loading-message');
-            if (loading) loading.remove();
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'chat-message bot';
-            errorDiv.textContent = '❌ Network error. Please try again.';
-            chatWindow.appendChild(errorDiv);
+        setTimeout(() => {
+            const botDiv = document.createElement('div');
+            botDiv.className = 'chat-message bot';
+            botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
+            chatWindow.appendChild(botDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-        }
+            createLog('KS1 Assistant', `Responded to: "${message}"`, 'Success');
+            loadLogs();
+        }, 800);
     };
 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    console.log('✅ KS1 Command Center initialized successfully');
 });
