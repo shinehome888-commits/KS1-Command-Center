@@ -4,150 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-        <div class="logo">
-            <h2>KS1 <span>COMMAND</span></h2>
+    <!-- AUTHENTICATION CONTAINER (Shown by default) -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-box">
+            <div class="logo" style="text-align: center; margin-bottom: 30px;">
+                <h2>KS1 <span>COMMAND</span></h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">Secure Access Portal</p>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form">
+                <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center;">Welcome Back</h3>
+                <input type="email" id="login-email" placeholder="Email Address" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <input type="password" id="login-password" placeholder="Password" required style="width: 100%; padding: 12px; margin-bottom: 20px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <button type="submit" id="login-btn" style="width: 100%; padding: 12px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem;">Sign In</button>
+                <p style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                    New to KS1? <a href="#" id="show-register" style="color: var(--gold); text-decoration: none;">Create an account</a>
+                </p>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" class="auth-form" style="display: none;">
+                <h3 style="color: var(--gold); margin-bottom: 20px; text-align: center;">Join the Foundation</h3>
+                <input type="text" id="register-name" placeholder="Full Name" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <input type="email" id="register-email" placeholder="Email Address" required style="width: 100%; padding: 12px; margin-bottom: 15px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <input type="password" id="register-password" placeholder="Password (min 6 characters)" required minlength="6" style="width: 100%; padding: 12px; margin-bottom: 20px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                <button type="submit" id="register-btn" style="width: 100%; padding: 12px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 1rem;">Create Account</button>
+                <p style="text-align: center; margin-top: 15px; color: rgba(255,255,255,0.6); font-size: 0.9rem;">
+                    Already have an account? <a href="#" id="show-login" style="color: var(--gold); text-decoration: none;">Sign In</a>
+                </p>
+            </form>
         </div>
-        <nav class="nav-menu">
-            <a href="#" class="nav-item active" data-section="dashboard">Dashboard</a>
-            <a href="#" class="nav-item" data-section="workforce">AI Workforce</a>
-            <a href="#" class="nav-item" data-section="projects">Projects</a>
-            <a href="#" class="nav-item" data-section="knowledge">Knowledge</a>
-            <a href="#" class="nav-item" data-section="comms">Communications</a>
-            <a href="#" class="nav-item" data-section="settings">Settings</a>
-        </nav>
-    </aside>
+    </div>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
+    <!-- MAIN DASHBOARD (Hidden until logged in) -->
+    <div id="dashboard-container" style="display: none; display: flex;">
         
-        <!-- Header & Greeting -->
-        <header class="top-header">
-            <h1>Grand Rising King Solomon 👑</h1>
-            <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
-        </header>
-
-        <!-- Mission Overview -->
-        <section class="section-card mission-section">
-            <h3>Our Mission</h3>
-            <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
-        </section>
-
-        <!-- AI Workforce Dashboard -->
-        <section class="section-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">AI Workforce</h3>
-                <button id="toggleAgentFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Agent</button>
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>KS1 <span>COMMAND</span></h2>
             </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">Dashboard</a>
+                <a href="#" class="nav-item" data-section="workforce">AI Workforce</a>
+                <a href="#" class="nav-item" data-section="projects">Projects</a>
+                <a href="#" class="nav-item" data-section="knowledge">Knowledge</a>
+                <a href="#" class="nav-item" data-section="comms">Communications</a>
+                <a href="#" class="nav-item" data-section="settings">Settings</a>
+                <a href="#" class="nav-item" id="logout-btn" style="margin-top: auto; color: #ff4444;">🚪 Logout</a>
+            </nav>
+        </aside>
 
-            <!-- Hidden Add Agent Form -->
-            <div id="addAgentForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
-                <h4 style="color: var(--gold); margin-bottom: 15px;">Deploy New AI Agent</h4>
-                <input type="text" id="newAgentName" placeholder="Agent Name (e.g., KS1 Finance Agent)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                <input type="text" id="newAgentRole" placeholder="Role (e.g., Financial Analyst)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                <select id="newAgentStatus" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                    <option value="Online">Online</option>
-                    <option value="Ready">Ready</option>
-                    <option value="Standby">Standby</option>
-                    <option value="Offline">Offline</option>
-                </select>
-                <div style="display: flex; gap: 10px;">
-                    <button id="submitAgentBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Deploy Agent</button>
-                    <button id="cancelAgentBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Header & Greeting -->
+            <header class="top-header">
+                <h1>Grand Rising <span id="user-name-display">King Solomon</span> 👑</h1>
+                <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
+            </header>
+
+            <!-- Mission Overview -->
+            <section class="section-card mission-section">
+                <h3>Our Mission</h3>
+                <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
+            </section>
+
+            <!-- AI Workforce Dashboard -->
+            <section class="section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">AI Workforce</h3>
+                    <button id="toggleAgentFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Agent</button>
                 </div>
-            </div>
-
-            <!-- Agents Grid -->
-            <div class="grid-layout" id="agents-grid"></div>
-        </section>
-
-        <!-- Project Dashboard -->
-        <section class="section-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Active Projects</h3>
-                <button id="toggleProjectFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Project</button>
-            </div>
-
-            <!-- Hidden Add Project Form -->
-            <div id="addProjectForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
-                <h4 style="color: var(--gold); margin-bottom: 15px;">Create New Project</h4>
-                <input type="text" id="newProjectName" placeholder="Project Name (e.g., KS1 Health)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                <input type="text" id="newProjectDesc" placeholder="Description" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                <select id="newProjectCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                    <option value="Education">Education</option>
-                    <option value="Blockchain">Blockchain</option>
-                    <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
-                    <option value="AI">AI</option>
-                    <option value="Other">Other</option>
-                </select>
-                <div style="display: flex; gap: 10px;">
-                    <button id="submitProjectBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Save to Database</button>
-                    <button id="cancelProjectBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                <div id="addAgentForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                    <h4 style="color: var(--gold); margin-bottom: 15px;">Deploy New AI Agent</h4>
+                    <input type="text" id="newAgentName" placeholder="Agent Name" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <input type="text" id="newAgentRole" placeholder="Role" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <select id="newAgentStatus" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                        <option value="Online">Online</option><option value="Ready">Ready</option><option value="Standby">Standby</option><option value="Offline">Offline</option>
+                    </select>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="submitAgentBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Deploy Agent</button>
+                        <button id="cancelAgentBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    </div>
                 </div>
-            </div>
+                <div class="grid-layout" id="agents-grid"></div>
+            </section>
 
-            <!-- Projects Grid -->
-            <div class="grid-layout" id="projects-grid"></div>
-        </section>
-
-        <!-- NEW: Knowledge Base Section -->
-        <section class="section-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Knowledge Base</h3>
-                <button id="toggleKnowledgeFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Knowledge Article</button>
-            </div>
-
-            <!-- Hidden Add Knowledge Form -->
-            <div id="addKnowledgeForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
-                <h4 style="color: var(--gold); margin-bottom: 15px;">Add New Knowledge Article</h4>
-                <input type="text" id="newKnowledgeTitle" placeholder="Article Title (e.g., Blockchain Basics)" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                <select id="newKnowledgeCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
-                    <option value="Education">Education</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Blockchain">Blockchain</option>
-                    <option value="AI">AI</option>
-                    <option value="Business">Business</option>
-                    <option value="Research">Research</option>
-                    <option value="Other">Other</option>
-                </select>
-                <textarea id="newKnowledgeContent" placeholder="Article Content (write your knowledge here...)" rows="6" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px; resize: vertical; font-family: inherit;"></textarea>
-                <div style="display: flex; gap: 10px;">
-                    <button id="submitKnowledgeBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Save Article</button>
-                    <button id="cancelKnowledgeBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+            <!-- Project Dashboard -->
+            <section class="section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Active Projects</h3>
+                    <button id="toggleProjectFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add New Project</button>
                 </div>
-            </div>
+                <div id="addProjectForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                    <h4 style="color: var(--gold); margin-bottom: 15px;">Create New Project</h4>
+                    <input type="text" id="newProjectName" placeholder="Project Name" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <input type="text" id="newProjectDesc" placeholder="Description" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <select id="newProjectCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                        <option value="Education">Education</option><option value="Blockchain">Blockchain</option><option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option><option value="AI">AI</option><option value="Other">Other</option>
+                    </select>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="submitProjectBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Save to Database</button>
+                        <button id="cancelProjectBtn" style="flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer;">Cancel</button>
+                    </div>
+                </div>
+                <div class="grid-layout" id="projects-grid"></div>
+            </section>
 
-            <!-- Knowledge Grid -->
-            <div class="grid-layout" id="knowledge-grid"></div>
-        </section>
-
-        <!-- AI Assistant Placeholder -->
-        <section class="section-card ai-chat-section">
-            <h3>KS1 Assistant</h3>
-            <div class="chat-window" id="chatWindow">
-                <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant...">
-                <button id="sendBtn">Send</button>
-            </div>
-        </section>
-
-        <!-- Recent Activity Log -->
-        <section class="section-card">
-            <h3>Recent Activity</h3>
-            <div id="activity-log-container" style="max-height: 300px; overflow-y: auto;">
-                <p style="color: rgba(255,255,255,0.5);">Loading activity logs...</p>
-            </div>
-        </section>
-
-    </main>
-
-    <script src="js/app.js?v=5"></script>
-</body>
-</html>
+            <!-- Knowledge Base Section -->
+            <section class="section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; border: none; padding-bottom: 0;">Knowledge Base</h3>
+                    <button id="toggleKnowledgeFormBtn" style="padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Knowledge Article</button>
+                </div>
+                <div id="addKnowledgeForm" style="display: none; background: var(--black); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--light-grey);">
+                    <h4 style="color: var(--gold); margin-bottom: 15px;">Add New Knowledge Article</h4>
+                    <input type="text" id="newKnowledgeTitle" placeholder="Article Title" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                    <select id="newKnowledgeCategory" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px;">
+                        <option value="Education">Education</option><option value="Technology">Technology</option><option value="Blockchain">Blockchain</option><option value="AI">AI</option><option value="Business">Business</option><option value="Research">Research</option><option value="Other">Other</option>
+                    </select>
+                    <textarea id="newKnowledgeContent" placeholder="Article Content..." rows="4" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--dark-grey); border: 1px solid var(--light-grey); color: white; border-radius: 6px; resize: vertical; font-family: inherit;"></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button id="submitKnowledgeBtn" style="flex: 1; padding: 10px; background: var(--deep-blue); color: white;
