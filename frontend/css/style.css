@@ -1,4 +1,3 @@
-/* --- Brand Variables --- */
 :root {
     --deep-blue: #1E3A8A;
     --gold: #D4AF37;
@@ -8,7 +7,6 @@
     --light-grey: #2A2A2A;
 }
 
-/* --- Reset & Base --- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -17,8 +15,11 @@ body {
     min-height: 100vh;
 }
 
-/* --- AUTHENTICATION STYLES --- */
-.auth-container {
+/* UTILITY: Completely hide elements */
+.hidden { display: none !important; }
+
+/* --- AUTH VIEW STYLES --- */
+.auth-view {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -32,25 +33,45 @@ body {
     border-radius: 12px;
     border: 1px solid var(--light-grey);
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    max-width: 420px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
 }
-.auth-form input:focus {
+.auth-form input, .auth-form select, .auth-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: var(--black);
+    border: 1px solid var(--light-grey);
+    color: white;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+.auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus {
     outline: none;
     border-color: var(--gold);
 }
-.auth-form button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    color: var(--black);
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1rem;
     transition: all 0.2s;
 }
+.auth-form button:hover { background: #b5952f; transform: translateY(-1px); }
+.auth-form a { color: var(--gold); text-decoration: none; font-weight: 500; }
+.auth-form a:hover { text-decoration: underline; }
 
-/* --- Sidebar Navigation --- */
-#dashboard-container { display: flex; min-height: 100vh; }
+/* --- DASHBOARD VIEW STYLES --- */
+.dashboard-view { display: flex; min-height: 100vh; }
 .sidebar {
-    width: 250px;
+    width: 260px;
     background-color: var(--deep-blue);
-    padding: 20px;
+    padding: 25px 20px;
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--light-grey);
@@ -60,7 +81,7 @@ body {
 }
 .logo h2 { color: var(--white); font-size: 1.5rem; margin-bottom: 40px; }
 .logo span { color: var(--gold); }
-.nav-menu { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.nav-menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .nav-item {
     color: rgba(255,255,255,0.7);
     text-decoration: none;
@@ -70,22 +91,25 @@ body {
     font-weight: 500;
 }
 .nav-item:hover, .nav-item.active {
-    background-color: rgba(212, 175, 55, 0.1);
+    background-color: rgba(212, 175, 55, 0.15);
     color: var(--gold);
     border-left: 3px solid var(--gold);
 }
-
-/* --- Main Content --- */
-.main-content {
-    flex: 1;
-    padding: 40px;
-    overflow-y: auto;
+.logout-item {
+    margin-top: auto;
+    color: #ff6b6b !important;
+    border: 1px solid rgba(255, 107, 107, 0.3);
 }
+.logout-item:hover {
+    background-color: rgba(255, 107, 107, 0.15) !important;
+    border-left: 3px solid #ff6b6b !important;
+}
+
+.main-content { flex: 1; padding: 40px; overflow-y: auto; }
 .top-header { margin-bottom: 30px; }
 .top-header h1 { font-size: 2rem; color: var(--gold); }
 .subtitle { color: rgba(255,255,255,0.6); margin-top: 5px; font-size: 1.1rem; }
 
-/* --- Sections & Cards --- */
 .section-card {
     background-color: var(--dark-grey);
     padding: 25px;
@@ -94,62 +118,52 @@ body {
     border: 1px solid var(--light-grey);
 }
 .section-card h3 { 
-    color: var(--white); 
-    margin-bottom: 20px; 
-    font-size: 1.25rem;
-    border-bottom: 1px solid var(--light-grey);
-    padding-bottom: 10px;
+    color: var(--white); margin-bottom: 20px; font-size: 1.25rem;
+    border-bottom: 1px solid var(--light-grey); padding-bottom: 10px;
 }
 .mission-section p { font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.8); }
 
-.grid-layout {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
+.grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
 .card {
-    background-color: var(--black);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--light-grey);
-    transition: transform 0.2s, border-color 0.2s;
+    background-color: var(--black); padding: 20px; border-radius: 8px;
+    border: 1px solid var(--light-grey); transition: all 0.2s;
 }
 .card:hover { transform: translateY(-3px); border-color: var(--gold); }
 .card h4 { color: var(--gold); margin-bottom: 8px; }
-.card .role, .card .category { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
 
-/* --- Agent Status Indicators --- */
-.status-indicator {
-    width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px;
+/* Forms inside dashboard */
+.form-panel {
+    background: var(--black); padding: 20px; border-radius: 8px;
+    margin-bottom: 20px; border: 1px solid var(--light-grey);
 }
+.form-panel h4 { color: var(--gold); margin-bottom: 15px; }
+.form-panel input, .form-panel select, .form-panel textarea {
+    width: 100%; padding: 10px; margin-bottom: 10px;
+    background: var(--dark-grey); border: 1px solid var(--light-grey);
+    color: white; border-radius: 6px;
+}
+.form-actions { display: flex; gap: 10px; }
+.btn-gold { padding: 8px 16px; background: var(--gold); color: var(--black); border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-blue { flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-grey { flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer; }
+
+/* Status & Chat */
+.status-indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
 .online { background-color: #10B981; box-shadow: 0 0 8px #10B981; }
 .ready { background-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-.standby, .offline { background-color: #6B7280; }
+.standby { background-color: #6B7280; }
 .status-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 10px; display: block; }
 
-/* --- AI Chat Interface --- */
 .chat-window {
-    background-color: var(--black);
-    border: 1px solid var(--light-grey);
-    border-radius: 8px;
-    height: 200px;
-    overflow-y: auto;
-    padding: 15px;
-    margin-bottom: 15px;
+    background-color: var(--black); border: 1px solid var(--light-grey);
+    border-radius: 8px; height: 200px; overflow-y: auto; padding: 15px; margin-bottom: 15px;
 }
 .chat-message { margin-bottom: 10px; padding: 10px; border-radius: 8px; max-width: 80%; }
 .chat-message.bot { background-color: var(--deep-blue); color: var(--white); }
-.chat-message.user { background-color: var(--light-grey); color: var(--white); margin-left: auto; text-align: right;}
-
+.chat-message.user { background-color: var(--light-grey); color: var(--white); margin-left: auto; text-align: right; }
 .chat-input-area { display: flex; gap: 10px; }
-.chat-input-area input {
-    flex: 1; padding: 12px; background: var(--black); border: 1px solid var(--light-grey);
-    border-radius: 8px; color: var(--white); outline: none;
-}
+.chat-input-area input { flex: 1; padding: 12px; background: var(--black); border: 1px solid var(--light-grey); border-radius: 8px; color: var(--white); outline: none; }
 .chat-input-area input:focus { border-color: var(--gold); }
-.chat-input-area button {
-    padding: 12px 24px; background: var(--gold); color: var(--black); border: none;
-    border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s;
-}
-.chat-input-area button:hover { background: #b5952f; }
+.chat-input-area button { padding: 12px 24px; background: var(--gold); color: var(--black); border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+.log-container { max-height: 300px; overflow-y: auto; }
