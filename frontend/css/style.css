@@ -15,58 +15,8 @@ body {
     min-height: 100vh;
 }
 
-/* UTILITY: Completely hide elements */
 .hidden { display: none !important; }
 
-/* --- AUTH VIEW STYLES --- */
-.auth-view {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--black) 0%, var(--deep-blue) 100%);
-    padding: 20px;
-}
-.auth-box {
-    background-color: var(--dark-grey);
-    padding: 40px;
-    border-radius: 12px;
-    border: 1px solid var(--light-grey);
-    width: 100%;
-    max-width: 420px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-}
-.auth-form input, .auth-form select, .auth-form textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    background: var(--black);
-    border: 1px solid var(--light-grey);
-    color: white;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-.auth-form input:focus, .auth-form select:focus, .auth-form textarea:focus {
-    outline: none;
-    border-color: var(--gold);
-}
-.auth-form button {
-    width: 100%;
-    padding: 12px;
-    background: var(--gold);
-    color: var(--black);
-    border: none;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: all 0.2s;
-}
-.auth-form button:hover { background: #b5952f; transform: translateY(-1px); }
-.auth-form a { color: var(--gold); text-decoration: none; font-weight: 500; }
-.auth-form a:hover { text-decoration: underline; }
-
-/* --- DASHBOARD VIEW STYLES --- */
 .dashboard-view { display: flex; min-height: 100vh; }
 .sidebar {
     width: 260px;
@@ -95,15 +45,6 @@ body {
     color: var(--gold);
     border-left: 3px solid var(--gold);
 }
-.logout-item {
-    margin-top: auto;
-    color: #ff6b6b !important;
-    border: 1px solid rgba(255, 107, 107, 0.3);
-}
-.logout-item:hover {
-    background-color: rgba(255, 107, 107, 0.15) !important;
-    border-left: 3px solid #ff6b6b !important;
-}
 
 .main-content { flex: 1; padding: 40px; overflow-y: auto; }
 .top-header { margin-bottom: 30px; }
@@ -131,7 +72,6 @@ body {
 .card:hover { transform: translateY(-3px); border-color: var(--gold); }
 .card h4 { color: var(--gold); margin-bottom: 8px; }
 
-/* Forms inside dashboard */
 .form-panel {
     background: var(--black); padding: 20px; border-radius: 8px;
     margin-bottom: 20px; border: 1px solid var(--light-grey);
@@ -147,12 +87,10 @@ body {
 .btn-blue { flex: 1; padding: 10px; background: var(--deep-blue); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 .btn-grey { flex: 1; padding: 10px; background: var(--light-grey); color: white; border: none; border-radius: 6px; cursor: pointer; }
 
-/* Status & Chat */
 .status-indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
 .online { background-color: #10B981; box-shadow: 0 0 8px #10B981; }
 .ready { background-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
 .standby { background-color: #6B7280; }
-.status-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 10px; display: block; }
 
 .chat-window {
     background-color: var(--black); border: 1px solid var(--light-grey);
