@@ -2,28 +2,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://ks1-command-center-api.onrender.com/api';
     const userName = 'King Solomon';
 
-    console.log('🚀 KS1 Command Center initializing...');
-
-    // Load all data immediately
     loadProjects();
     loadAgents();
     loadKnowledge();
     loadLogs();
 
-    // --- PROJECTS ---
     const loadProjects = async () => {
         try {
-            console.log('Loading projects...');
             const res = await fetch(`${API_URL}/projects`);
             const result = await res.json();
-            console.log('Projects response:', result);
-            
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('projects-grid');
-                if (!container) {
-                    console.error('projects-grid container not found!');
-                    return;
-                }
                 container.innerHTML = '';
                 result.data.forEach(project => {
                     const card = document.createElement('div');
@@ -39,29 +28,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(card);
                 });
-                console.log('✅ Projects loaded successfully');
-            } else {
-                console.log('No projects found');
             }
-        } catch (error) {
-            console.error('❌ Error loading projects:', error);
-        }
+        } catch (error) { console.error('Error loading projects:', error); }
     };
 
-    // --- AGENTS ---
     const loadAgents = async () => {
         try {
-            console.log('Loading agents...');
             const res = await fetch(`${API_URL}/agents`);
             const result = await res.json();
-            console.log('Agents response:', result);
-            
             if (result.success && result.data.length > 0) {
                 const container = document.getElementById('agents-grid');
-                if (!container) {
-                    console.error('agents-grid container not found!');
-                    return;
-                }
                 container.innerHTML = '';
                 result.data.forEach(agent => {
                     const statusClass = agent.status.toLowerCase();
@@ -78,29 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(card);
                 });
-                console.log('✅ Agents loaded successfully');
-            } else {
-                console.log('No agents found');
             }
-        } catch (error) {
-            console.error('❌ Error loading agents:', error);
-        }
+        } catch (error) { console.error('Error loading agents:', error); }
     };
 
-    // --- KNOWLEDGE ---
     const loadKnowledge = async () => {
         try {
-            console.log('Loading knowledge...');
             const res = await fetch(`${API_URL}/knowledge`);
             const result = await res.json();
-            console.log('Knowledge response:', result);
-            
             const container = document.getElementById('knowledge-grid');
-            if (!container) {
-                console.error('knowledge-grid container not found!');
-                return;
-            }
-            
             if (result.success && result.data.length > 0) {
                 container.innerHTML = '';
                 result.data.forEach(article => {
@@ -114,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <h4 style="color: var(--gold); margin-bottom: 4px;">${article.title}</h4>
                                 <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem;">${article.category} • ${date}</p>
                             </div>
-                            <span style="color: var(--gold); font-size: 1.2rem; transition: transform 0.3s;">▼</span>
+                            <span style="color: var(--gold); font-size: 1.2rem;">▼</span>
                         </div>
                         <div class="knowledge-content" style="display: none; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--light-grey);">
                             <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem; line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap;">${article.content}</p>
@@ -134,30 +96,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     container.appendChild(card);
                 });
-                console.log('✅ Knowledge loaded successfully');
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No knowledge articles yet.</p>';
-                console.log('No knowledge articles found');
             }
-        } catch (error) {
-            console.error('❌ Error loading knowledge:', error);
-        }
+        } catch (error) { console.error('Error loading knowledge:', error); }
     };
 
-    // --- LOGS ---
     const loadLogs = async () => {
         try {
-            console.log('Loading logs...');
             const res = await fetch(`${API_URL}/logs`);
             const result = await res.json();
-            console.log('Logs response:', result);
-            
             const container = document.getElementById('activity-log-container');
-            if (!container) {
-                console.error('activity-log-container not found!');
-                return;
-            }
-            
             if (result.success && result.data.length > 0) {
                 container.innerHTML = '';
                 result.data.forEach(log => {
@@ -174,17 +123,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     container.appendChild(logItem);
                 });
-                console.log('✅ Logs loaded successfully');
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
-                console.log('No logs found');
             }
-        } catch (error) {
-            console.error('❌ Error loading logs:', error);
-        }
+        } catch (error) { console.error('Error loading logs:', error); }
     };
 
-    // --- CREATE LOG ---
     const createLog = async (actor, action, status) => {
         try {
             await fetch(`${API_URL}/logs`, {
@@ -192,58 +136,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ actor, action, status })
             });
-        } catch (error) {
-            console.error('Error creating log:', error);
-        }
+        } catch (error) { console.error('Error creating log:', error); }
     };
 
-    // --- DELETE FUNCTIONS ---
     window.deleteProject = async (id) => {
         if (!confirm('Delete this project?')) return;
-        try {
-            const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) {
-                loadProjects();
-                createLog(userName, 'Deleted a project', 'Success');
-                loadLogs();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) { loadProjects(); createLog(userName, 'Deleted a project', 'Success'); loadLogs(); }
     };
 
     window.deleteAgent = async (id) => {
         if (!confirm('Decommission this AI Agent?')) return;
-        try {
-            const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) {
-                loadAgents();
-                createLog(userName, 'Decommissioned an AI Agent', 'Success');
-                loadLogs();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) { loadAgents(); createLog(userName, 'Decommissioned an AI Agent', 'Success'); loadLogs(); }
     };
 
     window.deleteKnowledge = async (id) => {
         if (!confirm('Delete this knowledge article?')) return;
-        try {
-            const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) {
-                loadKnowledge();
-                createLog(userName, 'Deleted a knowledge article', 'Success');
-                loadLogs();
-            }
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+        if (result.success) { loadKnowledge(); createLog(userName, 'Deleted a knowledge article', 'Success'); loadLogs(); }
     };
 
-    // --- FORM SETUP ---
     const setupForm = (toggleBtn, form, cancelBtn, submitBtn, endpoint, payloadFn, successMsg, reloadFn, btnLabel) => {
         if (!toggleBtn || !form) return;
         toggleBtn.addEventListener('click', () => form.classList.toggle('hidden'));
@@ -336,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         'Save Article'
     );
 
-    // --- CHAT (Placeholder for now, AI will be added back) ---
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatWindow = document.getElementById('chatWindow');
@@ -365,6 +280,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    console.log('✅ KS1 Command Center initialized successfully');
 });
