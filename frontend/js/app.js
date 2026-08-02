@@ -183,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration / steps);
     }
 
-    // ✅ CHART RENDERING FUNCTIONS
     let projectsChartInstance = null;
     let agentsChartInstance = null;
     let activityChartInstance = null;
@@ -206,8 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAgentsChart(agentsResult.data || []);
             renderActivityChart(logsResult.data || []);
             renderCommunicationsChart(commsResult.data || []);
-
-            console.log('✅ Charts rendered successfully');
         } catch (error) {
             console.error('❌ Error rendering charts:', error);
         }
@@ -216,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderProjectsChart(projects) {
         const ctx = document.getElementById('projectsChart');
         if (!ctx) return;
-
         if (projectsChartInstance) projectsChartInstance.destroy();
 
         const activeCount = projects.filter(p => p.status === 'Active').length;
@@ -230,34 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: ['Active', 'Planning', 'Completed', 'Other'],
                 datasets: [{
                     data: [activeCount, planningCount, completedCount, otherCount],
-                    backgroundColor: [
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(212, 175, 55, 0.8)',
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(107, 114, 128, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(16, 185, 129, 1)',
-                        'rgba(212, 175, 55, 1)',
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(107, 114, 128, 1)'
-                    ],
+                    backgroundColor: ['rgba(16, 185, 129, 0.8)', 'rgba(212, 175, 55, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(107, 114, 128, 0.8)'],
+                    borderColor: ['rgba(16, 185, 129, 1)', 'rgba(212, 175, 55, 1)', 'rgba(59, 130, 246, 1)', 'rgba(107, 114, 128, 1)'],
                     borderWidth: 2
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            font: { size: 11 },
-                            padding: 15
-                        }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255, 255, 255, 0.8)', font: { size: 11 }, padding: 15 } } }
             }
         });
     }
@@ -265,12 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAgentsChart(agents) {
         const ctx = document.getElementById('agentsChart');
         if (!ctx) return;
-
         if (agentsChartInstance) agentsChartInstance.destroy();
-
-        const onlineCount = agents.filter(a => a.status === 'Online').length;
-        const readyCount = agents.filter(a => a.status === 'Ready').length;
-        const standbyCount = agents.filter(a => a.status === 'Standby').length;
 
         agentsChartInstance = new Chart(ctx, {
             type: 'bar',
@@ -278,40 +249,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: ['Online', 'Ready', 'Standby'],
                 datasets: [{
                     label: 'Agents',
-                    data: [onlineCount, readyCount, standbyCount],
-                    backgroundColor: [
-                        'rgba(16, 185, 129, 0.7)',
-                        'rgba(212, 175, 55, 0.7)',
-                        'rgba(107, 114, 128, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(16, 185, 129, 1)',
-                        'rgba(212, 175, 55, 1)',
-                        'rgba(107, 114, 128, 1)'
-                    ],
-                    borderWidth: 2,
-                    borderRadius: 8
+                    data: [agents.filter(a => a.status === 'Online').length, agents.filter(a => a.status === 'Ready').length, agents.filter(a => a.status === 'Standby').length],
+                    backgroundColor: ['rgba(16, 185, 129, 0.7)', 'rgba(212, 175, 55, 0.7)', 'rgba(107, 114, 128, 0.7)'],
+                    borderColor: ['rgba(16, 185, 129, 1)', 'rgba(212, 175, 55, 1)', 'rgba(107, 114, 128, 1)'],
+                    borderWidth: 2, borderRadius: 8
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { 
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            stepSize: 1
-                        },
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                    },
-                    x: {
-                        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero: true, ticks: { color: 'rgba(255, 255, 255, 0.7)', stepSize: 1 }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                    x: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { display: false } }
                 }
             }
         });
@@ -320,14 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderActivityChart(logs) {
         const ctx = document.getElementById('activityChart');
         if (!ctx) return;
-
         if (activityChartInstance) activityChartInstance.destroy();
 
         const recentLogs = logs.slice(0, 7).reverse();
-        const labels = recentLogs.map(log => {
-            const date = new Date(log.createdAt);
-            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        });
+        const labels = recentLogs.map(log => new Date(log.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         const data = recentLogs.map((_, index) => index + 1);
 
         activityChartInstance = new Chart(ctx, {
@@ -339,35 +284,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     data: data.length > 0 ? data : [0],
                     borderColor: 'rgba(212, 175, 55, 1)',
                     backgroundColor: 'rgba(212, 175, 55, 0.2)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
+                    borderWidth: 3, fill: true, tension: 0.4,
                     pointBackgroundColor: 'rgba(212, 175, 55, 1)',
                     pointBorderColor: 'rgba(255, 255, 255, 1)',
-                    pointBorderWidth: 2,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    pointBorderWidth: 2, pointRadius: 5, pointHoverRadius: 7
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
                 scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { 
-                            color: 'rgba(255, 255, 255, 0.7)',
-                            stepSize: 1
-                        },
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                    },
-                    x: {
-                        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
-                        grid: { display: false }
-                    }
+                    y: { beginAtZero: true, ticks: { color: 'rgba(255, 255, 255, 0.7)', stepSize: 1 }, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                    x: { ticks: { color: 'rgba(255, 255, 255, 0.7)' }, grid: { display: false } }
                 }
             }
         });
@@ -376,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderCommunicationsChart(comms) {
         const ctx = document.getElementById('communicationsChart');
         if (!ctx) return;
-
         if (communicationsChartInstance) communicationsChartInstance.destroy();
 
         const categories = ['Announcement', 'News', 'Update', 'Event', 'Alert'];
@@ -388,36 +315,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: categories,
                 datasets: [{
                     data: counts,
-                    backgroundColor: [
-                        'rgba(245, 158, 11, 0.8)',
-                        'rgba(59, 130, 246, 0.8)',
-                        'rgba(16, 185, 129, 0.8)',
-                        'rgba(168, 85, 247, 0.8)',
-                        'rgba(239, 68, 68, 0.8)'
-                    ],
-                    borderColor: [
-                        'rgba(245, 158, 11, 1)',
-                        'rgba(59, 130, 246, 1)',
-                        'rgba(16, 185, 129, 1)',
-                        'rgba(168, 85, 247, 1)',
-                        'rgba(239, 68, 68, 1)'
-                    ],
+                    backgroundColor: ['rgba(245, 158, 11, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(168, 85, 247, 0.8)', 'rgba(239, 68, 68, 0.8)'],
+                    borderColor: ['rgba(245, 158, 11, 1)', 'rgba(59, 130, 246, 1)', 'rgba(16, 185, 129, 1)', 'rgba(168, 85, 247, 1)', 'rgba(239, 68, 68, 1)'],
                     borderWidth: 2
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            font: { size: 11 },
-                            padding: 15
-                        }
-                    }
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: 'rgba(255, 255, 255, 0.8)', font: { size: 11 }, padding: 15 } } }
             }
         });
     }
@@ -528,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }, 100);
                 });
-                console.log('✅ Communications loaded successfully');
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No communications yet. Post your first announcement!</p>';
             }
@@ -536,13 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getCategoryIcon(category) {
-        const icons = {
-            'Announcement': '📢',
-            'News': '📰',
-            'Update': '🔄',
-            'Event': '📅',
-            'Alert': '⚠️'
-        };
+        const icons = { 'Announcement': '📢', 'News': '📰', 'Update': '🔄', 'Event': '📅', 'Alert': '⚠️' };
         return icons[category] || '📢';
     }
 
@@ -712,12 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { 
-                alert('✅ Agent decommissioned!'); 
-                loadAgents(); 
-                await createLog(userName, 'Decommissioned an AI Agent', 'Success');
-                setTimeout(renderCharts, 300);
-            }
+            if (result.success) { alert('✅ Agent decommissioned!'); loadAgents(); await createLog(userName, 'Decommissioned an AI Agent', 'Success'); setTimeout(renderCharts, 300); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -726,12 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { 
-                alert('✅ Project deleted!'); 
-                loadProjects(); 
-                await createLog(userName, 'Deleted a project', 'Success');
-                setTimeout(renderCharts, 300);
-            }
+            if (result.success) { alert('✅ Project deleted!'); loadProjects(); await createLog(userName, 'Deleted a project', 'Success'); setTimeout(renderCharts, 300); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -740,11 +628,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { 
-                alert('✅ Article deleted!'); 
-                loadKnowledge(); 
-                await createLog(userName, 'Deleted a knowledge article', 'Success');
-            }
+            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -753,15 +637,11 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { 
-                alert('✅ Announcement deleted!'); 
-                loadCommunications(); 
-                await createLog(userName, 'Deleted an announcement', 'Success');
-                setTimeout(renderCharts, 300);
-            }
+            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); await createLog(userName, 'Deleted an announcement', 'Success'); setTimeout(renderCharts, 300); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
+    // ✅ AI CHAT WITH KNOWLEDGE-POWERED RESPONSES
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
@@ -780,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const thinkingDiv = document.createElement('div');
         thinkingDiv.className = 'chat-message bot';
         thinkingDiv.id = 'thinking-indicator';
-        thinkingDiv.innerHTML = '<em>🤔 KS1 Assistant is thinking...</em>';
+        thinkingDiv.innerHTML = '<em>🧠 KS1 Assistant is reading Knowledge Base...</em>';
         chatWindow.appendChild(thinkingDiv);
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
