@@ -1,19 +1,96 @@
 const fetch = require('node-fetch');
+const Knowledge = require('../models/Knowledge');
+const Project = require('../models/Project');
+const Agent = require('../models/Agent');
+
+const buildKnowledgeContext = async () => {
+    try {
+        const [articles, projects, agents] = await Promise.all([
+            Knowledge.find().sort({ createdAt: -1 }).limit(10),
+            Project.find().sort({ createdAt: -1 }).limit(10),
+            Agent.find().sort({ createdAt: -1 }).limit(10)
+        ]);
+
+        let context = '';
+
+        if (articles.length > 0) {
+            context += '\n\n=== KS1EGF KNOWLEDGE BASE ARTICLES ===\n';
+            articles.forEach((article, index) => {
+                context += `\nArticle ${index + 1}: "${article.title}"\n`;
+                context += `Category: ${article.category}\n`;
+                context += `Content: ${article.content}\n`;
+                context += '---\n';
+            });
+        }
+
+        if (projects.length > 0) {
+            context += '\n\n=== KS1EGF ACTIVE PROJECTS ===\n';
+            projects.forEach((project, index) => {
+                context += `\nProject ${index + 1}: ${project.name}\n`;
+                context += `Description: ${project.description}\n`;
+                context += `Category: ${project.category}\n`;
+                context += `Status: ${project.status}\n`;
+                context += '---\n';
+            });
+        }
+
+        if (agents.length > 0) {
+            context += '\n\n=== KS1EGF AI WORKFORCE ===\n';
+            agents.forEach((agent, index) => {
+                context += `\nAgent ${index + 1}: ${agent.name}\n`;
+                context += `Role: ${agent.role}\n`;
+                context += `Status: ${agent.status}\n`;
+                context += '---\n';
+            });
+        }
+
+        return context;
+    } catch (error) {
+        console.error('❌ Error building knowledge context:', error);
+        return '';
+    }
+};
 
 const callGroq = async (message) => {
     const apiKey = process.env.GROQ_API_KEY;
     
-    // Check if API key exists
     if (!apiKey) {
-        console.error('❌ GROQ_API_KEY is not set in environment variables');
+        console.error('❌ GROQ_API_KEY is not set');
         return {
             success: false,
-            response: "I apologize, King Solomon, but my AI brain is not configured yet. The system administrator needs to add the Groq API key. However, I'm still here and ready to help in any way I can!"
+            response: "I apologize, King Solomon, but my AI brain is not configured yet. Please add the Groq API key to the system."
         };
     }
 
     try {
-        console.log('🧠 Calling Groq AI API...');
+        console.log('🧠 Building knowledge context from database...');
+        const knowledgeContext = await buildKnowledgeContext();
+        console.log('✅ Knowledge context built successfully');
+
+        const systemPrompt = `You are the KS1 Assistant, the official AI-powered digital colleague of KS1 Empire Global Foundation (KS1EGF).
+
+Your Mission: To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.
+
+Your Personality:
+- Always address the user as "King Solomon" or "Partner"
+- Be wise, knowledgeable, professional, and inspiring
+- Keep responses concise but informative (under 200 words when possible)
+- Use emojis sparingly for emphasis
+- Start conversations with "Grand Rising" when appropriate
+- Be proud of KS1EGF's mission and achievements
+
+IMPORTANT INSTRUCTIONS:
+- You have access to the KS1EGF Knowledge Base, Projects, and AI Workforce data below
+- When answering questions about KS1EGF, ALWAYS use the provided data
+- If someone asks about a specific project, reference the actual project details
+- If someone asks about AI agents, reference the actual agent roster
+- If someone asks a knowledge question, reference the actual articles
+- If the answer is NOT in the provided data, you may use your general knowledge but clearly state that it's general information
+- Always be helpful and encouraging
+
+${knowledgeContext}`;
+
+        console.log('🧠 Calling Groq AI API with knowledge context...');
         
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -26,22 +103,7 @@ const callGroq = async (message) => {
                 messages: [
                     {
                         role: 'system',
-                        content: `You are the KS1 Assistant, the official AI-powered digital colleague of KS1 Empire Global Foundation (KS1EGF). 
-
-Your Mission: To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.
-
-About KS1EGF Projects:
-- ShineGPT: AI-powered education platform for humanity
-- KS1 Wallet: Secure blockchain digital wallet infrastructure
-- KS1 ALKEBULAN PAY: Digital trade infrastructure empowering Africa
-
-Your Personality:
-- Always address the user as "King Solomon" or "Partner"
-- Be wise, knowledgeable, professional, and inspiring
-- Keep responses concise but informative (under 200 words when possible)
-- Use emojis sparingly for emphasis
-- When asked about KS1EGF, speak proudly about the foundation's mission
-- Start conversations with "Grand Rising" when appropriate`
+                        content: systemPrompt
                     },
                     {
                         role: 'user',
@@ -65,7 +127,7 @@ Your Personality:
         const data = await response.json();
         
         if (data.choices && data.choices[0] && data.choices[0].message) {
-            console.log('✅ Groq AI response received successfully');
+            console.log('✅ Groq AI response received with knowledge context');
             return {
                 success: true,
                 response: data.choices[0].message.content
@@ -81,7 +143,7 @@ Your Personality:
         console.error('❌ Groq API exception:', error.message);
         return {
             success: false,
-            response: "I'm experiencing connectivity issues with my AI brain right now, King Solomon. Please try again in a moment. The rest of the Command Center is fully operational."
+            response: "I'm experiencing connectivity issues with my AI brain right now, King Solomon. Please try again in a moment."
         };
     }
 };
