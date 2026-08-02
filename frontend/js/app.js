@@ -1,3 +1,46 @@
+// ========================================
+// MOBILE MENU TOGGLE
+// ========================================
+const hamburger = document.getElementById('hamburger');
+const sidebar = document.getElementById('sidebar');
+const closeSidebar = document.getElementById('close-sidebar');
+const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+function openSidebar() {
+    sidebar.classList.add('active');
+    sidebarOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeSidebarMenu() {
+    sidebar.classList.remove('active');
+    sidebarOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+if (hamburger) {
+    hamburger.addEventListener('click', openSidebar);
+}
+
+if (closeSidebar) {
+    closeSidebar.addEventListener('click', closeSidebarMenu);
+}
+
+if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebarMenu);
+}
+
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            closeSidebarMenu();
+        }
+    });
+});
+
+// ========================================
+// MAIN APPLICATION
+// ========================================
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://ks1-command-center-api.onrender.com/api';
 
@@ -147,67 +190,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- AGENT MODAL LOGIC ---
+    // ========================================
+    // AGENT MODAL LOGIC
+    // ========================================
     const agentModal = document.getElementById('agent-modal');
     const addAgentBtn = document.getElementById('add-agent-btn');
     const closeAgentModalBtn = document.getElementById('close-agent-modal');
     const cancelAgentBtn = document.getElementById('cancel-agent-btn');
     const submitAgentBtn = document.getElementById('submit-agent-btn');
 
-    addAgentBtn.addEventListener('click', () => {
-        agentModal.style.display = 'block';
-    });
+    if (addAgentBtn) {
+        addAgentBtn.addEventListener('click', () => {
+            agentModal.style.display = 'block';
+        });
+    }
 
-    closeAgentModalBtn.addEventListener('click', () => {
-        agentModal.style.display = 'none';
-        clearAgentForm();
-    });
+    if (closeAgentModalBtn) {
+        closeAgentModalBtn.addEventListener('click', () => {
+            agentModal.style.display = 'none';
+            clearAgentForm();
+        });
+    }
 
-    cancelAgentBtn.addEventListener('click', () => {
-        agentModal.style.display = 'none';
-        clearAgentForm();
-    });
+    if (cancelAgentBtn) {
+        cancelAgentBtn.addEventListener('click', () => {
+            agentModal.style.display = 'none';
+            clearAgentForm();
+        });
+    }
 
     function clearAgentForm() {
         document.getElementById('agent-name').value = '';
         document.getElementById('agent-role').value = '';
     }
 
-    submitAgentBtn.addEventListener('click', async () => {
-        const name = document.getElementById('agent-name').value.trim();
-        const role = document.getElementById('agent-role').value.trim();
-        const status = document.getElementById('agent-status').value;
+    if (submitAgentBtn) {
+        submitAgentBtn.addEventListener('click', async () => {
+            const name = document.getElementById('agent-name').value.trim();
+            const role = document.getElementById('agent-role').value.trim();
+            const status = document.getElementById('agent-status').value;
 
-        if (!name || !role) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/agents`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, role, status })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('✅ Agent deployed successfully!');
-                agentModal.style.display = 'none';
-                clearAgentForm();
-                loadAgents();
-                await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
-            } else {
-                alert('❌ Error: ' + result.message);
+            if (!name || !role) {
+                alert('Please fill in all fields');
+                return;
             }
-        } catch (error) {
-            console.error('❌ Error deploying agent:', error);
-            alert('❌ Network error. Please try again.');
-        }
-    });
 
-    // --- DELETE AGENT FUNCTION ---
+            try {
+                const response = await fetch(`${API_URL}/agents`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, role, status })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Agent deployed successfully!');
+                    agentModal.style.display = 'none';
+                    clearAgentForm();
+                    loadAgents();
+                    await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error deploying agent:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        });
+    }
+
+    // --- DELETE AGENT ---
     window.deleteAgent = async (id) => {
         if (!confirm('Are you sure you want to decommission this AI Agent?')) return;
 
@@ -231,67 +284,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- PROJECT MODAL LOGIC ---
+    // ========================================
+    // PROJECT MODAL LOGIC
+    // ========================================
     const projectModal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
     const closeModalBtn = document.getElementById('close-modal');
     const cancelProjectBtn = document.getElementById('cancel-project-btn');
     const submitProjectBtn = document.getElementById('submit-project-btn');
 
-    addProjectBtn.addEventListener('click', () => {
-        projectModal.style.display = 'block';
-    });
+    if (addProjectBtn) {
+        addProjectBtn.addEventListener('click', () => {
+            projectModal.style.display = 'block';
+        });
+    }
 
-    closeModalBtn.addEventListener('click', () => {
-        projectModal.style.display = 'none';
-        clearProjectForm();
-    });
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            projectModal.style.display = 'none';
+            clearProjectForm();
+        });
+    }
 
-    cancelProjectBtn.addEventListener('click', () => {
-        projectModal.style.display = 'none';
-        clearProjectForm();
-    });
+    if (cancelProjectBtn) {
+        cancelProjectBtn.addEventListener('click', () => {
+            projectModal.style.display = 'none';
+            clearProjectForm();
+        });
+    }
 
     function clearProjectForm() {
         document.getElementById('project-name').value = '';
         document.getElementById('project-description').value = '';
     }
 
-    submitProjectBtn.addEventListener('click', async () => {
-        const name = document.getElementById('project-name').value.trim();
-        const description = document.getElementById('project-description').value.trim();
-        const category = document.getElementById('project-category').value;
+    if (submitProjectBtn) {
+        submitProjectBtn.addEventListener('click', async () => {
+            const name = document.getElementById('project-name').value.trim();
+            const description = document.getElementById('project-description').value.trim();
+            const category = document.getElementById('project-category').value;
 
-        if (!name || !description) {
-            alert('Please fill in all fields');
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_URL}/projects`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description, category, status: 'Planning' })
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                alert('✅ Project created successfully!');
-                projectModal.style.display = 'none';
-                clearProjectForm();
-                loadProjects();
-                await createLog('King Solomon', `Created project: ${name}`, 'Success');
-            } else {
-                alert('❌ Error: ' + result.message);
+            if (!name || !description) {
+                alert('Please fill in all fields');
+                return;
             }
-        } catch (error) {
-            console.error('❌ Error creating project:', error);
-            alert('❌ Network error. Please try again.');
-        }
-    });
 
-    // --- DELETE PROJECT FUNCTION ---
+            try {
+                const response = await fetch(`${API_URL}/projects`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description, category, status: 'Planning' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Project created successfully!');
+                    projectModal.style.display = 'none';
+                    clearProjectForm();
+                    loadProjects();
+                    await createLog('King Solomon', `Created project: ${name}`, 'Success');
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error creating project:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        });
+    }
+
+    // --- DELETE PROJECT ---
     window.deleteProject = async (id) => {
         if (!confirm('Are you sure you want to delete this project?')) return;
 
@@ -315,12 +378,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // --- CHAT PLACEHOLDER ---
+    // ========================================
+    // CHAT LOGIC
+    // ========================================
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
 
-    chatSend.addEventListener('click', async () => {
+    const sendMessage = async () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
@@ -340,10 +405,28 @@ document.addEventListener('DOMContentLoaded', () => {
             chatWindow.appendChild(botDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
         }, 800);
-    });
+    };
 
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') chatSend.click();
+    if (chatSend) {
+        chatSend.addEventListener('click', sendMessage);
+    }
+
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    }
+
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+        if (e.target === agentModal) {
+            agentModal.style.display = 'none';
+            clearAgentForm();
+        }
+        if (e.target === projectModal) {
+            projectModal.style.display = 'none';
+            clearProjectForm();
+        }
     });
 
     console.log('✅ KS1 Command Center initialized successfully');
