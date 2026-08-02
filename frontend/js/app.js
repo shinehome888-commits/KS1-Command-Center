@@ -119,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="snippet">${snippet}</p>
                     `;
                     
-                    // Click to view full article
                     card.addEventListener('click', () => {
                         openArticleView(article);
                     });
@@ -150,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('knowledge-view-modal').style.display = 'block';
     }
     
-    // View modal controls
     const viewModal = document.getElementById('knowledge-view-modal');
     const closeViewModalBtn = document.getElementById('close-view-modal');
     const closeViewBtn = document.getElementById('close-view-btn');
@@ -428,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ========================================
-    // CHAT LOGIC
+    // 🧠 REAL AI CHAT LOGIC (DEEPSEEK POWERED)
     // ========================================
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
@@ -438,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
+        // Show user message immediately
         const userDiv = document.createElement('div');
         userDiv.className = 'chat-message user';
         userDiv.textContent = message;
@@ -445,15 +444,68 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        await createLog('King Solomon', `Sent chat message: "${message}"`, 'Success');
+        // Show "thinking" indicator
+        const thinkingDiv = document.createElement('div');
+        thinkingDiv.className = 'chat-message bot';
+        thinkingDiv.id = 'thinking-indicator';
+        thinkingDiv.innerHTML = '<em>🤔 KS1 Assistant is thinking...</em>';
+        chatWindow.appendChild(thinkingDiv);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        setTimeout(() => {
+        // Log the user's message
+        await createLog('King Solomon', `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
+
+        try {
+            // Call the real AI backend
+            const response = await fetch(`${API_URL}/ai/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+
+            const result = await response.json();
+
+            // Remove thinking indicator
+            const thinking = document.getElementById('thinking-indicator');
+            if (thinking) thinking.remove();
+
+            // Display AI response
             const botDiv = document.createElement('div');
             botDiv.className = 'chat-message bot';
-            botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
+            
+            if (result.success && result.data && result.data.aiResponse) {
+                botDiv.textContent = result.data.aiResponse;
+                
+                // Log the AI response
+                await createLog(
+                    'KS1 Assistant', 
+                    `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 
+                    'Success'
+                );
+            } else {
+                botDiv.textContent = "I'm having a moment, King Solomon. Please try again.";
+                await createLog('KS1 Assistant', 'Failed to respond', 'Failed');
+            }
+            
             chatWindow.appendChild(botDiv);
             chatWindow.scrollTop = chatWindow.scrollHeight;
-        }, 800);
+            
+        } catch (error) {
+            console.error('❌ AI Chat error:', error);
+            
+            // Remove thinking indicator
+            const thinking = document.getElementById('thinking-indicator');
+            if (thinking) thinking.remove();
+            
+            // Show error message
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'chat-message bot';
+            errorDiv.textContent = "❌ Network error. Please check your connection and try again, King Solomon.";
+            chatWindow.appendChild(errorDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            
+            await createLog('KS1 Assistant', 'Network error', 'Failed');
+        }
     };
 
     if (chatSend) chatSend.addEventListener('click', sendMessage);
