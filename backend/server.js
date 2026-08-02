@@ -32,10 +32,12 @@ app.get('/api/seed', async (req, res) => {
         const Project = require('./models/Project');
         const Agent = require('./models/Agent');
         const Knowledge = require('./models/Knowledge');
+        const ActivityLog = require('./models/ActivityLog');
 
         await Project.deleteMany();
         await Agent.deleteMany();
         await Knowledge.deleteMany();
+        await ActivityLog.deleteMany();
 
         await Project.insertMany([
             { name: 'ShineGPT', description: 'AI-powered education platform for humanity.', category: 'Education', status: 'Active' },
@@ -52,6 +54,12 @@ app.get('/api/seed', async (req, res) => {
         await Knowledge.insertMany([
             { title: 'What is Artificial Intelligence?', category: 'AI', content: 'Artificial Intelligence (AI) is the simulation of human intelligence by machines. It includes learning, reasoning, problem-solving, and decision-making.' },
             { title: 'Blockchain Explained Simply', category: 'Blockchain', content: 'Blockchain is a digital ledger that records transactions across many computers. Once data is recorded, it cannot be changed.' }
+        ]);
+
+        // Add initial activity logs
+        await ActivityLog.insertMany([
+            { actor: 'System', action: 'Initialized KS1 Command Center v0.1', status: 'Success' },
+            { actor: 'King Solomon', action: 'Logged into the Command Center', status: 'Success' }
         ]);
 
         res.json({ success: true, message: "✅ Database seeded successfully!" });
