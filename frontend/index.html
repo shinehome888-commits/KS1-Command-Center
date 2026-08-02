@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <div class="dashboard-view">
-        
+    <div class="dashboard-container">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
                 <h2>KS1 <span>COMMAND</span></h2>
@@ -24,6 +24,7 @@
             </nav>
         </aside>
 
+        <!-- Main Content -->
         <main class="main-content">
             <header class="top-header">
                 <h1>Grand Rising King Solomon 👑</h1>
@@ -36,93 +37,70 @@
             </section>
 
             <section class="section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>AI Workforce</h3>
-                    <button id="toggleAgentFormBtn" class="btn-gold">+ Add New Agent</button>
-                </div>
-                <div id="addAgentForm" class="form-panel hidden">
-                    <h4>Deploy New AI Agent</h4>
-                    <input type="text" id="newAgentName" placeholder="Agent Name">
-                    <input type="text" id="newAgentRole" placeholder="Role">
-                    <select id="newAgentStatus">
-                        <option value="Online">Online</option>
-                        <option value="Ready">Ready</option>
-                        <option value="Standby">Standby</option>
-                    </select>
-                    <div class="form-actions">
-                        <button id="submitAgentBtn" class="btn-blue">Deploy Agent</button>
-                        <button id="cancelAgentBtn" class="btn-grey">Cancel</button>
+                <h3>AI Workforce</h3>
+                <div class="grid-layout">
+                    <div class="card agent-card">
+                        <div class="status-indicator online"></div>
+                        <h4>KS1 Operations Agent</h4>
+                        <p class="role">Digital Operations Coordinator</p>
+                        <span class="status-text">Online</span>
+                    </div>
+                    <div class="card agent-card">
+                        <div class="status-indicator ready"></div>
+                        <h4>KS1 Knowledge Agent</h4>
+                        <p class="role">Digital Librarian</p>
+                        <span class="status-text">Ready</span>
+                    </div>
+                    <div class="card agent-card">
+                        <div class="status-indicator standby"></div>
+                        <h4>KS1 Builder Agent</h4>
+                        <p class="role">Software Engineer</p>
+                        <span class="status-text">Standby</span>
                     </div>
                 </div>
-                <div class="grid-layout" id="agents-grid"></div>
             </section>
 
             <section class="section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Active Projects</h3>
-                    <button id="toggleProjectFormBtn" class="btn-gold">+ Add New Project</button>
-                </div>
-                <div id="addProjectForm" class="form-panel hidden">
-                    <h4>Create New Project</h4>
-                    <input type="text" id="newProjectName" placeholder="Project Name">
-                    <input type="text" id="newProjectDesc" placeholder="Description">
-                    <select id="newProjectCategory">
-                        <option value="Education">Education</option>
-                        <option value="Blockchain">Blockchain</option>
-                        <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
-                        <option value="AI">AI</option>
-                    </select>
-                    <div class="form-actions">
-                        <button id="submitProjectBtn" class="btn-blue">Save to Database</button>
-                        <button id="cancelProjectBtn" class="btn-grey">Cancel</button>
+                <h3>Active Projects</h3>
+                <div class="grid-layout">
+                    <div class="card project-card">
+                        <h4>ShineGPT</h4>
+                        <p class="description">AI-powered education platform for humanity.</p>
+                        <p class="category">Category: Education</p>
+                        <span class="badge active">Active</span>
+                    </div>
+                    <div class="card project-card">
+                        <h4>KS1 Wallet</h4>
+                        <p class="description">Secure blockchain digital wallet infrastructure.</p>
+                        <p class="category">Category: Blockchain</p>
+                        <span class="badge planning">Planning</span>
+                    </div>
+                    <div class="card project-card">
+                        <h4>KS1 ALKEBULAN PAY</h4>
+                        <p class="description">Digital trade infrastructure empowering Africa.</p>
+                        <p class="category">Category: Digital Trade</p>
+                        <span class="badge active">Active</span>
                     </div>
                 </div>
-                <div class="grid-layout" id="projects-grid"></div>
             </section>
 
             <section class="section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Knowledge Base</h3>
-                    <button id="toggleKnowledgeFormBtn" class="btn-gold">+ Add Article</button>
-                </div>
-                <div id="addKnowledgeForm" class="form-panel hidden">
-                    <h4>Add New Knowledge Article</h4>
-                    <input type="text" id="newKnowledgeTitle" placeholder="Article Title">
-                    <select id="newKnowledgeCategory">
-                        <option value="Education">Education</option>
-                        <option value="Technology">Technology</option>
-                        <option value="Blockchain">Blockchain</option>
-                        <option value="AI">AI</option>
-                    </select>
-                    <textarea id="newKnowledgeContent" placeholder="Article Content..." rows="4"></textarea>
-                    <div class="form-actions">
-                        <button id="submitKnowledgeBtn" class="btn-blue">Save Article</button>
-                        <button id="cancelKnowledgeBtn" class="btn-grey">Cancel</button>
+                <h3>Knowledge Base</h3>
+                <div class="grid-layout">
+                    <div class="card knowledge-card">
+                        <h4>What is Artificial Intelligence?</h4>
+                        <p class="meta">AI • Just now</p>
+                        <p class="snippet">Artificial Intelligence (AI) is the simulation of human intelligence by machines...</p>
                     </div>
-                </div>
-                <div class="grid-layout" id="knowledge-grid"></div>
-            </section>
-
-            <section class="section-card">
-                <h3>KS1 Assistant</h3>
-                <div class="chat-window" id="chatWindow">
-                    <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chatInput" placeholder="Ask the KS1 Assistant...">
-                    <button id="sendBtn">Send</button>
-                </div>
-            </section>
-
-            <section class="section-card">
-                <h3>Recent Activity</h3>
-                <div id="activity-log-container" class="log-container">
-                    <p style="color: rgba(255,255,255,0.5);">Loading activity logs...</p>
+                    <div class="card knowledge-card">
+                        <h4>Blockchain Explained Simply</h4>
+                        <p class="meta">Blockchain • Just now</p>
+                        <p class="snippet">Blockchain is a digital ledger that records transactions across many computers...</p>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="js/app.js?v=9"></script>
 </body>
 </html>
