@@ -26,7 +26,8 @@ app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
-app.use('/api/auth', require('./routes/authRoutes')); // NEW: Authentication
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/communications', require('./routes/communicationRoutes'));
 
 // Seed Route
 app.get('/api/seed', async (req, res) => {
