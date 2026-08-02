@@ -20,11 +20,13 @@ app.get('/', (req, res) => {
     res.json({ message: 'KS1 Command Center API is Operational', status: 'success' });
 });
 
+// API Routes
 app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
-app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
+app.use('/api/logs', require('./routes/activityRoutes'));
 
+// Seed Route
 app.get('/api/seed', async (req, res) => {
     try {
         const Project = require('./models/Project');
@@ -49,11 +51,10 @@ app.get('/api/seed', async (req, res) => {
 
         await Knowledge.insertMany([
             { title: 'What is Artificial Intelligence?', category: 'AI', content: 'Artificial Intelligence (AI) is the simulation of human intelligence by machines. It includes learning, reasoning, problem-solving, and decision-making.' },
-            { title: 'Blockchain Explained Simply', category: 'Blockchain', content: 'Blockchain is a digital ledger that records transactions across many computers. Once data is recorded, it cannot be changed.' },
-            { title: 'What is Web3?', category: 'Technology', content: 'Web3 is the next generation of the internet. Unlike Web2, Web3 is decentralized. Users own their data, identity, and digital assets.' }
+            { title: 'Blockchain Explained Simply', category: 'Blockchain', content: 'Blockchain is a digital ledger that records transactions across many computers. Once data is recorded, it cannot be changed.' }
         ]);
 
-        res.json({ success: true, message: "✅ Database seeded!" });
+        res.json({ success: true, message: "✅ Database seeded successfully!" });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
