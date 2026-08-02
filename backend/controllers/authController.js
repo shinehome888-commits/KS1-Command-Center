@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const ActivityLog = require('../models/ActivityLog');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id, name) => {
@@ -42,6 +43,13 @@ const registerUser = async (req, res) => {
         });
 
         if (user) {
+            // Log the registration
+            await ActivityLog.create({
+                actor: user.name,
+                action: 'Registered a new account',
+                status: 'Success'
+            });
+
             res.status(201).json({
                 success: true,
                 message: 'User registered successfully',
@@ -96,6 +104,13 @@ const loginUser = async (req, res) => {
                 message: 'Invalid email or password'
             });
         }
+
+        // ✅ RECORD THE LOGIN IN ACTIVITY LOG
+        await ActivityLog.create({
+            actor: user.name,
+            action: 'Logged into the Command Center',
+            status: 'Success'
+        });
 
         res.status(200).json({
             success: true,
