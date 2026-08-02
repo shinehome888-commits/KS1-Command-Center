@@ -40,6 +40,70 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
     loadKnowledge();
     loadActivityLog();
+    loadStats();
+
+    // --- LOAD DASHBOARD STATS ---
+    async function loadStats() {
+        try {
+            const [projectsRes, agentsRes, knowledgeRes, logsRes] = await Promise.all([
+                fetch(`${API_URL}/projects`),
+                fetch(`${API_URL}/agents`),
+                fetch(`${API_URL}/knowledge`),
+                fetch(`${API_URL}/logs`)
+            ]);
+
+            const [projectsResult, agentsResult, knowledgeResult, logsResult] = await Promise.all([
+                projectsRes.json(),
+                agentsRes.json(),
+                knowledgeRes.json(),
+                logsRes.json()
+            ]);
+
+            const projectsCount = projectsResult.success ? projectsResult.data.length : 0;
+            animateCounter('stat-projects-count', projectsCount);
+
+            const agentsCount = agentsResult.success ? agentsResult.data.length : 0;
+            const onlineAgents = agentsResult.success 
+                ? agentsResult.data.filter(a => a.status === 'Online').length 
+                : 0;
+            animateCounter('stat-agents-count', agentsCount);
+            document.getElementById('stat-agents-online').textContent = `${onlineAgents} Online`;
+
+            const knowledgeCount = knowledgeResult.success ? knowledgeResult.data.length : 0;
+            animateCounter('stat-knowledge-count', knowledgeCount);
+
+            const activityCount = logsResult.success ? logsResult.data.length : 0;
+            animateCounter('stat-activity-count', activityCount);
+
+            console.log('✅ Dashboard stats loaded successfully');
+        } catch (error) {
+            console.error('❌ Error loading stats:', error);
+        }
+    }
+
+    // --- ANIMATE COUNTER NUMBERS ---
+    function animateCounter(elementId, target) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        
+        const duration = 800;
+        const steps = 30;
+        const increment = target / steps;
+        let current = 0;
+        let step = 0;
+        
+        const timer = setInterval(() => {
+            step++;
+            current += increment;
+            
+            if (step >= steps) {
+                element.textContent = target;
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+        }, duration / steps);
+    }
 
     // --- LOAD AGENTS ---
     async function loadAgents() {
@@ -177,6 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('✅ Knowledge article deleted successfully!');
                     closeViewModal();
                     loadKnowledge();
+                    loadStats();
                     await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
                 } else {
                     alert('❌ Error: ' + result.message);
@@ -230,6 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ actor, action, status })
             });
             loadActivityLog();
+            loadStats();
         } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
@@ -272,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     agentModal.style.display = 'none';
                     clearAgentForm();
                     loadAgents();
+                    loadStats();
                     await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
                 } else { alert('❌ Error: ' + result.message); }
             } catch (error) {
@@ -289,6 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 alert('✅ Agent decommissioned successfully!');
                 loadAgents();
+                loadStats();
                 await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success');
             } else { alert('❌ Error: ' + result.message); }
         } catch (error) {
@@ -336,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     projectModal.style.display = 'none';
                     clearProjectForm();
                     loadProjects();
+                    loadStats();
                     await createLog('King Solomon', `Created project: ${name}`, 'Success');
                 } else { alert('❌ Error: ' + result.message); }
             } catch (error) {
@@ -353,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 alert('✅ Project deleted successfully!');
                 loadProjects();
+                loadStats();
                 await createLog('King Solomon', 'Deleted a project', 'Success');
             } else { alert('❌ Error: ' + result.message); }
         } catch (error) {
@@ -400,6 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     knowledgeModal.style.display = 'none';
                     clearKnowledgeForm();
                     loadKnowledge();
+                    loadStats();
                     await createLog('King Solomon', `Added knowledge: ${title}`, 'Success');
                 } else { alert('❌ Error: ' + result.message); }
             } catch (error) {
@@ -417,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 alert('✅ Knowledge article deleted successfully!');
                 loadKnowledge();
+                loadStats();
                 await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
             } else { alert('❌ Error: ' + result.message); }
         } catch (error) {
@@ -426,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ========================================
-    // 🧠 REAL AI CHAT LOGIC (DEEPSEEK POWERED)
+    // 🧠 REAL AI CHAT LOGIC (GROQ POWERED)
     // ========================================
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
@@ -436,7 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // Show user message immediately
         const userDiv = document.createElement('div');
         userDiv.className = 'chat-message user';
         userDiv.textContent = message;
@@ -444,7 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Show "thinking" indicator
         const thinkingDiv = document.createElement('div');
         thinkingDiv.className = 'chat-message bot';
         thinkingDiv.id = 'thinking-indicator';
@@ -452,11 +522,9 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.appendChild(thinkingDiv);
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Log the user's message
         await createLog('King Solomon', `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
 
         try {
-            // Call the real AI backend
             const response = await fetch(`${API_URL}/ai/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -465,18 +533,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
 
-            // Remove thinking indicator
             const thinking = document.getElementById('thinking-indicator');
             if (thinking) thinking.remove();
 
-            // Display AI response
             const botDiv = document.createElement('div');
             botDiv.className = 'chat-message bot';
             
             if (result.success && result.data && result.data.aiResponse) {
                 botDiv.textContent = result.data.aiResponse;
-                
-                // Log the AI response
                 await createLog(
                     'KS1 Assistant', 
                     `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 
@@ -493,11 +557,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('❌ AI Chat error:', error);
             
-            // Remove thinking indicator
             const thinking = document.getElementById('thinking-indicator');
             if (thinking) thinking.remove();
             
-            // Show error message
             const errorDiv = document.createElement('div');
             errorDiv.className = 'chat-message bot';
             errorDiv.textContent = "❌ Network error. Please check your connection and try again, King Solomon.";
