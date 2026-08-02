@@ -37,7 +37,12 @@
             </section>
 
             <section class="section-card">
-                <h3>AI Workforce</h3>
+                <div class="section-header">
+                    <h3>AI Workforce</h3>
+                    <button id="add-agent-btn" class="btn-primary">
+                        <span class="btn-icon">+</span> Deploy New Agent
+                    </button>
+                </div>
                 <div class="grid-layout" id="agents-grid">
                     <!-- Agents will be loaded here by JavaScript -->
                 </div>
@@ -83,6 +88,38 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- Modal for Adding Agent -->
+    <div id="agent-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Deploy New AI Agent</h2>
+                <button class="modal-close" id="close-agent-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Agent Name</label>
+                    <input type="text" id="agent-name" placeholder="Enter agent name" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <input type="text" id="agent-role" placeholder="e.g., Digital Operations Coordinator" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="agent-status" class="form-input">
+                        <option value="Online">Online</option>
+                        <option value="Ready">Ready</option>
+                        <option value="Standby">Standby</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-agent-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-agent-btn" class="btn-primary">Deploy Agent</button>
+            </div>
+        </div>
     </div>
 
     <!-- Modal for Adding Project -->
