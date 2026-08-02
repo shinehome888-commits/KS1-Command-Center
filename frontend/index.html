@@ -44,7 +44,29 @@
             </section>
 
             <section class="section-card">
-                <h3>Active Projects</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; border: none; padding: 0;">Active Projects</h3>
+                    <button id="add-project-btn" class="btn-gold" style="padding: 8px 16px; font-size: 0.9rem;">+ Add New Project</button>
+                </div>
+
+                <!-- Add Project Form (Hidden by default) -->
+                <div id="add-project-form" class="form-container" style="display: none; margin-bottom: 20px;">
+                    <h4 style="color: var(--gold); margin-bottom: 15px;">Create New Project</h4>
+                    <input type="text" id="project-name" placeholder="Project Name" class="form-input">
+                    <input type="text" id="project-description" placeholder="Description" class="form-input">
+                    <select id="project-category" class="form-input">
+                        <option value="Education">Education</option>
+                        <option value="Blockchain">Blockchain</option>
+                        <option value="AI">AI</option>
+                        <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button id="submit-project-btn" class="btn-gold" style="flex: 1;">Save Project</button>
+                        <button id="cancel-project-btn" class="btn-grey" style="flex: 1;">Cancel</button>
+                    </div>
+                </div>
+
                 <div class="grid-layout" id="projects-grid">
                     <!-- Projects will be loaded here by JavaScript -->
                 </div>
