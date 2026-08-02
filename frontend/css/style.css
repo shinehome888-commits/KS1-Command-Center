@@ -1,405 +1,797 @@
-// ========================================
-// MOBILE MENU TOGGLE
-// ========================================
-const hamburger = document.getElementById('hamburger');
-const sidebar = document.getElementById('sidebar');
-const closeSidebar = document.getElementById('close-sidebar');
-const sidebarOverlay = document.getElementById('sidebar-overlay');
-
-function openSidebar() {
-    sidebar.classList.add('active');
-    sidebarOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
+:root {
+    --deep-blue: #1E3A8A;
+    --gold: #D4AF37;
+    --gold-light: #F4CF57;
+    --white: #FFFFFF;
+    --black: #0A0A0A;
+    --dark-grey: #1A1A1A;
+    --light-grey: #2A2A2A;
+    --accent-green: #10B981;
+    --accent-red: #EF4444;
 }
 
-function closeSidebarMenu() {
-    sidebar.classList.remove('active');
-    sidebarOverlay.classList.remove('active');
-    document.body.style.overflow = '';
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0A0A0A 0%, #1A1A2E 50%, #0A0A0A 100%);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-if (hamburger) hamburger.addEventListener('click', openSidebar);
-if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
-if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
+.dashboard-container { display: flex; min-height: 100vh; }
 
-document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) closeSidebarMenu();
-    });
-});
+/* ========================================
+   SIDEBAR
+   ======================================== */
+.sidebar {
+    width: 260px;
+    background: linear-gradient(180deg, rgba(30, 58, 138, 0.95) 0%, rgba(20, 40, 100, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    padding: 25px 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(212, 175, 55, 0.2);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+.logo h2 { 
+    color: var(--white); 
+    font-size: 1.5rem; 
+    margin-bottom: 40px;
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+.logo span { 
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+}
+.nav-menu { display: flex; flex-direction: column; gap: 8px; }
+.nav-item {
+    color: rgba(255,255,255,0.7);
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+.nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, rgba(212, 175, 55, 0.3), transparent);
+    transition: width 0.3s ease;
+}
+.nav-item:hover::before { width: 100%; }
+.nav-item:hover, .nav-item.active {
+    color: var(--gold);
+    border-left: 3px solid var(--gold);
+}
 
-// ========================================
-// MAIN APPLICATION
-// ========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'https://ks1-command-center-api.onrender.com/api';
+.close-sidebar {
+    display: none;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 1001;
+}
 
-    console.log('🚀 KS1 Command Center initializing...');
+/* ========================================
+   MOBILE HEADER
+   ======================================== */
+.mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--deep-blue), rgba(30, 58, 138, 0.95));
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    z-index: 999;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    align-items: center;
+    justify-content: space-between;
+}
 
-    loadAgents();
-    loadProjects();
-    loadKnowledge();
-    loadActivityLog();
+.mobile-logo {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--white);
+}
 
-    // --- LOAD AGENTS ---
-    async function loadAgents() {
-        try {
-            const response = await fetch(`${API_URL}/agents`);
-            const result = await response.json();
-            
-            if (result.success && result.data.length > 0) {
-                const container = document.getElementById('agents-grid');
-                container.innerHTML = '';
-                
-                result.data.forEach(agent => {
-                    const statusClass = agent.status.toLowerCase();
-                    const card = document.createElement('div');
-                    card.className = 'card agent-card';
-                    card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteAgent('${agent._id}')">Delete</button>
-                        <div class="status-indicator ${statusClass}"></div>
-                        <h4>${agent.name}</h4>
-                        <p class="role">${agent.role}</p>
-                        <span class="status-text">${agent.status}</span>
-                    `;
-                    container.appendChild(card);
-                });
-                console.log('✅ Agents loaded successfully');
-            }
-        } catch (error) { console.error('❌ Error loading agents:', error); }
+.mobile-logo span {
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+.hamburger {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.hamburger span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background: var(--gold);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+    z-index: 998;
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+.main-content { flex: 1; padding: 40px; overflow-y: auto; }
+.top-header { margin-bottom: 30px; }
+.top-header h1 { 
+    font-size: 2.5rem; 
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+@keyframes glow {
+    from { text-shadow: 0 0 30px rgba(212, 175, 55, 0.6); }
+    to { text-shadow: 0 0 40px rgba(212, 175, 55, 0.9); }
+}
+.subtitle { color: rgba(255,255,255,0.6); margin-top: 5px; font-size: 1.1rem; }
+
+/* ========================================
+   CARDS & SECTIONS
+   ======================================== */
+.section-card {
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.9) 0%, rgba(42, 42, 42, 0.9) 100%);
+    backdrop-filter: blur(10px);
+    padding: 25px;
+    border-radius: 16px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+.section-card:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+}
+.section-card h3 { 
+    color: var(--white); 
+    margin-bottom: 20px; 
+    font-size: 1.25rem;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2); 
+    padding-bottom: 10px;
+}
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.section-header h3 {
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+.mission-section p { font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.8); }
+
+.grid-layout { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 20px; 
+}
+
+.card {
+    background: linear-gradient(135deg, rgba(10, 10, 10, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(212, 175, 55, 0.3);
+    border-color: var(--gold);
+}
+.card:hover::before { opacity: 1; }
+.card h4 { 
+    color: var(--gold); 
+    margin-bottom: 8px;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    padding-right: 80px;
+}
+
+/* Agent Specific */
+.status-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+.online { 
+    background: var(--accent-green); 
+    box-shadow: 0 0 15px var(--accent-green);
+    animation: pulse 2s infinite;
+}
+.ready { 
+    background: var(--gold); 
+    box-shadow: 0 0 15px var(--gold);
+    animation: pulse 2s infinite;
+}
+.standby { background: #6B7280; }
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.role { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 10px; }
+.status-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+
+/* Project Specific */
+.description { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 8px; }
+.category { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px; }
+.badge { 
+    display: inline-block; 
+    padding: 6px 12px; 
+    border-radius: 20px; 
+    font-size: 0.8rem; 
+    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.badge.active { 
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
+.badge.planning { 
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.1));
+    color: var(--gold);
+    border: 1px solid var(--gold);
+}
+
+/* Knowledge Specific */
+.meta { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 10px; }
+.snippet { 
+    color: rgba(255,255,255,0.7); 
+    font-size: 0.9rem; 
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+
+/* ========================================
+   CHAT INTERFACE
+   ======================================== */
+.chat-window {
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+    height: 200px;
+    overflow-y: auto;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+.chat-message { 
+    margin-bottom: 10px; 
+    padding: 10px 15px; 
+    border-radius: 12px; 
+    max-width: 80%; 
+    line-height: 1.4;
+    word-wrap: break-word;
+    animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.chat-message.bot { 
+    background: linear-gradient(135deg, var(--deep-blue), rgba(30, 58, 138, 0.8));
+    color: var(--white);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+}
+.chat-message.user { 
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+    color: var(--white);
+    margin-left: auto;
+    text-align: right;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.chat-input-area { display: flex; gap: 10px; }
+.chat-input { 
+    flex: 1;
+    padding: 12px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    color: var(--white);
+    outline: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+.chat-input:focus { 
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+.btn-primary { 
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--black);
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+}
+.btn-primary:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(212, 175, 55, 0.6);
+}
+.btn-primary:active {
+    transform: translateY(0);
+}
+.btn-icon {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.btn-secondary {
+    padding: 12px 24px;
+    background: rgba(42, 42, 42, 0.8);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-secondary:hover {
+    background: rgba(42, 42, 42, 1);
+    border-color: var(--gold);
+}
+
+.ai-badge {
+    font-size: 0.7rem;
+    color: var(--accent-green);
+    background: rgba(16, 185, 129, 0.15);
+    padding: 4px 10px;
+    border-radius: 12px;
+    margin-left: 10px;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* ========================================
+   ACTIVITY LOG
+   ======================================== */
+.log-container { 
+    max-height: 400px; 
+    overflow-y: auto; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+.log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(10, 10, 10, 0.8);
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    transition: all 0.3s ease;
+    gap: 15px;
+}
+.log-item:hover {
+    border-color: var(--gold);
+}
+.log-details { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 4px; 
+    flex: 1;
+    min-width: 0;
+}
+.log-actor { 
+    color: var(--gold); 
+    font-size: 0.95rem; 
+    font-weight: 600;
+}
+.log-action { 
+    color: rgba(255,255,255,0.8); 
+    font-size: 0.9rem;
+    word-wrap: break-word;
+}
+.log-meta { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+    flex-shrink: 0;
+}
+.badge-log { 
+    padding: 4px 10px; 
+    border-radius: 12px; 
+    font-size: 0.75rem; 
+    font-weight: bold;
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
+.log-time { 
+    color: rgba(255,255,255,0.5); 
+    font-size: 0.8rem; 
+    white-space: nowrap;
+}
+
+/* ========================================
+   DELETE BUTTON
+   ======================================== */
+.delete-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.1));
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    font-weight: bold;
+}
+.delete-btn:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(239, 68, 68, 0.3));
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+/* ========================================
+   MODAL
+   ======================================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.3s ease;
+    overflow-y: auto;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.modal-content {
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.98), rgba(42, 42, 42, 0.98));
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    box-shadow: 0 20px 60px rgba(212, 175, 55, 0.3);
+    animation: slideDown 0.4s ease;
+}
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+.modal-header h2 {
+    color: var(--gold);
+    font-size: 1.5rem;
+}
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+.modal-close:hover {
+    color: var(--accent-red);
+    transform: rotate(90deg);
+}
+.modal-body {
+    padding: 25px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    color: var(--gold);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.form-input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+    color: var(--white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+.form-input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+textarea.form-input {
+    resize: vertical;
+    min-height: 100px;
+}
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 25px;
+    border-top: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE - TABLET
+   ======================================== */
+@media screen and (max-width: 1024px) {
+    .grid-layout {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 15px;
     }
-
-    // --- LOAD PROJECTS ---
-    async function loadProjects() {
-        try {
-            const response = await fetch(`${API_URL}/projects`);
-            const result = await response.json();
-            
-            if (result.success && result.data.length > 0) {
-                const container = document.getElementById('projects-grid');
-                container.innerHTML = '';
-                
-                result.data.forEach(project => {
-                    const badgeClass = project.status.toLowerCase();
-                    const card = document.createElement('div');
-                    card.className = 'card project-card';
-                    card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteProject('${project._id}')">Delete</button>
-                        <h4>${project.name}</h4>
-                        <p class="description">${project.description}</p>
-                        <p class="category">Category: ${project.category}</p>
-                        <span class="badge ${badgeClass}">${project.status}</span>
-                    `;
-                    container.appendChild(card);
-                });
-                console.log('✅ Projects loaded successfully');
-            }
-        } catch (error) { console.error('❌ Error loading projects:', error); }
+    
+    .section-card {
+        padding: 20px;
     }
-
-    // --- LOAD KNOWLEDGE (UPDATED WITH DELETE BUTTONS) ---
-    async function loadKnowledge() {
-        try {
-            const response = await fetch(`${API_URL}/knowledge`);
-            const result = await response.json();
-            
-            if (result.success && result.data.length > 0) {
-                const container = document.getElementById('knowledge-grid');
-                container.innerHTML = '';
-                
-                result.data.forEach(article => {
-                    const date = new Date(article.createdAt).toLocaleDateString();
-                    const snippet = article.content.substring(0, 120) + (article.content.length > 120 ? '...' : '');
-                    const card = document.createElement('div');
-                    card.className = 'card knowledge-card';
-                    card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteKnowledge('${article._id}')">Delete</button>
-                        <h4>${article.title}</h4>
-                        <p class="meta">${article.category} • ${date}</p>
-                        <p class="snippet">${snippet}</p>
-                    `;
-                    container.appendChild(card);
-                });
-                console.log('✅ Knowledge loaded successfully');
-            }
-        } catch (error) { console.error('❌ Error loading knowledge:', error); }
+    
+    .main-content {
+        padding: 30px;
     }
+}
 
-    // --- LOAD ACTIVITY LOG ---
-    async function loadActivityLog() {
-        try {
-            const response = await fetch(`${API_URL}/logs`);
-            const result = await response.json();
-            
-            const container = document.getElementById('activity-log');
-            container.innerHTML = '';
-            
-            if (result.success && result.data.length > 0) {
-                result.data.forEach(log => {
-                    const timestamp = new Date(log.createdAt).toLocaleString();
-                    const logItem = document.createElement('div');
-                    logItem.className = 'log-item';
-                    logItem.innerHTML = `
-                        <div class="log-details">
-                            <strong class="log-actor">${log.actor}</strong>
-                            <span class="log-action">${log.action}</span>
-                        </div>
-                        <div class="log-meta">
-                            <span class="badge-log">${log.status}</span>
-                            <span class="log-time">${timestamp}</span>
-                        </div>
-                    `;
-                    container.appendChild(logItem);
-                });
-                console.log('✅ Activity log loaded successfully');
-            } else {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
-            }
-        } catch (error) { console.error('❌ Error loading activity log:', error); }
+/* ========================================
+   MOBILE RESPONSIVE - PHONE
+   ======================================== */
+@media screen and (max-width: 768px) {
+    /* Show mobile header */
+    .mobile-header {
+        display: flex;
     }
-
-    // --- CREATE ACTIVITY LOG ---
-    async function createLog(actor, action, status = 'Success') {
-        try {
-            await fetch(`${API_URL}/logs`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ actor, action, status })
-            });
-            loadActivityLog();
-        } catch (error) { console.error('❌ Error creating log:', error); }
+    
+    /* Sidebar becomes slide-in drawer */
+    .sidebar {
+        position: fixed;
+        left: -280px;
+        top: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 999;
+        transition: left 0.3s ease;
+        padding-top: 25px;
     }
-
-    // ========================================
-    // AGENT MODAL LOGIC
-    // ========================================
-    const agentModal = document.getElementById('agent-modal');
-    const addAgentBtn = document.getElementById('add-agent-btn');
-    const closeAgentModalBtn = document.getElementById('close-agent-modal');
-    const cancelAgentBtn = document.getElementById('cancel-agent-btn');
-    const submitAgentBtn = document.getElementById('submit-agent-btn');
-
-    if (addAgentBtn) addAgentBtn.addEventListener('click', () => agentModal.style.display = 'block');
-    if (closeAgentModalBtn) closeAgentModalBtn.addEventListener('click', () => { agentModal.style.display = 'none'; clearAgentForm(); });
-    if (cancelAgentBtn) cancelAgentBtn.addEventListener('click', () => { agentModal.style.display = 'none'; clearAgentForm(); });
-
-    function clearAgentForm() {
-        document.getElementById('agent-name').value = '';
-        document.getElementById('agent-role').value = '';
+    
+    .sidebar.active {
+        left: 0;
     }
-
-    if (submitAgentBtn) {
-        submitAgentBtn.addEventListener('click', async () => {
-            const name = document.getElementById('agent-name').value.trim();
-            const role = document.getElementById('agent-role').value.trim();
-            const status = document.getElementById('agent-status').value;
-
-            if (!name || !role) { alert('Please fill in all fields'); return; }
-
-            try {
-                const response = await fetch(`${API_URL}/agents`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, role, status })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    alert('✅ Agent deployed successfully!');
-                    agentModal.style.display = 'none';
-                    clearAgentForm();
-                    loadAgents();
-                    await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
-                } else { alert('❌ Error: ' + result.message); }
-            } catch (error) {
-                console.error('❌ Error deploying agent:', error);
-                alert('❌ Network error. Please try again.');
-            }
-        });
+    
+    .sidebar.active ~ .sidebar-overlay {
+        display: block;
     }
-
-    window.deleteAgent = async (id) => {
-        if (!confirm('Are you sure you want to decommission this AI Agent?')) return;
-        try {
-            const response = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
-            const result = await response.json();
-            if (result.success) {
-                alert('✅ Agent decommissioned successfully!');
-                loadAgents();
-                await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success');
-            } else { alert('❌ Error: ' + result.message); }
-        } catch (error) {
-            console.error('❌ Error deleting agent:', error);
-            alert('❌ Network error. Please try again.');
-        }
-    };
-
-    // ========================================
-    // PROJECT MODAL LOGIC
-    // ========================================
-    const projectModal = document.getElementById('project-modal');
-    const addProjectBtn = document.getElementById('add-project-btn');
-    const closeModalBtn = document.getElementById('close-modal');
-    const cancelProjectBtn = document.getElementById('cancel-project-btn');
-    const submitProjectBtn = document.getElementById('submit-project-btn');
-
-    if (addProjectBtn) addProjectBtn.addEventListener('click', () => projectModal.style.display = 'block');
-    if (closeModalBtn) closeModalBtn.addEventListener('click', () => { projectModal.style.display = 'none'; clearProjectForm(); });
-    if (cancelProjectBtn) cancelProjectBtn.addEventListener('click', () => { projectModal.style.display = 'none'; clearProjectForm(); });
-
-    function clearProjectForm() {
-        document.getElementById('project-name').value = '';
-        document.getElementById('project-description').value = '';
+    
+    .close-sidebar {
+        display: block;
     }
-
-    if (submitProjectBtn) {
-        submitProjectBtn.addEventListener('click', async () => {
-            const name = document.getElementById('project-name').value.trim();
-            const description = document.getElementById('project-description').value.trim();
-            const category = document.getElementById('project-category').value;
-
-            if (!name || !description) { alert('Please fill in all fields'); return; }
-
-            try {
-                const response = await fetch(`${API_URL}/projects`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description, category, status: 'Planning' })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    alert('✅ Project created successfully!');
-                    projectModal.style.display = 'none';
-                    clearProjectForm();
-                    loadProjects();
-                    await createLog('King Solomon', `Created project: ${name}`, 'Success');
-                } else { alert('❌ Error: ' + result.message); }
-            } catch (error) {
-                console.error('❌ Error creating project:', error);
-                alert('❌ Network error. Please try again.');
-            }
-        });
+    
+    /* Adjust main content for mobile header */
+    .main-content {
+        padding: 80px 15px 20px;
+        width: 100%;
     }
-
-    window.deleteProject = async (id) => {
-        if (!confirm('Are you sure you want to delete this project?')) return;
-        try {
-            const response = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-            const result = await response.json();
-            if (result.success) {
-                alert('✅ Project deleted successfully!');
-                loadProjects();
-                await createLog('King Solomon', 'Deleted a project', 'Success');
-            } else { alert('❌ Error: ' + result.message); }
-        } catch (error) {
-            console.error('❌ Error deleting project:', error);
-            alert('❌ Network error. Please try again.');
-        }
-    };
-
-    // ========================================
-    // KNOWLEDGE MODAL LOGIC (NEW!)
-    // ========================================
-    const knowledgeModal = document.getElementById('knowledge-modal');
-    const addKnowledgeBtn = document.getElementById('add-knowledge-btn');
-    const closeKnowledgeModalBtn = document.getElementById('close-knowledge-modal');
-    const cancelKnowledgeBtn = document.getElementById('cancel-knowledge-btn');
-    const submitKnowledgeBtn = document.getElementById('submit-knowledge-btn');
-
-    if (addKnowledgeBtn) addKnowledgeBtn.addEventListener('click', () => knowledgeModal.style.display = 'block');
-    if (closeKnowledgeModalBtn) closeKnowledgeModalBtn.addEventListener('click', () => { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); });
-    if (cancelKnowledgeBtn) cancelKnowledgeBtn.addEventListener('click', () => { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); });
-
-    function clearKnowledgeForm() {
-        document.getElementById('knowledge-title').value = '';
-        document.getElementById('knowledge-content').value = '';
+    
+    .top-header h1 {
+        font-size: 1.6rem;
     }
-
-    if (submitKnowledgeBtn) {
-        submitKnowledgeBtn.addEventListener('click', async () => {
-            const title = document.getElementById('knowledge-title').value.trim();
-            const category = document.getElementById('knowledge-category').value;
-            const content = document.getElementById('knowledge-content').value.trim();
-
-            if (!title || !content) { alert('Please fill in title and content'); return; }
-
-            try {
-                const response = await fetch(`${API_URL}/knowledge`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, category, content })
-                });
-                const result = await response.json();
-
-                if (result.success) {
-                    alert('✅ Knowledge article saved successfully!');
-                    knowledgeModal.style.display = 'none';
-                    clearKnowledgeForm();
-                    loadKnowledge();
-                    await createLog('King Solomon', `Added knowledge: ${title}`, 'Success');
-                } else { alert('❌ Error: ' + result.message); }
-            } catch (error) {
-                console.error('❌ Error creating knowledge:', error);
-                alert('❌ Network error. Please try again.');
-            }
-        });
+    
+    .subtitle {
+        font-size: 0.95rem;
     }
+    
+    /* Stack section headers */
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    
+    .section-header .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Single column grid */
+    .grid-layout {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Card adjustments */
+    .card {
+        padding: 15px;
+    }
+    
+    .card h4 {
+        font-size: 1.05rem;
+        padding-right: 80px;
+    }
+    
+    /* Modal full-width on mobile */
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .modal-footer {
+        flex-direction: column-reverse;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+    }
+    
+    /* Chat stacked */
+    .chat-input-area {
+        flex-direction: column;
+    }
+    
+    .chat-input-area button {
+        width: 100%;
+    }
+    
+    .chat-message {
+        max-width: 90%;
+    }
+    
+    /* Log items stacked */
+    .log-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .log-meta {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    /* Section card padding */
+    .section-card {
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+    
+    .section-card h3 {
+        font-size: 1.1rem;
+    }
+}
 
-    window.deleteKnowledge = async (id) => {
-        if (!confirm('Are you sure you want to delete this knowledge article?')) return;
-        try {
-            const response = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
-            const result = await response.json();
-            if (result.success) {
-                alert('✅ Knowledge article deleted successfully!');
-                loadKnowledge();
-                await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
-            } else { alert('❌ Error: ' + result.message); }
-        } catch (error) {
-            console.error('❌ Error deleting knowledge:', error);
-            alert('❌ Network error. Please try again.');
-        }
-    };
+/* Small phones */
+@media screen and (max-width: 480px) {
+    .top-header h1 {
+        font-size: 1.4rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        margin: 5% auto;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px;
+    }
+}
 
-    // ========================================
-    // CHAT LOGIC
-    // ========================================
-    const chatInput = document.getElementById('chat-input');
-    const chatSend = document.getElementById('chat-send');
-    const chatWindow = document.getElementById('chat-window');
+/* Touch device improvements */
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+    
+    .btn-primary:hover {
+        transform: none;
+    }
+    
+    .delete-btn {
+        padding: 8px 14px;
+        font-size: 0.8rem;
+    }
+}
 
-    const sendMessage = async () => {
-        const message = chatInput.value.trim();
-        if (!message) return;
-
-        const userDiv = document.createElement('div');
-        userDiv.className = 'chat-message user';
-        userDiv.textContent = message;
-        chatWindow.appendChild(userDiv);
-        chatInput.value = '';
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-
-        await createLog('King Solomon', `Sent chat message: "${message}"`, 'Success');
-
-        setTimeout(() => {
-            const botDiv = document.createElement('div');
-            botDiv.className = 'chat-message bot';
-            botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
-            chatWindow.appendChild(botDiv);
-            chatWindow.scrollTop = chatWindow.scrollHeight;
-        }, 800);
-    };
-
-    if (chatSend) chatSend.addEventListener('click', sendMessage);
-    if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
-
-    // Close modals when clicking outside
-    window.addEventListener('click', (e) => {
-        if (e.target === agentModal) { agentModal.style.display = 'none'; clearAgentForm(); }
-        if (e.target === projectModal) { projectModal.style.display = 'none'; clearProjectForm(); }
-        if (e.target === knowledgeModal) { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); }
-    });
-
-    console.log('✅ KS1 Command Center initialized successfully');
-});
+/* Landscape mobile */
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    .main-content {
+        padding: 70px 15px 15px;
+    }
+    
+    .section-card {
+        margin-bottom: 15px;
+    }
+    
+    .top-header h1 {
+        font-size: 1.5rem;
+    }
+}
