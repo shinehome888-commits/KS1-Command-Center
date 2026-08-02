@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading projects:', error); }
     }
 
-    // --- LOAD KNOWLEDGE (UPDATED WITH DELETE BUTTONS) ---
+    // --- LOAD KNOWLEDGE (WITH CLICK TO VIEW) ---
     async function loadKnowledge() {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
@@ -113,16 +113,81 @@ document.addEventListener('DOMContentLoaded', () => {
                     const card = document.createElement('div');
                     card.className = 'card knowledge-card';
                     card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteKnowledge('${article._id}')">Delete</button>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteKnowledge('${article._id}')">Delete</button>
                         <h4>${article.title}</h4>
                         <p class="meta">${article.category} • ${date}</p>
                         <p class="snippet">${snippet}</p>
                     `;
+                    
+                    // Click to view full article
+                    card.addEventListener('click', () => {
+                        openArticleView(article);
+                    });
+                    
                     container.appendChild(card);
                 });
                 console.log('✅ Knowledge loaded successfully');
             }
         } catch (error) { console.error('❌ Error loading knowledge:', error); }
+    }
+
+    // --- VIEW FULL ARTICLE IN MODAL ---
+    let currentViewArticleId = null;
+    
+    function openArticleView(article) {
+        currentViewArticleId = article._id;
+        const date = new Date(article.createdAt).toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+        
+        document.getElementById('view-article-title').textContent = article.title;
+        document.getElementById('view-article-category').textContent = article.category;
+        document.getElementById('view-article-date').textContent = `Published: ${date}`;
+        document.getElementById('view-article-content').textContent = article.content;
+        
+        document.getElementById('knowledge-view-modal').style.display = 'block';
+    }
+    
+    // View modal controls
+    const viewModal = document.getElementById('knowledge-view-modal');
+    const closeViewModalBtn = document.getElementById('close-view-modal');
+    const closeViewBtn = document.getElementById('close-view-btn');
+    const deleteViewArticleBtn = document.getElementById('delete-view-article-btn');
+    
+    function closeViewModal() {
+        viewModal.style.display = 'none';
+        currentViewArticleId = null;
+    }
+    
+    if (closeViewModalBtn) closeViewModalBtn.addEventListener('click', closeViewModal);
+    if (closeViewBtn) closeViewBtn.addEventListener('click', closeViewModal);
+    
+    if (deleteViewArticleBtn) {
+        deleteViewArticleBtn.addEventListener('click', async () => {
+            if (!currentViewArticleId) return;
+            if (!confirm('Are you sure you want to delete this knowledge article?')) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/knowledge/${currentViewArticleId}`, { 
+                    method: 'DELETE' 
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Knowledge article deleted successfully!');
+                    closeViewModal();
+                    loadKnowledge();
+                    await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('❌ Error deleting knowledge:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        });
     }
 
     // --- LOAD ACTIVITY LOG ---
@@ -299,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // ========================================
-    // KNOWLEDGE MODAL LOGIC (NEW!)
+    // KNOWLEDGE MODAL LOGIC
     // ========================================
     const knowledgeModal = document.getElementById('knowledge-modal');
     const addKnowledgeBtn = document.getElementById('add-knowledge-btn');
@@ -399,6 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === agentModal) { agentModal.style.display = 'none'; clearAgentForm(); }
         if (e.target === projectModal) { projectModal.style.display = 'none'; clearProjectForm(); }
         if (e.target === knowledgeModal) { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); }
+        if (e.target === viewModal) { closeViewModal(); }
     });
 
     console.log('✅ KS1 Command Center initialized successfully');
