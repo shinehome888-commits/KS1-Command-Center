@@ -8,9 +8,19 @@
 </head>
 <body>
 
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+        <div class="mobile-logo">KS1 <span>COMMAND</span></div>
+        <button class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
     <div class="dashboard-container">
         <!-- Sidebar -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="sidebar">
             <div class="logo">
                 <h2>KS1 <span>COMMAND</span></h2>
             </div>
@@ -22,7 +32,11 @@
                 <a href="#" class="nav-item">Communications</a>
                 <a href="#" class="nav-item">Settings</a>
             </nav>
+            <button class="close-sidebar" id="close-sidebar">&times;</button>
         </aside>
+
+        <!-- Overlay for mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -40,7 +54,7 @@
                 <div class="section-header">
                     <h3>AI Workforce</h3>
                     <button id="add-agent-btn" class="btn-primary">
-                        <span class="btn-icon">+</span> Deploy New Agent
+                        <span class="btn-icon">+</span> <span class="btn-text">Deploy Agent</span>
                     </button>
                 </div>
                 <div class="grid-layout" id="agents-grid">
@@ -52,7 +66,7 @@
                 <div class="section-header">
                     <h3>Active Projects</h3>
                     <button id="add-project-btn" class="btn-primary">
-                        <span class="btn-icon">+</span> Add New Project
+                        <span class="btn-icon">+</span> <span class="btn-text">Add Project</span>
                     </button>
                 </div>
                 <div class="grid-layout" id="projects-grid">
