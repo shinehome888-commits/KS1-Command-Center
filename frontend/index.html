@@ -38,109 +38,48 @@
 
             <section class="section-card">
                 <h3>AI Workforce</h3>
-                <div class="grid-layout">
-                    <div class="card agent-card">
-                        <div class="status-indicator online"></div>
-                        <h4>KS1 Operations Agent</h4>
-                        <p class="role">Digital Operations Coordinator</p>
-                        <span class="status-text">Online</span>
-                    </div>
-                    <div class="card agent-card">
-                        <div class="status-indicator ready"></div>
-                        <h4>KS1 Knowledge Agent</h4>
-                        <p class="role">Digital Librarian</p>
-                        <span class="status-text">Ready</span>
-                    </div>
-                    <div class="card agent-card">
-                        <div class="status-indicator standby"></div>
-                        <h4>KS1 Builder Agent</h4>
-                        <p class="role">Software Engineer</p>
-                        <span class="status-text">Standby</span>
-                    </div>
+                <div class="grid-layout" id="agents-grid">
+                    <!-- Agents will be loaded here by JavaScript -->
                 </div>
             </section>
 
             <section class="section-card">
                 <h3>Active Projects</h3>
-                <div class="grid-layout">
-                    <div class="card project-card">
-                        <h4>ShineGPT</h4>
-                        <p class="description">AI-powered education platform for humanity.</p>
-                        <p class="category">Category: Education</p>
-                        <span class="badge active">Active</span>
-                    </div>
-                    <div class="card project-card">
-                        <h4>KS1 Wallet</h4>
-                        <p class="description">Secure blockchain digital wallet infrastructure.</p>
-                        <p class="category">Category: Blockchain</p>
-                        <span class="badge planning">Planning</span>
-                    </div>
-                    <div class="card project-card">
-                        <h4>KS1 ALKEBULAN PAY</h4>
-                        <p class="description">Digital trade infrastructure empowering Africa.</p>
-                        <p class="category">Category: Digital Trade</p>
-                        <span class="badge active">Active</span>
-                    </div>
+                <div class="grid-layout" id="projects-grid">
+                    <!-- Projects will be loaded here by JavaScript -->
                 </div>
             </section>
 
             <section class="section-card">
                 <h3>Knowledge Base</h3>
-                <div class="grid-layout">
-                    <div class="card knowledge-card">
-                        <h4>What is Artificial Intelligence?</h4>
-                        <p class="meta">AI • Just now</p>
-                        <p class="snippet">Artificial Intelligence (AI) is the simulation of human intelligence by machines...</p>
-                    </div>
-                    <div class="card knowledge-card">
-                        <h4>Blockchain Explained Simply</h4>
-                        <p class="meta">Blockchain • Just now</p>
-                        <p class="snippet">Blockchain is a digital ledger that records transactions across many computers...</p>
-                    </div>
+                <div class="grid-layout" id="knowledge-grid">
+                    <!-- Knowledge articles will be loaded here by JavaScript -->
                 </div>
             </section>
 
-            <!-- NEW: KS1 Assistant -->
+            <!-- KS1 Assistant -->
             <section class="section-card">
                 <h3>KS1 Assistant <span style="font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 4px; margin-left: 8px;">🧠 AI Powered</span></h3>
-                <div class="chat-window">
+                <div class="chat-window" id="chat-window">
                     <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" class="chat-input" placeholder="Ask the KS1 Assistant...">
-                    <button class="btn-gold">Send</button>
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Ask the KS1 Assistant...">
+                    <button id="chat-send" class="btn-gold">Send</button>
                 </div>
             </section>
 
-            <!-- NEW: Recent Activity Log -->
+            <!-- Recent Activity Log -->
             <section class="section-card">
                 <h3>Recent Activity</h3>
-                <div class="log-container">
-                    <div class="log-item">
-                        <div class="log-details">
-                            <strong class="log-actor">King Solomon</strong>
-                            <span class="log-action">Logged into the Command Center</span>
-                        </div>
-                        <div class="log-meta">
-                            <span class="badge-log success">Success</span>
-                            <span class="log-time">Just now</span>
-                        </div>
-                    </div>
-                    <div class="log-item">
-                        <div class="log-details">
-                            <strong class="log-actor">System</strong>
-                            <span class="log-action">Initialized KS1 Command Center v0.1</span>
-                        </div>
-                        <div class="log-meta">
-                            <span class="badge-log success">Success</span>
-                            <span class="log-time">Just now</span>
-                        </div>
-                    </div>
+                <div class="log-container" id="activity-log">
+                    <!-- Activity logs will be loaded here by JavaScript -->
                 </div>
             </section>
 
         </main>
     </div>
 
+    <script src="js/app.js"></script>
 </body>
 </html>
