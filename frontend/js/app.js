@@ -149,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         performLogout();
     });
 
+    // ✅ LOAD ALL 5 STATS INCLUDING ACTIVITY COUNT
     async function loadStats() {
         try {
             const [projectsRes, agentsRes, knowledgeRes, logsRes, commsRes] = await Promise.all([
@@ -166,6 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('stat-agents-online').textContent = `${agentsResult.success ? agentsResult.data.filter(a => a.status === 'Online').length : 0} Online`;
             animateCounter('stat-knowledge-count', knowledgeResult.success ? knowledgeResult.data.length : 0);
             animateCounter('stat-communications-count', commsResult.success ? commsResult.data.length : 0);
+            // ✅ ACTIVITY COUNT RESTORED
+            animateCounter('stat-activity-count', logsResult.success ? logsResult.data.length : 0);
         } catch (error) { console.error('❌ Error loading stats:', error); }
     }
 
