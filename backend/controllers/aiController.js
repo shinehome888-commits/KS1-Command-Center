@@ -1,7 +1,5 @@
 const { callDeepSeek } = require('../services/aiService');
 
-// @desc    Process AI chat message
-// @route   POST /api/ai/chat
 const chatWithAI = async (req, res) => {
     try {
         const { message } = req.body;
@@ -13,20 +11,30 @@ const chatWithAI = async (req, res) => {
             });
         }
 
-        const aiResponse = await callDeepSeek(message);
+        console.log(`💬 Processing message: "${message.substring(0, 50)}..."`);
         
+        const result = await callDeepSeek(message);
+        
+        // ALWAYS return success:true so frontend doesn't break
+        // The "success" field in result tells us if AI actually worked
         res.status(200).json({ 
-            success: true, 
+            success: true,
             data: {
                 userMessage: message,
-                aiResponse: aiResponse
+                aiResponse: result.response,
+                aiPowered: result.success
             }
         });
     } catch (error) {
-        console.error('AI Chat Error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Failed to process AI request' 
+        console.error('❌ AI Controller error:', error);
+        // NEVER fail - always return something
+        res.status(200).json({ 
+            success: true,
+            data: {
+                userMessage: req.body.message,
+                aiResponse: "I'm having a moment, King Solomon. Please try again.",
+                aiPowered: false
+            }
         });
     }
 };
