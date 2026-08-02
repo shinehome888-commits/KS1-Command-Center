@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -92,7 +93,6 @@
                     </div>
                 </header>
 
-                <!-- ✅ 5 STATS CARDS - All positioned beautifully -->
                 <section class="stats-grid" id="stats-grid">
                     <div class="stat-card stat-projects">
                         <div class="stat-icon">📊</div>
@@ -128,6 +128,37 @@
                         <div class="stat-info">
                             <h2 id="stat-activity-count">0</h2>
                             <p>Total Activities</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ✅ NEW: VISUAL DATA CHARTS SECTION -->
+                <section class="section-card charts-section">
+                    <h3>📊 Analytics Dashboard <span class="ai-badge">Live Data</span></h3>
+                    <div class="charts-grid">
+                        <div class="chart-card">
+                            <h4>Projects Status</h4>
+                            <div class="chart-container">
+                                <canvas id="projectsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4>AI Agent Status</h4>
+                            <div class="chart-container">
+                                <canvas id="agentsChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4>Recent Activity</h4>
+                            <div class="chart-container">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4>Communications by Category</h4>
+                            <div class="chart-container">
+                                <canvas id="communicationsChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </section>
