@@ -44,29 +44,12 @@
             </section>
 
             <section class="section-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0; border: none; padding: 0;">Active Projects</h3>
-                    <button id="add-project-btn" class="btn-gold" style="padding: 8px 16px; font-size: 0.9rem;">+ Add New Project</button>
+                <div class="section-header">
+                    <h3>Active Projects</h3>
+                    <button id="add-project-btn" class="btn-primary">
+                        <span class="btn-icon">+</span> Add New Project
+                    </button>
                 </div>
-
-                <!-- Add Project Form (Hidden by default) -->
-                <div id="add-project-form" class="form-container" style="display: none; margin-bottom: 20px;">
-                    <h4 style="color: var(--gold); margin-bottom: 15px;">Create New Project</h4>
-                    <input type="text" id="project-name" placeholder="Project Name" class="form-input">
-                    <input type="text" id="project-description" placeholder="Description" class="form-input">
-                    <select id="project-category" class="form-input">
-                        <option value="Education">Education</option>
-                        <option value="Blockchain">Blockchain</option>
-                        <option value="AI">AI</option>
-                        <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <div style="display: flex; gap: 10px; margin-top: 15px;">
-                        <button id="submit-project-btn" class="btn-gold" style="flex: 1;">Save Project</button>
-                        <button id="cancel-project-btn" class="btn-grey" style="flex: 1;">Cancel</button>
-                    </div>
-                </div>
-
                 <div class="grid-layout" id="projects-grid">
                     <!-- Projects will be loaded here by JavaScript -->
                 </div>
@@ -81,13 +64,13 @@
 
             <!-- KS1 Assistant -->
             <section class="section-card">
-                <h3>KS1 Assistant <span style="font-size: 0.7rem; color: #10B981; background: rgba(16,185,129,0.15); padding: 3px 8px; border-radius: 4px; margin-left: 8px;">🧠 AI Powered</span></h3>
+                <h3>KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
                 <div class="chat-window" id="chat-window">
                     <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
                 </div>
                 <div class="chat-input-area">
                     <input type="text" id="chat-input" class="chat-input" placeholder="Ask the KS1 Assistant...">
-                    <button id="chat-send" class="btn-gold">Send</button>
+                    <button id="chat-send" class="btn-primary">Send</button>
                 </div>
             </section>
 
@@ -100,6 +83,40 @@
             </section>
 
         </main>
+    </div>
+
+    <!-- Modal for Adding Project -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Project</h2>
+                <button class="modal-close" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Project Name</label>
+                    <input type="text" id="project-name" placeholder="Enter project name" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="project-description" placeholder="Describe your project" class="form-input" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="project-category" class="form-input">
+                        <option value="Education">Education</option>
+                        <option value="Blockchain">Blockchain</option>
+                        <option value="AI">AI</option>
+                        <option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-project-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-project-btn" class="btn-primary">Create Project</button>
+            </div>
+        </div>
     </div>
 
     <script src="js/app.js"></script>
