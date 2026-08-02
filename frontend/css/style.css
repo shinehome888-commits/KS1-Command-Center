@@ -94,3 +94,38 @@ body {
 /* Knowledge Specific */
 .meta { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 10px; }
 .snippet { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.5; }
+
+/* --- NEW: Chat Interface --- */
+.chat-window {
+    background-color: var(--black); border: 1px solid var(--light-grey);
+    border-radius: 8px; height: 200px; overflow-y: auto; padding: 15px; margin-bottom: 15px;
+}
+.chat-message { margin-bottom: 10px; padding: 10px 15px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
+.chat-message.bot { background-color: var(--deep-blue); color: var(--white); }
+.chat-message.user { background-color: var(--light-grey); color: var(--white); margin-left: auto; text-align: right; }
+
+.chat-input-area { display: flex; gap: 10px; }
+.chat-input { 
+    flex: 1; padding: 12px; background: var(--black); border: 1px solid var(--light-grey); 
+    border-radius: 8px; color: var(--white); outline: none; font-size: 1rem;
+}
+.chat-input:focus { border-color: var(--gold); }
+.btn-gold { 
+    padding: 12px 24px; background: var(--gold); color: var(--black); border: none; 
+    border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+}
+.btn-gold:hover { background: #b5952f; }
+
+/* --- NEW: Activity Log --- */
+.log-container { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.log-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px; background-color: var(--black); border-radius: 8px; border: 1px solid var(--light-grey);
+}
+.log-details { display: flex; flex-direction: column; gap: 4px; }
+.log-actor { color: var(--gold); font-size: 0.9rem; }
+.log-action { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
+.log-meta { display: flex; align-items: center; gap: 10px; }
+.badge-log { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+.badge-log.success { background: rgba(16, 185, 129, 0.2); color: #10B981; }
+.log-time { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
