@@ -149,7 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
         performLogout();
     });
 
-    // ✅ LOAD ALL 5 STATS INCLUDING ACTIVITY COUNT
     async function loadStats() {
         try {
             const [projectsRes, agentsRes, knowledgeRes, logsRes, commsRes] = await Promise.all([
@@ -167,7 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('stat-agents-online').textContent = `${agentsResult.success ? agentsResult.data.filter(a => a.status === 'Online').length : 0} Online`;
             animateCounter('stat-knowledge-count', knowledgeResult.success ? knowledgeResult.data.length : 0);
             animateCounter('stat-communications-count', commsResult.success ? commsResult.data.length : 0);
-            // ✅ ACTIVITY COUNT RESTORED
             animateCounter('stat-activity-count', logsResult.success ? logsResult.data.length : 0);
         } catch (error) { console.error('❌ Error loading stats:', error); }
     }
@@ -352,7 +350,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
             if (result.success) {
                 alert('✅ Deleted!'); viewModal.style.display = 'none'; currentViewArticleId = null;
-                loadKnowledge(); loadStats(); await createLog(userName, 'Deleted a knowledge article', 'Success');
+                loadKnowledge(); 
+                await createLog(userName, 'Deleted a knowledge article', 'Success');
+                loadStats();
             }
         } catch (error) { console.error('❌ Error:', error); }
     });
@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ actor, action, status })
             });
-            loadActivityLog(); loadStats();
+            loadActivityLog();
         } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
@@ -411,7 +411,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await res.json();
                 if (result.success) {
                     alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
-                    reloadFn(); loadStats(); await createLog(userName, successMsg, 'Success');
+                    reloadFn(); 
+                    await createLog(userName, successMsg, 'Success');
+                    loadStats();
                 } else { alert('❌ ' + result.message); }
             } catch (error) { alert('❌ Network error.'); }
             finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
@@ -473,7 +475,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Agent decommissioned!'); loadAgents(); loadStats(); await createLog(userName, 'Decommissioned an AI Agent', 'Success'); }
+            if (result.success) { 
+                alert('✅ Agent decommissioned!'); 
+                loadAgents(); 
+                await createLog(userName, 'Decommissioned an AI Agent', 'Success');
+                loadStats();
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -482,7 +489,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Project deleted!'); loadProjects(); loadStats(); await createLog(userName, 'Deleted a project', 'Success'); }
+            if (result.success) { 
+                alert('✅ Project deleted!'); 
+                loadProjects(); 
+                await createLog(userName, 'Deleted a project', 'Success');
+                loadStats();
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -491,7 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); loadStats(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
+            if (result.success) { 
+                alert('✅ Article deleted!'); 
+                loadKnowledge(); 
+                await createLog(userName, 'Deleted a knowledge article', 'Success');
+                loadStats();
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -500,7 +517,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); loadStats(); await createLog(userName, 'Deleted an announcement', 'Success'); }
+            if (result.success) { 
+                alert('✅ Announcement deleted!'); 
+                loadCommunications(); 
+                await createLog(userName, 'Deleted an announcement', 'Success');
+                loadStats();
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -527,6 +549,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         await createLog(userName, `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
+        loadStats();
 
         try {
             const response = await fetch(`${API_URL}/ai/chat`, {
@@ -541,6 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.data && result.data.aiResponse) {
                 botDiv.textContent = result.data.aiResponse;
                 await createLog('KS1 Assistant', `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 'Success');
+                loadStats();
             } else {
                 botDiv.textContent = "I'm having a moment, King Solomon. Please try again.";
             }
