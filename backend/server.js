@@ -25,7 +25,8 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes')); // NEW: DeepSeek AI Integration
+app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/auth', require('./routes/authRoutes')); // NEW: Authentication
 
 // Seed Route
 app.get('/api/seed', async (req, res) => {
