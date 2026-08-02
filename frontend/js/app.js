@@ -18,23 +18,13 @@ function closeSidebarMenu() {
     document.body.style.overflow = '';
 }
 
-if (hamburger) {
-    hamburger.addEventListener('click', openSidebar);
-}
-
-if (closeSidebar) {
-    closeSidebar.addEventListener('click', closeSidebarMenu);
-}
-
-if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', closeSidebarMenu);
-}
+if (hamburger) hamburger.addEventListener('click', openSidebar);
+if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
+if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
 document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', () => {
-        if (window.innerWidth <= 768) {
-            closeSidebarMenu();
-        }
+        if (window.innerWidth <= 768) closeSidebarMenu();
     });
 });
 
@@ -46,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log('🚀 KS1 Command Center initializing...');
 
-    // Load all data on page load
     loadAgents();
     loadProjects();
     loadKnowledge();
@@ -77,9 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 console.log('✅ Agents loaded successfully');
             }
-        } catch (error) {
-            console.error('❌ Error loading agents:', error);
-        }
+        } catch (error) { console.error('❌ Error loading agents:', error); }
     }
 
     // --- LOAD PROJECTS ---
@@ -107,12 +94,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 console.log('✅ Projects loaded successfully');
             }
-        } catch (error) {
-            console.error('❌ Error loading projects:', error);
-        }
+        } catch (error) { console.error('❌ Error loading projects:', error); }
     }
 
-    // --- LOAD KNOWLEDGE ---
+    // --- LOAD KNOWLEDGE (UPDATED WITH DELETE BUTTONS) ---
     async function loadKnowledge() {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
@@ -124,10 +109,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 result.data.forEach(article => {
                     const date = new Date(article.createdAt).toLocaleDateString();
-                    const snippet = article.content.substring(0, 100) + '...';
+                    const snippet = article.content.substring(0, 120) + (article.content.length > 120 ? '...' : '');
                     const card = document.createElement('div');
                     card.className = 'card knowledge-card';
                     card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteKnowledge('${article._id}')">Delete</button>
                         <h4>${article.title}</h4>
                         <p class="meta">${article.category} • ${date}</p>
                         <p class="snippet">${snippet}</p>
@@ -136,9 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 console.log('✅ Knowledge loaded successfully');
             }
-        } catch (error) {
-            console.error('❌ Error loading knowledge:', error);
-        }
+        } catch (error) { console.error('❌ Error loading knowledge:', error); }
     }
 
     // --- LOAD ACTIVITY LOG ---
@@ -171,9 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
             }
-        } catch (error) {
-            console.error('❌ Error loading activity log:', error);
-        }
+        } catch (error) { console.error('❌ Error loading activity log:', error); }
     }
 
     // --- CREATE ACTIVITY LOG ---
@@ -185,9 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ actor, action, status })
             });
             loadActivityLog();
-        } catch (error) {
-            console.error('❌ Error creating log:', error);
-        }
+        } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
     // ========================================
@@ -199,25 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelAgentBtn = document.getElementById('cancel-agent-btn');
     const submitAgentBtn = document.getElementById('submit-agent-btn');
 
-    if (addAgentBtn) {
-        addAgentBtn.addEventListener('click', () => {
-            agentModal.style.display = 'block';
-        });
-    }
-
-    if (closeAgentModalBtn) {
-        closeAgentModalBtn.addEventListener('click', () => {
-            agentModal.style.display = 'none';
-            clearAgentForm();
-        });
-    }
-
-    if (cancelAgentBtn) {
-        cancelAgentBtn.addEventListener('click', () => {
-            agentModal.style.display = 'none';
-            clearAgentForm();
-        });
-    }
+    if (addAgentBtn) addAgentBtn.addEventListener('click', () => agentModal.style.display = 'block');
+    if (closeAgentModalBtn) closeAgentModalBtn.addEventListener('click', () => { agentModal.style.display = 'none'; clearAgentForm(); });
+    if (cancelAgentBtn) cancelAgentBtn.addEventListener('click', () => { agentModal.style.display = 'none'; clearAgentForm(); });
 
     function clearAgentForm() {
         document.getElementById('agent-name').value = '';
@@ -230,10 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const role = document.getElementById('agent-role').value.trim();
             const status = document.getElementById('agent-status').value;
 
-            if (!name || !role) {
-                alert('Please fill in all fields');
-                return;
-            }
+            if (!name || !role) { alert('Please fill in all fields'); return; }
 
             try {
                 const response = await fetch(`${API_URL}/agents`, {
@@ -241,7 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, role, status })
                 });
-
                 const result = await response.json();
 
                 if (result.success) {
@@ -250,9 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearAgentForm();
                     loadAgents();
                     await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
-                } else {
-                    alert('❌ Error: ' + result.message);
-                }
+                } else { alert('❌ Error: ' + result.message); }
             } catch (error) {
                 console.error('❌ Error deploying agent:', error);
                 alert('❌ Network error. Please try again.');
@@ -260,24 +218,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- DELETE AGENT ---
     window.deleteAgent = async (id) => {
         if (!confirm('Are you sure you want to decommission this AI Agent?')) return;
-
         try {
-            const response = await fetch(`${API_URL}/agents/${id}`, {
-                method: 'DELETE'
-            });
-
+            const response = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
             const result = await response.json();
-
             if (result.success) {
                 alert('✅ Agent decommissioned successfully!');
                 loadAgents();
                 await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success');
-            } else {
-                alert('❌ Error: ' + result.message);
-            }
+            } else { alert('❌ Error: ' + result.message); }
         } catch (error) {
             console.error('❌ Error deleting agent:', error);
             alert('❌ Network error. Please try again.');
@@ -293,25 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelProjectBtn = document.getElementById('cancel-project-btn');
     const submitProjectBtn = document.getElementById('submit-project-btn');
 
-    if (addProjectBtn) {
-        addProjectBtn.addEventListener('click', () => {
-            projectModal.style.display = 'block';
-        });
-    }
-
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => {
-            projectModal.style.display = 'none';
-            clearProjectForm();
-        });
-    }
-
-    if (cancelProjectBtn) {
-        cancelProjectBtn.addEventListener('click', () => {
-            projectModal.style.display = 'none';
-            clearProjectForm();
-        });
-    }
+    if (addProjectBtn) addProjectBtn.addEventListener('click', () => projectModal.style.display = 'block');
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => { projectModal.style.display = 'none'; clearProjectForm(); });
+    if (cancelProjectBtn) cancelProjectBtn.addEventListener('click', () => { projectModal.style.display = 'none'; clearProjectForm(); });
 
     function clearProjectForm() {
         document.getElementById('project-name').value = '';
@@ -324,10 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const description = document.getElementById('project-description').value.trim();
             const category = document.getElementById('project-category').value;
 
-            if (!name || !description) {
-                alert('Please fill in all fields');
-                return;
-            }
+            if (!name || !description) { alert('Please fill in all fields'); return; }
 
             try {
                 const response = await fetch(`${API_URL}/projects`, {
@@ -335,7 +266,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, description, category, status: 'Planning' })
                 });
-
                 const result = await response.json();
 
                 if (result.success) {
@@ -344,9 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearProjectForm();
                     loadProjects();
                     await createLog('King Solomon', `Created project: ${name}`, 'Success');
-                } else {
-                    alert('❌ Error: ' + result.message);
-                }
+                } else { alert('❌ Error: ' + result.message); }
             } catch (error) {
                 console.error('❌ Error creating project:', error);
                 alert('❌ Network error. Please try again.');
@@ -354,26 +282,82 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- DELETE PROJECT ---
     window.deleteProject = async (id) => {
         if (!confirm('Are you sure you want to delete this project?')) return;
-
         try {
-            const response = await fetch(`${API_URL}/projects/${id}`, {
-                method: 'DELETE'
-            });
-
+            const response = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
             const result = await response.json();
-
             if (result.success) {
                 alert('✅ Project deleted successfully!');
                 loadProjects();
                 await createLog('King Solomon', 'Deleted a project', 'Success');
-            } else {
-                alert('❌ Error: ' + result.message);
-            }
+            } else { alert('❌ Error: ' + result.message); }
         } catch (error) {
             console.error('❌ Error deleting project:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
+    // ========================================
+    // KNOWLEDGE MODAL LOGIC (NEW!)
+    // ========================================
+    const knowledgeModal = document.getElementById('knowledge-modal');
+    const addKnowledgeBtn = document.getElementById('add-knowledge-btn');
+    const closeKnowledgeModalBtn = document.getElementById('close-knowledge-modal');
+    const cancelKnowledgeBtn = document.getElementById('cancel-knowledge-btn');
+    const submitKnowledgeBtn = document.getElementById('submit-knowledge-btn');
+
+    if (addKnowledgeBtn) addKnowledgeBtn.addEventListener('click', () => knowledgeModal.style.display = 'block');
+    if (closeKnowledgeModalBtn) closeKnowledgeModalBtn.addEventListener('click', () => { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); });
+    if (cancelKnowledgeBtn) cancelKnowledgeBtn.addEventListener('click', () => { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); });
+
+    function clearKnowledgeForm() {
+        document.getElementById('knowledge-title').value = '';
+        document.getElementById('knowledge-content').value = '';
+    }
+
+    if (submitKnowledgeBtn) {
+        submitKnowledgeBtn.addEventListener('click', async () => {
+            const title = document.getElementById('knowledge-title').value.trim();
+            const category = document.getElementById('knowledge-category').value;
+            const content = document.getElementById('knowledge-content').value.trim();
+
+            if (!title || !content) { alert('Please fill in title and content'); return; }
+
+            try {
+                const response = await fetch(`${API_URL}/knowledge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, category, content })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Knowledge article saved successfully!');
+                    knowledgeModal.style.display = 'none';
+                    clearKnowledgeForm();
+                    loadKnowledge();
+                    await createLog('King Solomon', `Added knowledge: ${title}`, 'Success');
+                } else { alert('❌ Error: ' + result.message); }
+            } catch (error) {
+                console.error('❌ Error creating knowledge:', error);
+                alert('❌ Network error. Please try again.');
+            }
+        });
+    }
+
+    window.deleteKnowledge = async (id) => {
+        if (!confirm('Are you sure you want to delete this knowledge article?')) return;
+        try {
+            const response = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                alert('✅ Knowledge article deleted successfully!');
+                loadKnowledge();
+                await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
+            } else { alert('❌ Error: ' + result.message); }
+        } catch (error) {
+            console.error('❌ Error deleting knowledge:', error);
             alert('❌ Network error. Please try again.');
         }
     };
@@ -407,26 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 800);
     };
 
-    if (chatSend) {
-        chatSend.addEventListener('click', sendMessage);
-    }
-
-    if (chatInput) {
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-    }
+    if (chatSend) chatSend.addEventListener('click', sendMessage);
+    if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
     // Close modals when clicking outside
     window.addEventListener('click', (e) => {
-        if (e.target === agentModal) {
-            agentModal.style.display = 'none';
-            clearAgentForm();
-        }
-        if (e.target === projectModal) {
-            projectModal.style.display = 'none';
-            clearProjectForm();
-        }
+        if (e.target === agentModal) { agentModal.style.display = 'none'; clearAgentForm(); }
+        if (e.target === projectModal) { projectModal.style.display = 'none'; clearProjectForm(); }
+        if (e.target === knowledgeModal) { knowledgeModal.style.display = 'none'; clearKnowledgeForm(); }
     });
 
     console.log('✅ KS1 Command Center initialized successfully');
