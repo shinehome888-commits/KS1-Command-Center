@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const card = document.createElement('div');
                     card.className = 'card agent-card';
                     card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteAgent('${agent._id}')">Delete</button>
                         <div class="status-indicator ${statusClass}"></div>
                         <h4>${agent.name}</h4>
                         <p class="role">${agent.role}</p>
@@ -146,35 +147,112 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- MODAL LOGIC ---
-    const modal = document.getElementById('project-modal');
+    // --- AGENT MODAL LOGIC ---
+    const agentModal = document.getElementById('agent-modal');
+    const addAgentBtn = document.getElementById('add-agent-btn');
+    const closeAgentModalBtn = document.getElementById('close-agent-modal');
+    const cancelAgentBtn = document.getElementById('cancel-agent-btn');
+    const submitAgentBtn = document.getElementById('submit-agent-btn');
+
+    addAgentBtn.addEventListener('click', () => {
+        agentModal.style.display = 'block';
+    });
+
+    closeAgentModalBtn.addEventListener('click', () => {
+        agentModal.style.display = 'none';
+        clearAgentForm();
+    });
+
+    cancelAgentBtn.addEventListener('click', () => {
+        agentModal.style.display = 'none';
+        clearAgentForm();
+    });
+
+    function clearAgentForm() {
+        document.getElementById('agent-name').value = '';
+        document.getElementById('agent-role').value = '';
+    }
+
+    submitAgentBtn.addEventListener('click', async () => {
+        const name = document.getElementById('agent-name').value.trim();
+        const role = document.getElementById('agent-role').value.trim();
+        const status = document.getElementById('agent-status').value;
+
+        if (!name || !role) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/agents`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, role, status })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Agent deployed successfully!');
+                agentModal.style.display = 'none';
+                clearAgentForm();
+                loadAgents();
+                await createLog('King Solomon', `Deployed agent: ${name}`, 'Success');
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error deploying agent:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    });
+
+    // --- DELETE AGENT FUNCTION ---
+    window.deleteAgent = async (id) => {
+        if (!confirm('Are you sure you want to decommission this AI Agent?')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/agents/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Agent decommissioned successfully!');
+                loadAgents();
+                await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success');
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error deleting agent:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
+    // --- PROJECT MODAL LOGIC ---
+    const projectModal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
     const closeModalBtn = document.getElementById('close-modal');
     const cancelProjectBtn = document.getElementById('cancel-project-btn');
     const submitProjectBtn = document.getElementById('submit-project-btn');
 
     addProjectBtn.addEventListener('click', () => {
-        modal.style.display = 'block';
+        projectModal.style.display = 'block';
     });
 
     closeModalBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-        clearForm();
+        projectModal.style.display = 'none';
+        clearProjectForm();
     });
 
     cancelProjectBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-        clearForm();
+        projectModal.style.display = 'none';
+        clearProjectForm();
     });
 
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-            clearForm();
-        }
-    });
-
-    function clearForm() {
+    function clearProjectForm() {
         document.getElementById('project-name').value = '';
         document.getElementById('project-description').value = '';
     }
@@ -200,8 +278,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 alert('✅ Project created successfully!');
-                modal.style.display = 'none';
-                clearForm();
+                projectModal.style.display = 'none';
+                clearProjectForm();
                 loadProjects();
                 await createLog('King Solomon', `Created project: ${name}`, 'Success');
             } else {
