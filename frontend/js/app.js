@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="log-action">${log.action}</span>
                         </div>
                         <div class="log-meta">
-                            <span class="badge-log success">${log.status}</span>
+                            <span class="badge-log">${log.status}</span>
                             <span class="log-time">${timestamp}</span>
                         </div>
                     `;
@@ -140,30 +140,44 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ actor, action, status })
             });
-            // Refresh the activity log display
             loadActivityLog();
         } catch (error) {
             console.error('❌ Error creating log:', error);
         }
     }
 
-    // --- ADD PROJECT FORM LOGIC ---
+    // --- MODAL LOGIC ---
+    const modal = document.getElementById('project-modal');
     const addProjectBtn = document.getElementById('add-project-btn');
-    const addProjectForm = document.getElementById('add-project-form');
+    const closeModalBtn = document.getElementById('close-modal');
     const cancelProjectBtn = document.getElementById('cancel-project-btn');
     const submitProjectBtn = document.getElementById('submit-project-btn');
 
     addProjectBtn.addEventListener('click', () => {
-        addProjectForm.style.display = 'block';
-        addProjectBtn.style.display = 'none';
+        modal.style.display = 'block';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+        clearForm();
     });
 
     cancelProjectBtn.addEventListener('click', () => {
-        addProjectForm.style.display = 'none';
-        addProjectBtn.style.display = 'block';
+        modal.style.display = 'none';
+        clearForm();
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            clearForm();
+        }
+    });
+
+    function clearForm() {
         document.getElementById('project-name').value = '';
         document.getElementById('project-description').value = '';
-    });
+    }
 
     submitProjectBtn.addEventListener('click', async () => {
         const name = document.getElementById('project-name').value.trim();
@@ -186,13 +200,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 alert('✅ Project created successfully!');
-                addProjectForm.style.display = 'none';
-                addProjectBtn.style.display = 'block';
-                document.getElementById('project-name').value = '';
-                document.getElementById('project-description').value = '';
+                modal.style.display = 'none';
+                clearForm();
                 loadProjects();
-                
-                // Log this action
                 await createLog('King Solomon', `Created project: ${name}`, 'Success');
             } else {
                 alert('❌ Error: ' + result.message);
@@ -217,8 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 alert('✅ Project deleted successfully!');
                 loadProjects();
-                
-                // Log this action
                 await createLog('King Solomon', 'Deleted a project', 'Success');
             } else {
                 alert('❌ Error: ' + result.message);
@@ -245,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Log chat message
         await createLog('King Solomon', `Sent chat message: "${message}"`, 'Success');
 
         setTimeout(() => {
