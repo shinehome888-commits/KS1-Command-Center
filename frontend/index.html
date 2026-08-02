@@ -45,6 +45,39 @@
                 <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
             </header>
 
+            <!-- Dashboard Analytics Stats -->
+            <section class="stats-grid" id="stats-grid">
+                <div class="stat-card stat-projects">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <h2 id="stat-projects-count">0</h2>
+                        <p>Total Projects</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-agents">
+                    <div class="stat-icon">🤖</div>
+                    <div class="stat-info">
+                        <h2 id="stat-agents-count">0</h2>
+                        <p>AI Agents</p>
+                        <span class="stat-sub" id="stat-agents-online">0 Online</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-knowledge">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-info">
+                        <h2 id="stat-knowledge-count">0</h2>
+                        <p>Knowledge Articles</p>
+                    </div>
+                </div>
+                <div class="stat-card stat-activity">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-info">
+                        <h2 id="stat-activity-count">0</h2>
+                        <p>Total Activities</p>
+                    </div>
+                </div>
+            </section>
+
             <section class="section-card mission-section">
                 <h3>Our Mission</h3>
                 <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
@@ -203,7 +236,7 @@
         </div>
     </div>
 
-    <!-- NEW: Modal for Viewing Knowledge Article -->
+    <!-- Modal for Viewing Knowledge Article -->
     <div id="knowledge-view-modal" class="modal">
         <div class="modal-content view-modal-content">
             <div class="modal-header">
@@ -215,9 +248,7 @@
                     <span class="article-category" id="view-article-category">Category</span>
                     <span class="article-date" id="view-article-date">Date</span>
                 </div>
-                <div class="article-content" id="view-article-content">
-                    <!-- Full article content will be inserted here -->
-                </div>
+                <div class="article-content" id="view-article-content"></div>
             </div>
             <div class="modal-footer">
                 <button id="delete-view-article-btn" class="btn-danger">Delete Article</button>
