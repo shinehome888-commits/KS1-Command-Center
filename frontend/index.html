@@ -57,9 +57,7 @@
                         <span class="btn-icon">+</span> <span class="btn-text">Deploy Agent</span>
                     </button>
                 </div>
-                <div class="grid-layout" id="agents-grid">
-                    <!-- Agents will be loaded here by JavaScript -->
-                </div>
+                <div class="grid-layout" id="agents-grid"></div>
             </section>
 
             <section class="section-card">
@@ -69,16 +67,17 @@
                         <span class="btn-icon">+</span> <span class="btn-text">Add Project</span>
                     </button>
                 </div>
-                <div class="grid-layout" id="projects-grid">
-                    <!-- Projects will be loaded here by JavaScript -->
-                </div>
+                <div class="grid-layout" id="projects-grid"></div>
             </section>
 
             <section class="section-card">
-                <h3>Knowledge Base</h3>
-                <div class="grid-layout" id="knowledge-grid">
-                    <!-- Knowledge articles will be loaded here by JavaScript -->
+                <div class="section-header">
+                    <h3>Knowledge Base</h3>
+                    <button id="add-knowledge-btn" class="btn-primary">
+                        <span class="btn-icon">+</span> <span class="btn-text">Add Article</span>
+                    </button>
                 </div>
+                <div class="grid-layout" id="knowledge-grid"></div>
             </section>
 
             <!-- KS1 Assistant -->
@@ -96,9 +95,7 @@
             <!-- Recent Activity Log -->
             <section class="section-card">
                 <h3>Recent Activity</h3>
-                <div class="log-container" id="activity-log">
-                    <!-- Activity logs will be loaded here by JavaScript -->
-                </div>
+                <div class="log-container" id="activity-log"></div>
             </section>
 
         </main>
@@ -166,6 +163,42 @@
             <div class="modal-footer">
                 <button id="cancel-project-btn" class="btn-secondary">Cancel</button>
                 <button id="submit-project-btn" class="btn-primary">Create Project</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Modal for Adding Knowledge Article -->
+    <div id="knowledge-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Knowledge Article</h2>
+                <button class="modal-close" id="close-knowledge-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Article Title</label>
+                    <input type="text" id="knowledge-title" placeholder="Enter article title" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="knowledge-category" class="form-input">
+                        <option value="Education">Education</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Blockchain">Blockchain</option>
+                        <option value="AI">AI</option>
+                        <option value="Business">Business</option>
+                        <option value="Research">Research</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="knowledge-content" placeholder="Write your knowledge article here..." class="form-input" rows="6"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-knowledge-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-knowledge-btn" class="btn-primary">Save Article</button>
             </div>
         </div>
     </div>
