@@ -2,16 +2,41 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const UserSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, enum: ['Admin', 'Member', 'Contributor'], default: 'Admin' },
-    organization: { type: String, default: 'KS1 Empire Global Foundation' }
-}, { timestamps: true }); // Automatically adds createdAt and updatedAt
+    name: { 
+        type: String, 
+        required: [true, 'Please provide a name'],
+        trim: true
+    },
+    email: { 
+        type: String, 
+        required: [true, 'Please provide an email'],
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email']
+    },
+    password: { 
+        type: String, 
+        required: [true, 'Please provide a password'],
+        minlength: 6,
+        select: false
+    },
+    role: { 
+        type: String, 
+        enum: ['Admin', 'Member', 'Contributor'], 
+        default: 'Admin' 
+    },
+    organization: { 
+        type: String, 
+        default: 'KS1 Empire Global Foundation' 
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 
-// Hash password before saving to the database
 UserSchema.pre('save', async function(next) {
-    // Only hash the password if it has been modified (or is new)
     if (!this.isModified('password')) return next();
     
     try {
@@ -23,7 +48,6 @@ UserSchema.pre('save', async function(next) {
     }
 });
 
-// Method to compare entered password with hashed password in database
 UserSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
