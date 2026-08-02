@@ -295,6 +295,24 @@ body {
     word-wrap: break-word;
 }
 
+.knowledge-card {
+    cursor: pointer;
+}
+
+.knowledge-card .snippet::after {
+    content: ' → Read more';
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+}
+
+.knowledge-card:hover .snippet::after {
+    transform: translateX(5px);
+}
+
 /* ========================================
    CHAT INTERFACE
    ======================================== */
@@ -393,6 +411,23 @@ body {
 .btn-secondary:hover {
     background: rgba(42, 42, 42, 1);
     border-color: var(--gold);
+}
+
+.btn-danger {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.2));
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(239, 68, 68, 0.3));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
 
 .ai-badge {
@@ -591,6 +626,65 @@ textarea.form-input {
 }
 
 /* ========================================
+   KNOWLEDGE VIEW MODAL
+   ======================================== */
+.view-modal-content {
+    max-width: 700px;
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+.article-category {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0.1));
+    color: var(--gold);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.article-date {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.article-content {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding: 20px;
+    background: rgba(10, 10, 10, 0.5);
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.1);
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.article-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.article-content::-webkit-scrollbar-track {
+    background: rgba(10, 10, 10, 0.5);
+    border-radius: 4px;
+}
+
+.article-content::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 4px;
+}
+
+/* ========================================
    MOBILE RESPONSIVE - TABLET
    ======================================== */
 @media screen and (max-width: 1024px) {
@@ -734,6 +828,24 @@ textarea.form-input {
     
     .section-card h3 {
         font-size: 1.1rem;
+    }
+    
+    /* View modal mobile */
+    .view-modal-content {
+        max-width: 95%;
+    }
+    
+    .article-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .article-content {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        padding: 15px;
+        max-height: 50vh;
     }
 }
 
