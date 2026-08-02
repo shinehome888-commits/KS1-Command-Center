@@ -25,6 +25,7 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes')); // NEW: DeepSeek AI Integration
 
 // Seed Route
 app.get('/api/seed', async (req, res) => {
@@ -56,7 +57,6 @@ app.get('/api/seed', async (req, res) => {
             { title: 'Blockchain Explained Simply', category: 'Blockchain', content: 'Blockchain is a digital ledger that records transactions across many computers. Once data is recorded, it cannot be changed.' }
         ]);
 
-        // Add initial activity logs
         await ActivityLog.insertMany([
             { actor: 'System', action: 'Initialized KS1 Command Center v0.1', status: 'Success' },
             { actor: 'King Solomon', action: 'Logged into the Command Center', status: 'Success' }
