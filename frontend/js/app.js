@@ -132,6 +132,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- CREATE ACTIVITY LOG ---
+    async function createLog(actor, action, status = 'Success') {
+        try {
+            await fetch(`${API_URL}/logs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actor, action, status })
+            });
+            // Refresh the activity log display
+            loadActivityLog();
+        } catch (error) {
+            console.error('❌ Error creating log:', error);
+        }
+    }
+
     // --- ADD PROJECT FORM LOGIC ---
     const addProjectBtn = document.getElementById('add-project-btn');
     const addProjectForm = document.getElementById('add-project-form');
@@ -175,7 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 addProjectBtn.style.display = 'block';
                 document.getElementById('project-name').value = '';
                 document.getElementById('project-description').value = '';
-                loadProjects(); // Reload to show new project
+                loadProjects();
+                
+                // Log this action
+                await createLog('King Solomon', `Created project: ${name}`, 'Success');
             } else {
                 alert('❌ Error: ' + result.message);
             }
@@ -198,7 +216,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (result.success) {
                 alert('✅ Project deleted successfully!');
-                loadProjects(); // Reload to remove deleted project
+                loadProjects();
+                
+                // Log this action
+                await createLog('King Solomon', 'Deleted a project', 'Success');
             } else {
                 alert('❌ Error: ' + result.message);
             }
@@ -213,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
 
-    chatSend.addEventListener('click', () => {
+    chatSend.addEventListener('click', async () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
@@ -223,6 +244,9 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.appendChild(userDiv);
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Log chat message
+        await createLog('King Solomon', `Sent chat message: "${message}"`, 'Success');
 
         setTimeout(() => {
             const botDiv = document.createElement('div');
