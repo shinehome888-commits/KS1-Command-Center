@@ -8,17 +8,12 @@
 </head>
 <body>
 
-    <!-- ==========================================
-         AUTHENTICATION VIEW (Login / Register)
-         ========================================== -->
     <div id="auth-view" class="auth-view">
         <div class="auth-box">
             <div class="auth-logo">
                 <h2>KS1 <span>COMMAND</span></h2>
                 <p>Secure Access Portal</p>
             </div>
-
-            <!-- Login Form -->
             <form id="login-form" class="auth-form">
                 <h3>Welcome Back</h3>
                 <div class="form-group">
@@ -34,8 +29,6 @@
                     New to KS1? <a href="#" id="show-register">Create an account</a>
                 </p>
             </form>
-
-            <!-- Register Form -->
             <form id="register-form" class="auth-form hidden">
                 <h3>Join the Foundation</h3>
                 <div class="form-group">
@@ -58,20 +51,18 @@
         </div>
     </div>
 
-    <!-- ==========================================
-         DASHBOARD VIEW (Protected)
-         ========================================== -->
     <div id="dashboard-view" class="dashboard-view hidden">
-        <!-- Mobile Header -->
         <header class="mobile-header">
             <div class="mobile-logo">KS1 <span>COMMAND</span></div>
-            <button class="hamburger" id="hamburger">
-                <span></span><span></span><span></span>
-            </button>
+            <div class="mobile-header-actions">
+                <button class="mobile-logout-btn" id="mobile-logout-btn" title="Logout">🚪</button>
+                <button class="hamburger" id="hamburger">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
         </header>
 
         <div class="dashboard-container">
-            <!-- Sidebar -->
             <aside class="sidebar" id="sidebar">
                 <div class="logo">
                     <h2>KS1 <span>COMMAND</span></h2>
@@ -90,14 +81,17 @@
 
             <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
-            <!-- Main Content -->
             <main class="main-content">
                 <header class="top-header">
-                    <h1>Grand Rising <span id="user-name-display">King Solomon</span> 👑</h1>
-                    <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
+                    <div class="top-header-row">
+                        <div>
+                            <h1>Grand Rising <span id="user-name-display">King Solomon</span> 👑</h1>
+                            <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
+                        </div>
+                        <button class="desktop-logout-btn" id="desktop-logout-btn" title="Logout">🚪 Logout</button>
+                    </div>
                 </header>
 
-                <!-- Dashboard Analytics Stats -->
                 <section class="stats-grid" id="stats-grid">
                     <div class="stat-card stat-projects">
                         <div class="stat-icon">📊</div>
@@ -121,11 +115,11 @@
                             <p>Knowledge Articles</p>
                         </div>
                     </div>
-                    <div class="stat-card stat-activity">
-                        <div class="stat-icon">📝</div>
+                    <div class="stat-card stat-communications">
+                        <div class="stat-icon">📢</div>
                         <div class="stat-info">
-                            <h2 id="stat-activity-count">0</h2>
-                            <p>Total Activities</p>
+                            <h2 id="stat-communications-count">0</h2>
+                            <p>Communications</p>
                         </div>
                     </div>
                 </section>
@@ -165,7 +159,16 @@
                     <div class="grid-layout" id="knowledge-grid"></div>
                 </section>
 
-                <!-- KS1 Assistant -->
+                <section class="section-card">
+                    <div class="section-header">
+                        <h3>Communications Hub 📢</h3>
+                        <button id="add-communication-btn" class="btn-primary">
+                            <span class="btn-icon">+</span> <span class="btn-text">Post Announcement</span>
+                        </button>
+                    </div>
+                    <div class="grid-layout" id="communications-grid"></div>
+                </section>
+
                 <section class="section-card">
                     <h3>KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
                     <div class="chat-window" id="chat-window">
@@ -177,7 +180,6 @@
                     </div>
                 </section>
 
-                <!-- Recent Activity Log -->
                 <section class="section-card">
                     <h3>Recent Activity</h3>
                     <div class="log-container" id="activity-log"></div>
@@ -186,7 +188,6 @@
         </div>
     </div>
 
-    <!-- Modals (Agent, Project, Knowledge, View Knowledge) -->
     <div id="agent-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -249,6 +250,39 @@
             <div class="modal-footer">
                 <button id="cancel-knowledge-btn" class="btn-secondary">Cancel</button>
                 <button id="submit-knowledge-btn" class="btn-primary">Save Article</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="communication-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Post New Announcement</h2>
+                <button class="modal-close" id="close-communication-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Title</label><input type="text" id="communication-title" class="form-input" placeholder="Announcement title"></div>
+                <div class="form-group"><label>Category</label>
+                    <select id="communication-category" class="form-input">
+                        <option value="Announcement">📢 Announcement</option>
+                        <option value="News">📰 News</option>
+                        <option value="Update">🔄 Update</option>
+                        <option value="Event">📅 Event</option>
+                        <option value="Alert">⚠️ Alert</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Priority</label>
+                    <select id="communication-priority" class="form-input">
+                        <option value="Normal">Normal</option>
+                        <option value="High">High</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Content</label><textarea id="communication-content" class="form-input" rows="6" placeholder="Write your announcement..."></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-communication-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-communication-btn" class="btn-primary">Post Announcement</button>
             </div>
         </div>
     </div>
