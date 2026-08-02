@@ -2,6 +2,7 @@
     --deep-blue: #1E3A8A;
     --gold: #D4AF37;
     --gold-light: #F4CF57;
+    --gold-dark: #b5952f;
     --white: #FFFFFF;
     --black: #0A0A0A;
     --dark-grey: #1A1A1A;
@@ -95,8 +96,28 @@ body {
 .nav-item:hover::before { width: 100%; }
 .nav-item:hover, .nav-item.active { color: var(--gold); border-left: 3px solid var(--gold); }
 
-.logout-item { margin-top: auto; color: var(--accent-red) !important; border: 1px solid rgba(239, 68, 68, 0.3); }
-.logout-item:hover { background: rgba(239, 68, 68, 0.1) !important; border-left: 3px solid var(--accent-red) !important; }
+/* ✅ 3D GOLD LOGOUT BUTTON */
+.logout-item {
+    margin-top: auto;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light)) !important;
+    color: var(--black) !important;
+    border: none !important;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 0 var(--gold-dark), 0 6px 15px rgba(0,0,0,0.3);
+    transition: all 0.1s ease;
+}
+.logout-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--gold-dark), 0 8px 20px rgba(0,0,0,0.4);
+}
+.logout-item:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 var(--gold-dark), 0 0 0 rgba(0,0,0,0.4);
+}
+.logout-item::before {
+    background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent) !important;
+}
 
 .close-sidebar { display: none; position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--white); font-size: 2rem; cursor: pointer; z-index: 1001; }
 
@@ -300,6 +321,7 @@ textarea.form-input { resize: vertical; min-height: 100px; }
 }
 @media (hover: none) and (pointer: coarse) {
     .card:hover, .btn-primary:hover, .stat-card:hover { transform: none; }
+    .logout-item:hover, .logout-item:active { transform: none; box-shadow: 0 4px 0 var(--gold-dark), 0 6px 15px rgba(0,0,0,0.3); }
     .delete-btn { padding: 8px 14px; font-size: 0.8rem; }
 }
 @media screen and (max-width: 768px) and (orientation: landscape) {
