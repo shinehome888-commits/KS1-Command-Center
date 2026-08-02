@@ -167,7 +167,7 @@
         </div>
     </div>
 
-    <!-- NEW: Modal for Adding Knowledge Article -->
+    <!-- Modal for Adding Knowledge Article -->
     <div id="knowledge-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -199,6 +199,29 @@
             <div class="modal-footer">
                 <button id="cancel-knowledge-btn" class="btn-secondary">Cancel</button>
                 <button id="submit-knowledge-btn" class="btn-primary">Save Article</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Modal for Viewing Knowledge Article -->
+    <div id="knowledge-view-modal" class="modal">
+        <div class="modal-content view-modal-content">
+            <div class="modal-header">
+                <h2 id="view-article-title">Article Title</h2>
+                <button class="modal-close" id="close-view-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="article-meta">
+                    <span class="article-category" id="view-article-category">Category</span>
+                    <span class="article-date" id="view-article-date">Date</span>
+                </div>
+                <div class="article-content" id="view-article-content">
+                    <!-- Full article content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="delete-view-article-btn" class="btn-danger">Delete Article</button>
+                <button id="close-view-btn" class="btn-secondary">Close</button>
             </div>
         </div>
     </div>
