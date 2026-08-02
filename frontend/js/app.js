@@ -1,6 +1,3 @@
-// ========================================
-// MOBILE MENU TOGGLE
-// ========================================
 const hamburger = document.getElementById('hamburger');
 const sidebar = document.getElementById('sidebar');
 const closeSidebar = document.getElementById('close-sidebar');
@@ -28,13 +25,9 @@ document.querySelectorAll('.nav-item').forEach(item => {
     });
 });
 
-// ========================================
-// MAIN APPLICATION
-// ========================================
 document.addEventListener('DOMContentLoaded', () => {
     const API_URL = 'https://ks1-command-center-api.onrender.com/api';
 
-    // --- AUTHENTICATION CHECK ---
     const token = localStorage.getItem('ks1_token');
     const userName = localStorage.getItem('ks1_userName') || 'King Solomon';
     const authView = document.getElementById('auth-view');
@@ -45,13 +38,12 @@ document.addEventListener('DOMContentLoaded', () => {
         authView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userName;
-        loadAgents(); loadProjects(); loadKnowledge(); loadActivityLog(); loadStats();
+        loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); loadActivityLog(); loadStats();
     } else {
         authView.classList.remove('hidden');
         dashboardView.classList.add('hidden');
     }
 
-    // --- AUTH FORM TOGGLING ---
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
@@ -67,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.classList.remove('hidden');
     });
 
-    // --- HANDLE LOGIN ---
     loginForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('login-email').value;
@@ -101,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- HANDLE REGISTER ---
     registerForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('register-name').value;
@@ -136,25 +126,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- HANDLE LOGOUT ---
-    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
-        e.preventDefault();
+    function performLogout() {
         if (confirm('Are you sure you want to log out of the Command Center?')) {
             localStorage.removeItem('ks1_token');
             localStorage.removeItem('ks1_userName');
             window.location.reload();
         }
+    }
+
+    document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        performLogout();
     });
 
-    // --- DASHBOARD FUNCTIONS (Only run if logged in) ---
+    document.getElementById('mobile-logout-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        performLogout();
+    });
+
+    document.getElementById('desktop-logout-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        performLogout();
+    });
+
     async function loadStats() {
         try {
-            const [projectsRes, agentsRes, knowledgeRes, logsRes] = await Promise.all([
+            const [projectsRes, agentsRes, knowledgeRes, logsRes, commsRes] = await Promise.all([
                 fetch(`${API_URL}/projects`), fetch(`${API_URL}/agents`),
-                fetch(`${API_URL}/knowledge`), fetch(`${API_URL}/logs`)
+                fetch(`${API_URL}/knowledge`), fetch(`${API_URL}/logs`),
+                fetch(`${API_URL}/communications`)
             ]);
-            const [projectsResult, agentsResult, knowledgeResult, logsResult] = await Promise.all([
-                projectsRes.json(), agentsRes.json(), knowledgeRes.json(), logsRes.json()
+            const [projectsResult, agentsResult, knowledgeResult, logsResult, commsResult] = await Promise.all([
+                projectsRes.json(), agentsRes.json(), knowledgeRes.json(), logsRes.json(), commsRes.json()
             ]);
 
             animateCounter('stat-projects-count', projectsResult.success ? projectsResult.data.length : 0);
@@ -162,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
             animateCounter('stat-agents-count', agentsCount);
             document.getElementById('stat-agents-online').textContent = `${agentsResult.success ? agentsResult.data.filter(a => a.status === 'Online').length : 0} Online`;
             animateCounter('stat-knowledge-count', knowledgeResult.success ? knowledgeResult.data.length : 0);
-            animateCounter('stat-activity-count', logsResult.success ? logsResult.data.length : 0);
+            animateCounter('stat-communications-count', commsResult.success ? commsResult.data.length : 0);
         } catch (error) { console.error('❌ Error loading stats:', error); }
     }
 
@@ -243,6 +246,88 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading knowledge:', error); }
     }
 
+    async function loadCommunications() {
+        try {
+            const response = await fetch(`${API_URL}/communications`);
+            const result = await response.json();
+            const container = document.getElementById('communications-grid');
+            if (!container) return;
+            
+            if (result.success && result.data.length > 0) {
+                container.innerHTML = '';
+                result.data.forEach(comm => {
+                    const date = new Date(comm.createdAt);
+                    const timeAgo = getTimeAgo(date);
+                    const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    
+                    const card = document.createElement('div');
+                    card.className = 'card communication-card';
+                    card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteCommunication('${comm._id}')">Delete</button>
+                        <div class="communication-badges">
+                            <span class="comm-category-badge ${comm.category.toLowerCase()}">${getCategoryIcon(comm.category)} ${comm.category}</span>
+                            <span class="comm-priority-badge ${comm.priority.toLowerCase()}">${comm.priority}</span>
+                        </div>
+                        <h4>${comm.title}</h4>
+                        <div class="communication-content" id="comm-content-${comm._id}">${comm.content}</div>
+                        <button class="read-more-btn" onclick="toggleReadMore('${comm._id}', this)" style="display: none;">Read more</button>
+                        <div class="communication-footer">
+                            <span class="communication-author">By ${comm.author}</span>
+                            <span class="communication-time" title="${formattedDate} ${formattedTime}">${timeAgo}</span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                    
+                    setTimeout(() => {
+                        const contentEl = document.getElementById(`comm-content-${comm._id}`);
+                        const readMoreBtn = card.querySelector('.read-more-btn');
+                        if (contentEl && contentEl.scrollHeight > contentEl.clientHeight + 5) {
+                            readMoreBtn.style.display = 'block';
+                        }
+                    }, 100);
+                });
+                console.log('✅ Communications loaded successfully');
+            } else {
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No communications yet. Post your first announcement!</p>';
+            }
+        } catch (error) { console.error('❌ Error loading communications:', error); }
+    }
+
+    function getCategoryIcon(category) {
+        const icons = {
+            'Announcement': '📢',
+            'News': '📰',
+            'Update': '🔄',
+            'Event': '📅',
+            'Alert': '⚠️'
+        };
+        return icons[category] || '📢';
+    }
+
+    function getTimeAgo(date) {
+        const seconds = Math.floor((new Date() - date) / 1000);
+        if (seconds < 60) return 'Just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes}m ago`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours}h ago`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days}d ago`;
+        return date.toLocaleDateString();
+    }
+
+    window.toggleReadMore = (id, btn) => {
+        const content = document.getElementById(`comm-content-${id}`);
+        if (content.classList.contains('expanded')) {
+            content.classList.remove('expanded');
+            btn.textContent = 'Read more';
+        } else {
+            content.classList.add('expanded');
+            btn.textContent = 'Show less';
+        }
+    };
+
     let currentViewArticleId = null;
     function openArticleView(article) {
         currentViewArticleId = article._id;
@@ -264,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
             if (result.success) {
                 alert('✅ Deleted!'); viewModal.style.display = 'none'; currentViewArticleId = null;
-                loadKnowledge(); loadStats(); await createLog('King Solomon', 'Deleted a knowledge article', 'Success');
+                loadKnowledge(); loadStats(); await createLog(userName, 'Deleted a knowledge article', 'Success');
             }
         } catch (error) { console.error('❌ Error:', error); }
     });
@@ -301,7 +386,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
-    // --- MODAL LOGIC (Agent, Project, Knowledge) ---
     const setupModal = (modalId, addBtnId, closeBtnId, cancelBtnId, submitBtnId, endpoint, payloadFn, successMsg, reloadFn, btnLabel, clearFn) => {
         const modal = document.getElementById(modalId);
         const addBtn = document.getElementById(addBtnId);
@@ -324,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await res.json();
                 if (result.success) {
                     alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
-                    reloadFn(); loadStats(); await createLog('King Solomon', successMsg, 'Success');
+                    reloadFn(); loadStats(); await createLog(userName, successMsg, 'Success');
                 } else { alert('❌ ' + result.message); }
             } catch (error) { alert('❌ Network error.'); }
             finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
@@ -364,13 +448,29 @@ document.addEventListener('DOMContentLoaded', () => {
         () => { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
     );
 
-    // --- DELETE FUNCTIONS ---
+    setupModal('communication-modal', 'add-communication-btn', 'close-communication-modal', 'cancel-communication-btn', 'submit-communication-btn', '/communications',
+        () => {
+            const t = document.getElementById('communication-title').value.trim();
+            const c = document.getElementById('communication-category').value;
+            const p = document.getElementById('communication-priority').value;
+            const cnt = document.getElementById('communication-content').value.trim();
+            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            return { title: t, category: c, priority: p, content: cnt, author: userName };
+        }, 'Announcement posted successfully!', loadCommunications, 'Post Announcement',
+        () => { 
+            document.getElementById('communication-title').value = ''; 
+            document.getElementById('communication-content').value = '';
+            document.getElementById('communication-category').value = 'Announcement';
+            document.getElementById('communication-priority').value = 'Normal';
+        }
+    );
+
     window.deleteAgent = async (id) => {
         if (!confirm('Decommission this AI Agent?')) return;
         try {
             const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Agent decommissioned!'); loadAgents(); loadStats(); await createLog('King Solomon', 'Decommissioned an AI Agent', 'Success'); }
+            if (result.success) { alert('✅ Agent decommissioned!'); loadAgents(); loadStats(); await createLog(userName, 'Decommissioned an AI Agent', 'Success'); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -379,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Project deleted!'); loadProjects(); loadStats(); await createLog('King Solomon', 'Deleted a project', 'Success'); }
+            if (result.success) { alert('✅ Project deleted!'); loadProjects(); loadStats(); await createLog(userName, 'Deleted a project', 'Success'); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -388,11 +488,19 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); loadStats(); await createLog('King Solomon', 'Deleted a knowledge article', 'Success'); }
+            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); loadStats(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
-    // --- AI CHAT LOGIC ---
+    window.deleteCommunication = async (id) => {
+        if (!confirm('Delete this announcement?')) return;
+        try {
+            const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); loadStats(); await createLog(userName, 'Deleted an announcement', 'Success'); }
+        } catch (error) { console.error('❌ Error:', error); }
+    };
+
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
@@ -415,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.appendChild(thinkingDiv);
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        await createLog('King Solomon', `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
+        await createLog(userName, `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
 
         try {
             const response = await fetch(`${API_URL}/ai/chat`, {
@@ -449,13 +557,18 @@ document.addEventListener('DOMContentLoaded', () => {
     chatSend?.addEventListener('click', sendMessage);
     chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
-    // Close modals on outside click
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
             if (e.target.id === 'agent-modal') { document.getElementById('agent-name').value = ''; document.getElementById('agent-role').value = ''; }
             if (e.target.id === 'project-modal') { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
             if (e.target.id === 'knowledge-modal') { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
+            if (e.target.id === 'communication-modal') { 
+                document.getElementById('communication-title').value = ''; 
+                document.getElementById('communication-content').value = '';
+                document.getElementById('communication-category').value = 'Announcement';
+                document.getElementById('communication-priority').value = 'Normal';
+            }
             if (e.target.id === 'knowledge-view-modal') { currentViewArticleId = null; }
         }
     });
