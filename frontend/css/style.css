@@ -1,178 +1,265 @@
-:root {
-    --deep-blue: #1E3A8A;
-    --gold: #D4AF37;
-    --white: #FFFFFF;
-    --black: #0A0A0A;
-    --dark-grey: #1A1A1A;
-    --light-grey: #2A2A2A;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const API_URL = 'https://ks1-command-center-api.onrender.com/api';
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+    console.log('🚀 KS1 Command Center initializing...');
 
-body {
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    background-color: var(--black);
-    color: var(--white);
-    min-height: 100vh;
-}
+    // Load all data on page load
+    loadAgents();
+    loadProjects();
+    loadKnowledge();
+    loadActivityLog();
 
-.dashboard-container { display: flex; min-height: 100vh; }
+    // --- LOAD AGENTS ---
+    async function loadAgents() {
+        try {
+            const response = await fetch(`${API_URL}/agents`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                const container = document.getElementById('agents-grid');
+                container.innerHTML = '';
+                
+                result.data.forEach(agent => {
+                    const statusClass = agent.status.toLowerCase();
+                    const card = document.createElement('div');
+                    card.className = 'card agent-card';
+                    card.innerHTML = `
+                        <div class="status-indicator ${statusClass}"></div>
+                        <h4>${agent.name}</h4>
+                        <p class="role">${agent.role}</p>
+                        <span class="status-text">${agent.status}</span>
+                    `;
+                    container.appendChild(card);
+                });
+                console.log('✅ Agents loaded successfully');
+            }
+        } catch (error) {
+            console.error('❌ Error loading agents:', error);
+        }
+    }
 
-/* Sidebar */
-.sidebar {
-    width: 260px;
-    background-color: var(--deep-blue);
-    padding: 25px 20px;
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid var(--light-grey);
-    position: sticky;
-    top: 0;
-    height: 100vh;
-}
-.logo h2 { color: var(--white); font-size: 1.5rem; margin-bottom: 40px; }
-.logo span { color: var(--gold); }
-.nav-menu { display: flex; flex-direction: column; gap: 8px; }
-.nav-item {
-    color: rgba(255,255,255,0.7);
-    text-decoration: none;
-    padding: 12px 15px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    font-weight: 500;
-}
-.nav-item:hover, .nav-item.active {
-    background-color: rgba(212, 175, 55, 0.15);
-    color: var(--gold);
-    border-left: 3px solid var(--gold);
-}
+    // --- LOAD PROJECTS ---
+    async function loadProjects() {
+        try {
+            const response = await fetch(`${API_URL}/projects`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                const container = document.getElementById('projects-grid');
+                container.innerHTML = '';
+                
+                result.data.forEach(project => {
+                    const badgeClass = project.status.toLowerCase();
+                    const card = document.createElement('div');
+                    card.className = 'card project-card';
+                    card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteProject('${project._id}')">Delete</button>
+                        <h4>${project.name}</h4>
+                        <p class="description">${project.description}</p>
+                        <p class="category">Category: ${project.category}</p>
+                        <span class="badge ${badgeClass}">${project.status}</span>
+                    `;
+                    container.appendChild(card);
+                });
+                console.log('✅ Projects loaded successfully');
+            }
+        } catch (error) {
+            console.error('❌ Error loading projects:', error);
+        }
+    }
 
-/* Main Content */
-.main-content { flex: 1; padding: 40px; overflow-y: auto; }
-.top-header { margin-bottom: 30px; }
-.top-header h1 { font-size: 2rem; color: var(--gold); }
-.subtitle { color: rgba(255,255,255,0.6); margin-top: 5px; font-size: 1.1rem; }
+    // --- LOAD KNOWLEDGE ---
+    async function loadKnowledge() {
+        try {
+            const response = await fetch(`${API_URL}/knowledge`);
+            const result = await response.json();
+            
+            if (result.success && result.data.length > 0) {
+                const container = document.getElementById('knowledge-grid');
+                container.innerHTML = '';
+                
+                result.data.forEach(article => {
+                    const date = new Date(article.createdAt).toLocaleDateString();
+                    const snippet = article.content.substring(0, 100) + '...';
+                    const card = document.createElement('div');
+                    card.className = 'card knowledge-card';
+                    card.innerHTML = `
+                        <h4>${article.title}</h4>
+                        <p class="meta">${article.category} • ${date}</p>
+                        <p class="snippet">${snippet}</p>
+                    `;
+                    container.appendChild(card);
+                });
+                console.log('✅ Knowledge loaded successfully');
+            }
+        } catch (error) {
+            console.error('❌ Error loading knowledge:', error);
+        }
+    }
 
-/* Cards & Sections */
-.section-card {
-    background-color: var(--dark-grey);
-    padding: 25px;
-    border-radius: 12px;
-    margin-bottom: 25px;
-    border: 1px solid var(--light-grey);
-}
-.section-card h3 { 
-    color: var(--white); margin-bottom: 20px; font-size: 1.25rem;
-    border-bottom: 1px solid var(--light-grey); padding-bottom: 10px;
-}
-.mission-section p { font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.8); }
+    // --- LOAD ACTIVITY LOG ---
+    async function loadActivityLog() {
+        try {
+            const response = await fetch(`${API_URL}/logs`);
+            const result = await response.json();
+            
+            const container = document.getElementById('activity-log');
+            container.innerHTML = '';
+            
+            if (result.success && result.data.length > 0) {
+                result.data.forEach(log => {
+                    const timestamp = new Date(log.createdAt).toLocaleString();
+                    const logItem = document.createElement('div');
+                    logItem.className = 'log-item';
+                    logItem.innerHTML = `
+                        <div class="log-details">
+                            <strong class="log-actor">${log.actor}</strong>
+                            <span class="log-action">${log.action}</span>
+                        </div>
+                        <div class="log-meta">
+                            <span class="badge-log success">${log.status}</span>
+                            <span class="log-time">${timestamp}</span>
+                        </div>
+                    `;
+                    container.appendChild(logItem);
+                });
+                console.log('✅ Activity log loaded successfully');
+            } else {
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
+            }
+        } catch (error) {
+            console.error('❌ Error loading activity log:', error);
+        }
+    }
 
-.grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    // --- CREATE ACTIVITY LOG ---
+    async function createLog(actor, action, status = 'Success') {
+        try {
+            await fetch(`${API_URL}/logs`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ actor, action, status })
+            });
+            // Refresh the activity log display
+            loadActivityLog();
+        } catch (error) {
+            console.error('❌ Error creating log:', error);
+        }
+    }
 
-.card {
-    background-color: var(--black);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--light-grey);
-    transition: all 0.2s;
-    position: relative;
-}
-.card:hover { transform: translateY(-3px); border-color: var(--gold); }
-.card h4 { color: var(--gold); margin-bottom: 8px; }
+    // --- ADD PROJECT FORM LOGIC ---
+    const addProjectBtn = document.getElementById('add-project-btn');
+    const addProjectForm = document.getElementById('add-project-form');
+    const cancelProjectBtn = document.getElementById('cancel-project-btn');
+    const submitProjectBtn = document.getElementById('submit-project-btn');
 
-/* Agent Specific */
-.status-indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; }
-.online { background-color: #10B981; box-shadow: 0 0 8px #10B981; }
-.ready { background-color: var(--gold); box-shadow: 0 0 8px var(--gold); }
-.standby { background-color: #6B7280; }
-.role { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 10px; }
-.status-text { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+    addProjectBtn.addEventListener('click', () => {
+        addProjectForm.style.display = 'block';
+        addProjectBtn.style.display = 'none';
+    });
 
-/* Project Specific */
-.description { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 8px; }
-.category { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px; }
-.badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; }
-.badge.active { background: rgba(16, 185, 129, 0.2); color: #10B981; }
-.badge.planning { background: rgba(212, 175, 55, 0.2); color: #D4AF37; }
+    cancelProjectBtn.addEventListener('click', () => {
+        addProjectForm.style.display = 'none';
+        addProjectBtn.style.display = 'block';
+        document.getElementById('project-name').value = '';
+        document.getElementById('project-description').value = '';
+    });
 
-/* Knowledge Specific */
-.meta { color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 10px; }
-.snippet { color: rgba(255,255,255,0.7); font-size: 0.9rem; line-height: 1.5; }
+    submitProjectBtn.addEventListener('click', async () => {
+        const name = document.getElementById('project-name').value.trim();
+        const description = document.getElementById('project-description').value.trim();
+        const category = document.getElementById('project-category').value;
 
-/* Chat Interface */
-.chat-window {
-    background-color: var(--black);
-    border: 1px solid var(--light-grey);
-    border-radius: 8px;
-    height: 200px;
-    overflow-y: auto;
-    padding: 15px;
-    margin-bottom: 15px;
-}
-.chat-message { margin-bottom: 10px; padding: 10px 15px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
-.chat-message.bot { background-color: var(--deep-blue); color: var(--white); }
-.chat-message.user { background-color: var(--light-grey); color: var(--white); margin-left: auto; text-align: right; }
+        if (!name || !description) {
+            alert('Please fill in all fields');
+            return;
+        }
 
-.chat-input-area { display: flex; gap: 10px; }
-.chat-input { 
-    flex: 1;
-    padding: 12px;
-    background: var(--black);
-    border: 1px solid var(--light-grey);
-    border-radius: 8px;
-    color: var(--white);
-    outline: none;
-    font-size: 1rem;
-}
-.chat-input:focus { border-color: var(--gold); }
-.btn-gold { 
-    padding: 12px 24px;
-    background: var(--gold);
-    color: var(--black);
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.btn-gold:hover { background: #b5952f; }
+        try {
+            const response = await fetch(`${API_URL}/projects`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, category, status: 'Planning' })
+            });
 
-/* Activity Log */
-.log-container { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.log-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    background-color: var(--black);
-    border-radius: 8px;
-    border: 1px solid var(--light-grey);
-}
-.log-details { display: flex; flex-direction: column; gap: 4px; }
-.log-actor { color: var(--gold); font-size: 0.9rem; }
-.log-action { color: rgba(255,255,255,0.8); font-size: 0.9rem; }
-.log-meta { display: flex; align-items: center; gap: 10px; }
-.badge-log { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
-.badge-log.success { background: rgba(16, 185, 129, 0.2); color: #10B981; }
-.log-time { color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+            const result = await response.json();
 
-/* Form Styles */
-.form-container {
-    background-color: var(--black);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--light-grey);
-}
+            if (result.success) {
+                alert('✅ Project created successfully!');
+                addProjectForm.style.display = 'none';
+                addProjectBtn.style.display = 'block';
+                document.getElementById('project-name').value = '';
+                document.getElementById('project-description').value = '';
+                loadProjects();
+                
+                // Log this action
+                await createLog('King Solomon', `Created project: ${name}`, 'Success');
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error creating project:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    });
 
-.form-input {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    background-color: var(--dark-grey);
-    border: 1px solid var(--light-grey);
-    border-radius: 6px;
-    color: var(--white);
-    font-size: 1rem;
-}
+    // --- DELETE PROJECT FUNCTION ---
+    window.deleteProject = async (id) => {
+        if (!confirm('Are you sure you want to delete this project?')) return;
 
-.form
+        try {
+            const response = await fetch(`${API_URL}/projects/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Project deleted successfully!');
+                loadProjects();
+                
+                // Log this action
+                await createLog('King Solomon', 'Deleted a project', 'Success');
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error deleting project:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
+    // --- CHAT PLACEHOLDER ---
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    const chatWindow = document.getElementById('chat-window');
+
+    chatSend.addEventListener('click', async () => {
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        const userDiv = document.createElement('div');
+        userDiv.className = 'chat-message user';
+        userDiv.textContent = message;
+        chatWindow.appendChild(userDiv);
+        chatInput.value = '';
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Log chat message
+        await createLog('King Solomon', `Sent chat message: "${message}"`, 'Success');
+
+        setTimeout(() => {
+            const botDiv = document.createElement('div');
+            botDiv.className = 'chat-message bot';
+            botDiv.textContent = `KS1 Assistant: Command received. Processing "${message}" via backend API.`;
+            chatWindow.appendChild(botDiv);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }, 800);
+    });
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') chatSend.click();
+    });
+
+    console.log('✅ KS1 Command Center initialized successfully');
+});
