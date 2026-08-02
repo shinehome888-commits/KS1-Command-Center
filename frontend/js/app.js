@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const card = document.createElement('div');
                     card.className = 'card project-card';
                     card.innerHTML = `
+                        <button class="delete-btn" onclick="deleteProject('${project._id}')">Delete</button>
                         <h4>${project.name}</h4>
                         <p class="description">${project.description}</p>
                         <p class="category">Category: ${project.category}</p>
@@ -131,6 +132,82 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- ADD PROJECT FORM LOGIC ---
+    const addProjectBtn = document.getElementById('add-project-btn');
+    const addProjectForm = document.getElementById('add-project-form');
+    const cancelProjectBtn = document.getElementById('cancel-project-btn');
+    const submitProjectBtn = document.getElementById('submit-project-btn');
+
+    addProjectBtn.addEventListener('click', () => {
+        addProjectForm.style.display = 'block';
+        addProjectBtn.style.display = 'none';
+    });
+
+    cancelProjectBtn.addEventListener('click', () => {
+        addProjectForm.style.display = 'none';
+        addProjectBtn.style.display = 'block';
+        document.getElementById('project-name').value = '';
+        document.getElementById('project-description').value = '';
+    });
+
+    submitProjectBtn.addEventListener('click', async () => {
+        const name = document.getElementById('project-name').value.trim();
+        const description = document.getElementById('project-description').value.trim();
+        const category = document.getElementById('project-category').value;
+
+        if (!name || !description) {
+            alert('Please fill in all fields');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/projects`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description, category, status: 'Planning' })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Project created successfully!');
+                addProjectForm.style.display = 'none';
+                addProjectBtn.style.display = 'block';
+                document.getElementById('project-name').value = '';
+                document.getElementById('project-description').value = '';
+                loadProjects(); // Reload to show new project
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error creating project:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    });
+
+    // --- DELETE PROJECT FUNCTION ---
+    window.deleteProject = async (id) => {
+        if (!confirm('Are you sure you want to delete this project?')) return;
+
+        try {
+            const response = await fetch(`${API_URL}/projects/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('✅ Project deleted successfully!');
+                loadProjects(); // Reload to remove deleted project
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error deleting project:', error);
+            alert('❌ Network error. Please try again.');
+        }
+    };
+
     // --- CHAT PLACEHOLDER ---
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
@@ -140,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const message = chatInput.value.trim();
         if (!message) return;
 
-        // Add user message
         const userDiv = document.createElement('div');
         userDiv.className = 'chat-message user';
         userDiv.textContent = message;
@@ -148,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatInput.value = '';
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
-        // Placeholder bot response
         setTimeout(() => {
             const botDiv = document.createElement('div');
             botDiv.className = 'chat-message bot';
