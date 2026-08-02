@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardView.classList.remove('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userName;
         loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); loadActivityLog(); loadStats();
+        setTimeout(renderCharts, 500);
     } else {
         authView.classList.remove('hidden');
         dashboardView.classList.add('hidden');
@@ -180,6 +181,245 @@ document.addEventListener('DOMContentLoaded', () => {
             if (step >= steps) { element.textContent = target; clearInterval(timer); }
             else { element.textContent = Math.floor(current); }
         }, duration / steps);
+    }
+
+    // ✅ CHART RENDERING FUNCTIONS
+    let projectsChartInstance = null;
+    let agentsChartInstance = null;
+    let activityChartInstance = null;
+    let communicationsChartInstance = null;
+
+    async function renderCharts() {
+        try {
+            const [projectsRes, agentsRes, logsRes, commsRes] = await Promise.all([
+                fetch(`${API_URL}/projects`),
+                fetch(`${API_URL}/agents`),
+                fetch(`${API_URL}/logs`),
+                fetch(`${API_URL}/communications`)
+            ]);
+
+            const [projectsResult, agentsResult, logsResult, commsResult] = await Promise.all([
+                projectsRes.json(), agentsRes.json(), logsRes.json(), commsRes.json()
+            ]);
+
+            renderProjectsChart(projectsResult.data || []);
+            renderAgentsChart(agentsResult.data || []);
+            renderActivityChart(logsResult.data || []);
+            renderCommunicationsChart(commsResult.data || []);
+
+            console.log('✅ Charts rendered successfully');
+        } catch (error) {
+            console.error('❌ Error rendering charts:', error);
+        }
+    }
+
+    function renderProjectsChart(projects) {
+        const ctx = document.getElementById('projectsChart');
+        if (!ctx) return;
+
+        if (projectsChartInstance) projectsChartInstance.destroy();
+
+        const activeCount = projects.filter(p => p.status === 'Active').length;
+        const planningCount = projects.filter(p => p.status === 'Planning').length;
+        const completedCount = projects.filter(p => p.status === 'Completed').length;
+        const otherCount = projects.length - activeCount - planningCount - completedCount;
+
+        projectsChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Planning', 'Completed', 'Other'],
+                datasets: [{
+                    data: [activeCount, planningCount, completedCount, otherCount],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(212, 175, 55, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(107, 114, 128, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(212, 175, 55, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(107, 114, 128, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: { size: 11 },
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderAgentsChart(agents) {
+        const ctx = document.getElementById('agentsChart');
+        if (!ctx) return;
+
+        if (agentsChartInstance) agentsChartInstance.destroy();
+
+        const onlineCount = agents.filter(a => a.status === 'Online').length;
+        const readyCount = agents.filter(a => a.status === 'Ready').length;
+        const standbyCount = agents.filter(a => a.status === 'Standby').length;
+
+        agentsChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Online', 'Ready', 'Standby'],
+                datasets: [{
+                    label: 'Agents',
+                    data: [onlineCount, readyCount, standbyCount],
+                    backgroundColor: [
+                        'rgba(16, 185, 129, 0.7)',
+                        'rgba(212, 175, 55, 0.7)',
+                        'rgba(107, 114, 128, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(212, 175, 55, 1)',
+                        'rgba(107, 114, 128, 1)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            stepSize: 1
+                        },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    },
+                    x: {
+                        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderActivityChart(logs) {
+        const ctx = document.getElementById('activityChart');
+        if (!ctx) return;
+
+        if (activityChartInstance) activityChartInstance.destroy();
+
+        const recentLogs = logs.slice(0, 7).reverse();
+        const labels = recentLogs.map(log => {
+            const date = new Date(log.createdAt);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        });
+        const data = recentLogs.map((_, index) => index + 1);
+
+        activityChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels.length > 0 ? labels : ['No Data'],
+                datasets: [{
+                    label: 'Activity',
+                    data: data.length > 0 ? data : [0],
+                    borderColor: 'rgba(212, 175, 55, 1)',
+                    backgroundColor: 'rgba(212, 175, 55, 0.2)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'rgba(212, 175, 55, 1)',
+                    pointBorderColor: 'rgba(255, 255, 255, 1)',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            stepSize: 1
+                        },
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                    },
+                    x: {
+                        ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    function renderCommunicationsChart(comms) {
+        const ctx = document.getElementById('communicationsChart');
+        if (!ctx) return;
+
+        if (communicationsChartInstance) communicationsChartInstance.destroy();
+
+        const categories = ['Announcement', 'News', 'Update', 'Event', 'Alert'];
+        const counts = categories.map(cat => comms.filter(c => c.category === cat).length);
+
+        communicationsChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: counts,
+                    backgroundColor: [
+                        'rgba(245, 158, 11, 0.8)',
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(168, 85, 247, 0.8)',
+                        'rgba(239, 68, 68, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(245, 158, 11, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(16, 185, 129, 1)',
+                        'rgba(168, 85, 247, 1)',
+                        'rgba(239, 68, 68, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            font: { size: 11 },
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
     }
 
     async function loadAgents() {
@@ -350,9 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
             if (result.success) {
                 alert('✅ Deleted!'); viewModal.style.display = 'none'; currentViewArticleId = null;
-                loadKnowledge(); 
-                await createLog(userName, 'Deleted a knowledge article', 'Success');
-                loadStats();
+                loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success');
             }
         } catch (error) { console.error('❌ Error:', error); }
     });
@@ -411,9 +649,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await res.json();
                 if (result.success) {
                     alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
-                    reloadFn(); 
-                    await createLog(userName, successMsg, 'Success');
-                    loadStats();
+                    reloadFn(); await createLog(userName, successMsg, 'Success');
+                    setTimeout(renderCharts, 300);
                 } else { alert('❌ ' + result.message); }
             } catch (error) { alert('❌ Network error.'); }
             finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
@@ -479,7 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('✅ Agent decommissioned!'); 
                 loadAgents(); 
                 await createLog(userName, 'Decommissioned an AI Agent', 'Success');
-                loadStats();
+                setTimeout(renderCharts, 300);
             }
         } catch (error) { console.error('❌ Error:', error); }
     };
@@ -493,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('✅ Project deleted!'); 
                 loadProjects(); 
                 await createLog(userName, 'Deleted a project', 'Success');
-                loadStats();
+                setTimeout(renderCharts, 300);
             }
         } catch (error) { console.error('❌ Error:', error); }
     };
@@ -507,7 +744,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('✅ Article deleted!'); 
                 loadKnowledge(); 
                 await createLog(userName, 'Deleted a knowledge article', 'Success');
-                loadStats();
             }
         } catch (error) { console.error('❌ Error:', error); }
     };
@@ -521,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('✅ Announcement deleted!'); 
                 loadCommunications(); 
                 await createLog(userName, 'Deleted an announcement', 'Success');
-                loadStats();
+                setTimeout(renderCharts, 300);
             }
         } catch (error) { console.error('❌ Error:', error); }
     };
@@ -549,7 +785,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         await createLog(userName, `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
-        loadStats();
 
         try {
             const response = await fetch(`${API_URL}/ai/chat`, {
@@ -564,7 +799,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.data && result.data.aiResponse) {
                 botDiv.textContent = result.data.aiResponse;
                 await createLog('KS1 Assistant', `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 'Success');
-                loadStats();
             } else {
                 botDiv.textContent = "I'm having a moment, King Solomon. Please try again.";
             }
