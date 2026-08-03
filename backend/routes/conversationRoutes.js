@@ -8,7 +8,7 @@ const {
 } = require('../controllers/conversationController');
 const { protect } = require('../middleware/auth');
 
-// All conversation routes are protected
+// All conversation routes require authentication
 router.use(protect);
 
 router.get('/', getUserConversations);
