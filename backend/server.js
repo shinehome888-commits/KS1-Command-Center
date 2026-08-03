@@ -2,6 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const jwt = require('jsonwebtoken');
+const User = require('./models/User');
 
 dotenv.config();
 connectDB();
@@ -26,27 +28,38 @@ app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/communications', require('./routes/communicationRoutes'));
-app.use('/api/conversations', require('./routes/conversationRoutes')); // NEW: Conversation History
+app.use('/api/conversations', require('./routes/conversationRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 
-// AI route - now with optional authentication
+// ✅ AI CHAT ROUTE WITH OPTIONAL AUTHENTICATION
 const { chatWithAI } = require('./controllers/aiController');
-const { protect } = require('./middleware/auth');
 
-// Make AI chat work with or without auth (optional auth)
 app.post('/api/ai/chat', async (req, res, next) => {
-    // Try to authenticate if token exists, but don't fail if it doesn't
-    const token = req.headers.authorization?.split(' ')[1];
-    if (token) {
+    const authHeader = req.headers.authorization;
+    console.log('🔐 Auth header received:', authHeader ? 'Yes' : 'No');
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        console.log('🔑 Token extracted');
+        
         try {
-            const jwt = require('jsonwebtoken');
-            const User = require('./models/User');
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = await User.findById(decoded.id).select('-password');
+            console.log('✅ Token verified, user ID:', decoded.id);
+            
+            const user = await User.findById(decoded.id).select('-password');
+            
+            if (user) {
+                req.user = user;
+                console.log('✅ User attached to request:', user.email);
+            } else {
+                console.log('⚠️ User not found in database');
+            }
         } catch (error) {
-            // Token invalid, continue without user
+            console.log('⚠️ Token verification failed:', error.message);
+            // Continue without user - AI chat still works
         }
     }
+    
     next();
 }, chatWithAI);
 
