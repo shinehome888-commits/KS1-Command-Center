@@ -25,9 +25,30 @@ app.use('/api/projects', require('./routes/projectRoutes'));
 app.use('/api/agents', require('./routes/agentRoutes'));
 app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
-app.use('/api/ai', require('./routes/aiRoutes'));
-app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/communications', require('./routes/communicationRoutes'));
+app.use('/api/conversations', require('./routes/conversationRoutes')); // NEW: Conversation History
+app.use('/api/auth', require('./routes/authRoutes'));
+
+// AI route - now with optional authentication
+const { chatWithAI } = require('./controllers/aiController');
+const { protect } = require('./middleware/auth');
+
+// Make AI chat work with or without auth (optional auth)
+app.post('/api/ai/chat', async (req, res, next) => {
+    // Try to authenticate if token exists, but don't fail if it doesn't
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token) {
+        try {
+            const jwt = require('jsonwebtoken');
+            const User = require('./models/User');
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            req.user = await User.findById(decoded.id).select('-password');
+        } catch (error) {
+            // Token invalid, continue without user
+        }
+    }
+    next();
+}, chatWithAI);
 
 // Seed Route
 app.get('/api/seed', async (req, res) => {
