@@ -34,11 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardView = document.getElementById('dashboard-view');
     const userNameDisplay = document.getElementById('user-name-display');
 
+    // ✅ CONVERSATION STATE
+    let currentConversationId = null;
+    let conversationHistory = [];
+
     if (token) {
         authView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userName;
         loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); loadActivityLog(); loadStats();
+        loadConversationHistory();
         setTimeout(renderCharts, 500);
     } else {
         authView.classList.remove('hidden');
@@ -641,7 +646,152 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error:', error); }
     };
 
-    // ✅ AI CHAT WITH KNOWLEDGE-POWERED RESPONSES
+    // ✅ CONVERSATION HISTORY FUNCTIONS
+    async function loadConversationHistory() {
+        if (!token) return;
+        try {
+            const response = await fetch(`${API_URL}/conversations`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (result.success) {
+                conversationHistory = result.data;
+                renderConversationHistory();
+            }
+        } catch (error) {
+            console.error('❌ Error loading conversation history:', error);
+        }
+    }
+
+    function renderConversationHistory() {
+        const historyList = document.getElementById('history-list');
+        if (!historyList) return;
+
+        if (conversationHistory.length === 0) {
+            historyList.innerHTML = '<p class="history-empty">No conversations yet. Start chatting!</p>';
+            return;
+        }
+
+        historyList.innerHTML = '';
+        conversationHistory.forEach(conv => {
+            const item = document.createElement('div');
+            item.className = 'history-item' + (currentConversationId === conv._id ? ' active' : '');
+            const date = new Date(conv.updatedAt).toLocaleDateString('en-US', { 
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+            });
+            item.innerHTML = `
+                <div class="history-item-content">
+                    <div class="history-item-title">💬 ${conv.title}</div>
+                    <div class="history-item-date">${date}</div>
+                </div>
+                <button class="history-item-delete" onclick="deleteConversation('${conv._id}', event)">🗑️</button>
+            `;
+            item.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('history-item-delete')) {
+                    loadConversation(conv._id);
+                }
+            });
+            historyList.appendChild(item);
+        });
+    }
+
+    async function loadConversation(conversationId) {
+        if (!token) return;
+        try {
+            const response = await fetch(`${API_URL}/conversations/${conversationId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                currentConversationId = conversationId;
+                const chatWindow = document.getElementById('chat-window');
+                chatWindow.innerHTML = '';
+                
+                // Show conversation title
+                const titleDisplay = document.getElementById('current-conversation-title');
+                const titleText = document.getElementById('current-title-text');
+                if (titleDisplay && titleText) {
+                    titleText.textContent = result.data.title;
+                    titleDisplay.classList.remove('hidden');
+                }
+                
+                // Render all messages
+                result.data.messages.forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `chat-message ${msg.role === 'user' ? 'user' : 'bot'}`;
+                    msgDiv.textContent = msg.content;
+                    chatWindow.appendChild(msgDiv);
+                });
+                
+                chatWindow.scrollTop = chatWindow.scrollHeight;
+                renderConversationHistory();
+            }
+        } catch (error) {
+            console.error('❌ Error loading conversation:', error);
+        }
+    }
+
+    window.deleteConversation = async (id, event) => {
+        event.stopPropagation();
+        if (!confirm('Delete this conversation?')) return;
+        try {
+            const response = await fetch(`${API_URL}/conversations/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (result.success) {
+                if (currentConversationId === id) {
+                    startNewConversation();
+                }
+                await loadConversationHistory();
+            }
+        } catch (error) {
+            console.error('❌ Error deleting conversation:', error);
+        }
+    };
+
+    function startNewConversation() {
+        currentConversationId = null;
+        const chatWindow = document.getElementById('chat-window');
+        chatWindow.innerHTML = '<div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>';
+        
+        const titleDisplay = document.getElementById('current-conversation-title');
+        if (titleDisplay) titleDisplay.classList.add('hidden');
+        
+        renderConversationHistory();
+    }
+
+    // ✅ CHAT HISTORY & ACTION BUTTONS
+    document.getElementById('toggle-history-btn')?.addEventListener('click', () => {
+        const history = document.getElementById('conversation-history');
+        if (history) history.classList.toggle('hidden');
+    });
+
+    document.getElementById('new-conversation-btn')?.addEventListener('click', () => {
+        startNewConversation();
+    });
+
+    document.getElementById('clear-all-history-btn')?.addEventListener('click', async () => {
+        if (!confirm('Delete ALL conversation history? This cannot be undone!')) return;
+        try {
+            const response = await fetch(`${API_URL}/conversations/clear/all`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (result.success) {
+                startNewConversation();
+                await loadConversationHistory();
+                alert('✅ All conversations cleared!');
+            }
+        } catch (error) {
+            console.error('❌ Error clearing history:', error);
+        }
+    });
+
+    // ✅ AI CHAT WITH CONVERSATION TRACKING
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
@@ -667,8 +817,18 @@ document.addEventListener('DOMContentLoaded', () => {
         await createLog(userName, `Sent to AI: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"`, 'Success');
 
         try {
+            const requestBody = { message };
+            if (currentConversationId) {
+                requestBody.conversationId = currentConversationId;
+            }
+
             const response = await fetch(`${API_URL}/ai/chat`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message })
+                method: 'POST', 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }, 
+                body: JSON.stringify(requestBody)
             });
             const result = await response.json();
             const thinking = document.getElementById('thinking-indicator');
@@ -679,6 +839,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success && result.data && result.data.aiResponse) {
                 botDiv.textContent = result.data.aiResponse;
                 await createLog('KS1 Assistant', `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 'Success');
+                
+                // ✅ UPDATE CONVERSATION ID IF NEW
+                if (result.data.conversationId && !currentConversationId) {
+                    currentConversationId = result.data.conversationId;
+                    
+                    // Show conversation title
+                    const titleDisplay = document.getElementById('current-conversation-title');
+                    const titleText = document.getElementById('current-title-text');
+                    if (titleDisplay && titleText && result.data.conversationTitle) {
+                        titleText.textContent = result.data.conversationTitle;
+                        titleDisplay.classList.remove('hidden');
+                    }
+                    
+                    // Refresh history list
+                    await loadConversationHistory();
+                }
             } else {
                 botDiv.textContent = "I'm having a moment, King Solomon. Please try again.";
             }
