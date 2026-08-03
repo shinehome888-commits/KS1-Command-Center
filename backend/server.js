@@ -31,32 +31,24 @@ app.use('/api/communications', require('./routes/communicationRoutes'));
 app.use('/api/conversations', require('./routes/conversationRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 
-// ✅ AI CHAT ROUTE WITH OPTIONAL AUTHENTICATION
+// AI Chat Route with Optional Authentication
 const { chatWithAI } = require('./controllers/aiController');
 
 app.post('/api/ai/chat', async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    console.log('🔐 Auth header received:', authHeader ? 'Yes' : 'No');
     
     if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
-        console.log('🔑 Token extracted');
         
         try {
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            console.log('✅ Token verified, user ID:', decoded.id);
-            
             const user = await User.findById(decoded.id).select('-password');
             
             if (user) {
                 req.user = user;
-                console.log('✅ User attached to request:', user.email);
-            } else {
-                console.log('⚠️ User not found in database');
             }
         } catch (error) {
-            console.log('⚠️ Token verification failed:', error.message);
-            // Continue without user - AI chat still works
+            // Continue without user
         }
     }
     
