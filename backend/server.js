@@ -29,6 +29,7 @@ app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/communications', require('./routes/communicationRoutes'));
 app.use('/api/conversations', require('./routes/conversationRoutes'));
+app.use('/api/tasks', require('./routes/taskRoutes')); // NEW: Task System
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // AI Chat Route with Optional Authentication
@@ -62,11 +63,13 @@ app.get('/api/seed', async (req, res) => {
         const Agent = require('./models/Agent');
         const Knowledge = require('./models/Knowledge');
         const ActivityLog = require('./models/ActivityLog');
+        const Task = require('./models/Task');
 
         await Project.deleteMany();
         await Agent.deleteMany();
         await Knowledge.deleteMany();
         await ActivityLog.deleteMany();
+        await Task.deleteMany();
 
         await Project.insertMany([
             { name: 'ShineGPT', description: 'AI-powered education platform for humanity.', category: 'Education', status: 'Active' },
