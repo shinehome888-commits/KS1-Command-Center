@@ -9,6 +9,7 @@
 </head>
 <body>
 
+    <!-- AUTH VIEW -->
     <div id="auth-view" class="auth-view">
         <div class="auth-box">
             <div class="auth-logo">
@@ -26,48 +27,32 @@
                     <input type="password" id="login-password" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" id="login-btn" class="btn-primary full-width">Sign In</button>
-                <p class="auth-switch">
-                    New to KS1? <a href="#" id="show-register">Create an account</a>
-                </p>
+                <p class="auth-switch">New to KS1? <a href="#" id="show-register">Create an account</a></p>
             </form>
             <form id="register-form" class="auth-form hidden">
                 <h3>Join the Foundation</h3>
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="register-name" placeholder="Enter your full name" required>
-                </div>
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="register-email" placeholder="Enter your email" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="register-password" placeholder="Min 6 characters" minlength="6" required>
-                </div>
+                <div class="form-group"><label>Full Name</label><input type="text" id="register-name" placeholder="Enter your full name" required></div>
+                <div class="form-group"><label>Email Address</label><input type="email" id="register-email" placeholder="Enter your email" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="register-password" placeholder="Min 6 characters" minlength="6" required></div>
                 <button type="submit" id="register-btn" class="btn-primary full-width">Create Account</button>
-                <p class="auth-switch">
-                    Already have an account? <a href="#" id="show-login">Sign In</a>
-                </p>
+                <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign In</a></p>
             </form>
         </div>
     </div>
 
+    <!-- DASHBOARD VIEW -->
     <div id="dashboard-view" class="dashboard-view hidden">
         <header class="mobile-header">
             <div class="mobile-logo">KS1 <span>COMMAND</span></div>
             <div class="mobile-header-actions">
                 <button class="mobile-logout-btn" id="mobile-logout-btn" title="Logout">🚪</button>
-                <button class="hamburger" id="hamburger">
-                    <span></span><span></span><span></span>
-                </button>
+                <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
             </div>
         </header>
 
         <div class="dashboard-container">
             <aside class="sidebar" id="sidebar">
-                <div class="logo">
-                    <h2>KS1 <span>COMMAND</span></h2>
-                </div>
+                <div class="logo"><h2>KS1 <span>COMMAND</span></h2></div>
                 <nav class="nav-menu">
                     <a href="#" class="nav-item active">Dashboard</a>
                     <a href="#" class="nav-item">AI Workforce</a>
@@ -79,7 +64,6 @@
                 </nav>
                 <button class="close-sidebar" id="close-sidebar">&times;</button>
             </aside>
-
             <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
             <main class="main-content">
@@ -89,125 +73,67 @@
                             <h1>Grand Rising <span id="user-name-display">King Solomon</span> 👑</h1>
                             <p class="subtitle">Welcome to KS1 Command Center. Your AI workforce is preparing to serve humanity.</p>
                         </div>
-                        <button class="desktop-logout-btn" id="desktop-logout-btn" title="Logout">🚪 Logout</button>
+                        <button class="desktop-logout-btn" id="desktop-logout-btn">🚪 Logout</button>
                     </div>
                 </header>
 
+                <!-- STATS -->
                 <section class="stats-grid" id="stats-grid">
-                    <div class="stat-card stat-projects">
-                        <div class="stat-icon">📊</div>
-                        <div class="stat-info">
-                            <h2 id="stat-projects-count">0</h2>
-                            <p>Total Projects</p>
-                        </div>
-                    </div>
-                    <div class="stat-card stat-agents">
-                        <div class="stat-icon">🤖</div>
-                        <div class="stat-info">
-                            <h2 id="stat-agents-count">0</h2>
-                            <p>AI Agents</p>
-                            <span class="stat-sub" id="stat-agents-online">0 Online</span>
-                        </div>
-                    </div>
-                    <div class="stat-card stat-knowledge">
-                        <div class="stat-icon">📚</div>
-                        <div class="stat-info">
-                            <h2 id="stat-knowledge-count">0</h2>
-                            <p>Knowledge Articles</p>
-                        </div>
-                    </div>
-                    <div class="stat-card stat-tasks">
-                        <div class="stat-icon">📋</div>
-                        <div class="stat-info">
-                            <h2 id="stat-tasks-count">0</h2>
-                            <p>Tasks Executed</p>
-                        </div>
-                    </div>
-                    <div class="stat-card stat-activity">
-                        <div class="stat-icon">📝</div>
-                        <div class="stat-info">
-                            <h2 id="stat-activity-count">0</h2>
-                            <p>Total Activities</p>
-                        </div>
-                    </div>
+                    <div class="stat-card stat-projects"><div class="stat-icon">📊</div><div class="stat-info"><h2 id="stat-projects-count">0</h2><p>Total Projects</p></div></div>
+                    <div class="stat-card stat-agents"><div class="stat-icon">🤖</div><div class="stat-info"><h2 id="stat-agents-count">0</h2><p>AI Agents</p><span class="stat-sub" id="stat-agents-online">0 Online</span></div></div>
+                    <div class="stat-card stat-knowledge"><div class="stat-icon">📚</div><div class="stat-info"><h2 id="stat-knowledge-count">0</h2><p>Knowledge Articles</p></div></div>
+                    <div class="stat-card stat-tasks"><div class="stat-icon">📋</div><div class="stat-info"><h2 id="stat-tasks-count">0</h2><p>Tasks Executed</p></div></div>
+                    <div class="stat-card stat-activity"><div class="stat-icon">📝</div><div class="stat-info"><h2 id="stat-activity-count">0</h2><p>Total Activities</p></div></div>
                 </section>
 
-                <!-- AI WORKFORCE WITH TASK ASSIGNMENT -->
+                <!-- AGENTS -->
                 <section class="section-card">
-                    <div class="section-header">
-                        <h3>🤖 AI Workforce <span class="ai-badge">Click to Assign Tasks</span></h3>
-                    </div>
+                    <div class="section-header"><h3>🤖 AI Workforce <span class="ai-badge">Click to Assign Tasks</span></h3></div>
                     <div class="grid-layout" id="agents-grid"></div>
                 </section>
 
-                <!-- TASK QUEUE -->
+                <!-- TASKS -->
                 <section class="section-card">
-                    <div class="section-header">
-                        <h3>📋 Task Queue</h3>
-                        <button id="refresh-tasks-btn" class="btn-secondary btn-small">🔄 Refresh</button>
-                    </div>
-                    <div id="task-queue" class="task-queue">
-                        <p class="empty-state">No tasks yet. Assign a task to an agent above!</p>
-                    </div>
+                    <div class="section-header"><h3>📋 Task Queue</h3><button id="refresh-tasks-btn" class="btn-secondary btn-small">🔄 Refresh</button></div>
+                    <div id="task-queue" class="task-queue"><p class="empty-state">No tasks yet. Assign a task to an agent above!</p></div>
                 </section>
 
+                <!-- CHARTS -->
                 <section class="section-card charts-section">
                     <h3>📊 Analytics Dashboard <span class="ai-badge">Live Data</span></h3>
                     <div class="charts-grid">
-                        <div class="chart-card">
-                            <h4>Projects Status</h4>
-                            <div class="chart-container"><canvas id="projectsChart"></canvas></div>
-                        </div>
-                        <div class="chart-card">
-                            <h4>AI Agent Status</h4>
-                            <div class="chart-container"><canvas id="agentsChart"></canvas></div>
-                        </div>
-                        <div class="chart-card">
-                            <h4>Recent Activity</h4>
-                            <div class="chart-container"><canvas id="activityChart"></canvas></div>
-                        </div>
-                        <div class="chart-card">
-                            <h4>Communications by Category</h4>
-                            <div class="chart-container"><canvas id="communicationsChart"></canvas></div>
-                        </div>
+                        <div class="chart-card"><h4>Projects Status</h4><div class="chart-container"><canvas id="projectsChart"></canvas></div></div>
+                        <div class="chart-card"><h4>AI Agent Status</h4><div class="chart-container"><canvas id="agentsChart"></canvas></div></div>
+                        <div class="chart-card"><h4>Recent Activity</h4><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
+                        <div class="chart-card"><h4>Communications by Category</h4><div class="chart-container"><canvas id="communicationsChart"></canvas></div></div>
                     </div>
                 </section>
 
+                <!-- MISSION -->
                 <section class="section-card mission-section">
                     <h3>Our Mission</h3>
                     <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
                 </section>
 
+                <!-- PROJECTS -->
                 <section class="section-card">
-                    <div class="section-header">
-                        <h3>Active Projects</h3>
-                        <button id="add-project-btn" class="btn-primary">
-                            <span class="btn-icon">+</span> <span class="btn-text">Add Project</span>
-                        </button>
-                    </div>
+                    <div class="section-header"><h3>Active Projects</h3><button id="add-project-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Add Project</span></button></div>
                     <div class="grid-layout" id="projects-grid"></div>
                 </section>
 
+                <!-- KNOWLEDGE -->
                 <section class="section-card">
-                    <div class="section-header">
-                        <h3>Knowledge Base</h3>
-                        <button id="add-knowledge-btn" class="btn-primary">
-                            <span class="btn-icon">+</span> <span class="btn-text">Add Article</span>
-                        </button>
-                    </div>
+                    <div class="section-header"><h3>Knowledge Base</h3><button id="add-knowledge-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Add Article</span></button></div>
                     <div class="grid-layout" id="knowledge-grid"></div>
                 </section>
 
+                <!-- COMMUNICATIONS -->
                 <section class="section-card">
-                    <div class="section-header">
-                        <h3>Communications Hub 📢</h3>
-                        <button id="add-communication-btn" class="btn-primary">
-                            <span class="btn-icon">+</span> <span class="btn-text">Post Announcement</span>
-                        </button>
-                    </div>
+                    <div class="section-header"><h3>Communications Hub 📢</h3><button id="add-communication-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Post Announcement</span></button></div>
                     <div class="grid-layout" id="communications-grid"></div>
                 </section>
 
+                <!-- CHAT -->
                 <section class="section-card ai-chat-section">
                     <div class="chat-header-row">
                         <h3>💬 KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
@@ -217,26 +143,18 @@
                         </div>
                     </div>
                     <div id="conversation-history" class="conversation-history hidden">
-                        <div class="history-header">
-                            <h4>💬 Conversation History</h4>
-                            <button id="clear-all-history-btn" class="btn-danger btn-small">Clear All</button>
-                        </div>
-                        <div id="history-list" class="history-list">
-                            <p class="history-empty">No conversations yet. Start chatting!</p>
-                        </div>
+                        <div class="history-header"><h4>💬 Conversation History</h4><button id="clear-all-history-btn" class="btn-danger btn-small">Clear All</button></div>
+                        <div id="history-list" class="history-list"><p class="history-empty">No conversations yet. Start chatting!</p></div>
                     </div>
-                    <div id="current-conversation-title" class="current-conversation-title hidden">
-                        <span>💬 </span><span id="current-title-text"></span>
-                    </div>
-                    <div class="chat-window" id="chat-window">
-                        <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
-                    </div>
+                    <div id="current-conversation-title" class="current-conversation-title hidden"><span>💬 </span><span id="current-title-text"></span></div>
+                    <div class="chat-window" id="chat-window"><div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div></div>
                     <div class="chat-input-area">
                         <input type="text" id="chat-input" class="chat-input" placeholder="Ask the KS1 Assistant...">
                         <button id="chat-send" class="btn-primary">Send</button>
                     </div>
                 </section>
 
+                <!-- LOGS -->
                 <section class="section-card">
                     <h3>Recent Activity</h3>
                     <div class="log-container" id="activity-log"></div>
@@ -245,155 +163,84 @@
         </div>
     </div>
 
-    <!-- TASK ASSIGNMENT MODAL -->
+    <!-- MODALS -->
     <div id="task-modal" class="modal">
         <div class="modal-content task-modal-content">
-            <div class="modal-header">
-                <h2>🤖 Assign Task to <span id="task-agent-name">Agent</span></h2>
-                <button class="modal-close" id="close-task-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h2>🤖 Assign Task to <span id="task-agent-name">Agent</span></h2><button class="modal-close" id="close-task-modal">&times;</button></div>
             <div class="modal-body">
                 <div id="task-agent-info" class="task-agent-info"></div>
-                <div class="form-group">
-                    <label>Task Title</label>
-                    <input type="text" id="task-title" class="form-input" placeholder="e.g., Schedule dev team meeting">
-                </div>
-                <div class="form-group">
-                    <label>Task Details</label>
-                    <textarea id="task-description" class="form-input" rows="5" placeholder="Describe what you want the agent to do..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Priority</label>
+                <div class="form-group"><label>Task Title</label><input type="text" id="task-title" class="form-input" placeholder="e.g., Schedule dev team meeting"></div>
+                <div class="form-group"><label>Task Details</label><textarea id="task-description" class="form-input" rows="5" placeholder="Describe what you want the agent to do..."></textarea></div>
+                <div class="form-group"><label>Priority</label>
                     <select id="task-priority" class="form-input">
-                        <option value="Low">🟢 Low</option>
-                        <option value="Medium" selected>🟡 Medium</option>
-                        <option value="High">🟠 High</option>
-                        <option value="Urgent">🔴 Urgent</option>
+                        <option value="Low">🟢 Low</option><option value="Medium" selected>🟡 Medium</option><option value="High">🟠 High</option><option value="Urgent">🔴 Urgent</option>
                     </select>
                 </div>
-                <div class="task-examples">
-                    <p class="examples-title">💡 Quick Task Templates:</p>
-                    <div class="example-chips" id="task-examples"></div>
-                </div>
+                <div class="task-examples"><p class="examples-title">💡 Quick Task Templates:</p><div class="example-chips" id="task-examples"></div></div>
             </div>
-            <div class="modal-footer">
-                <button id="cancel-task-btn" class="btn-secondary">Cancel</button>
-                <button id="submit-task-btn" class="btn-primary">🚀 Execute Task</button>
-            </div>
+            <div class="modal-footer"><button id="cancel-task-btn" class="btn-secondary">Cancel</button><button id="submit-task-btn" class="btn-primary">🚀 Execute Task</button></div>
         </div>
     </div>
 
-    <!-- TASK RESULT MODAL -->
     <div id="task-result-modal" class="modal">
         <div class="modal-content task-result-modal-content">
-            <div class="modal-header">
-                <h2>📋 Task Result</h2>
-                <button class="modal-close" id="close-task-result-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="task-result-content"></div>
-            </div>
-            <div class="modal-footer">
-                <button id="close-result-btn" class="btn-primary">Close</button>
-            </div>
+            <div class="modal-header"><h2>📋 Task Result</h2><button class="modal-close" id="close-task-result-modal">&times;</button></div>
+            <div class="modal-body"><div id="task-result-content"></div></div>
+            <div class="modal-footer"><button id="close-result-btn" class="btn-primary">Close</button></div>
         </div>
     </div>
 
-    <!-- OTHER MODALS (Projects, Knowledge, Communications) -->
     <div id="project-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Create New Project</h2>
-                <button class="modal-close" id="close-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h2>Create New Project</h2><button class="modal-close" id="close-modal">&times;</button></div>
             <div class="modal-body">
                 <div class="form-group"><label>Project Name</label><input type="text" id="project-name" class="form-input"></div>
                 <div class="form-group"><label>Description</label><textarea id="project-description" class="form-input" rows="4"></textarea></div>
                 <div class="form-group"><label>Category</label>
-                    <select id="project-category" class="form-input">
-                        <option value="Education">Education</option><option value="Blockchain">Blockchain</option><option value="AI">AI</option><option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option><option value="Other">Other</option>
-                    </select>
+                    <select id="project-category" class="form-input"><option value="Education">Education</option><option value="Blockchain">Blockchain</option><option value="AI">AI</option><option value="Digital Trade Infrastructure">Digital Trade Infrastructure</option><option value="Other">Other</option></select>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button id="cancel-project-btn" class="btn-secondary">Cancel</button>
-                <button id="submit-project-btn" class="btn-primary">Create Project</button>
-            </div>
+            <div class="modal-footer"><button id="cancel-project-btn" class="btn-secondary">Cancel</button><button id="submit-project-btn" class="btn-primary">Create Project</button></div>
         </div>
     </div>
 
     <div id="knowledge-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add Knowledge Article</h2>
-                <button class="modal-close" id="close-knowledge-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h2>Add Knowledge Article</h2><button class="modal-close" id="close-knowledge-modal">&times;</button></div>
             <div class="modal-body">
                 <div class="form-group"><label>Article Title</label><input type="text" id="knowledge-title" class="form-input"></div>
                 <div class="form-group"><label>Category</label>
-                    <select id="knowledge-category" class="form-input">
-                        <option value="Education">Education</option><option value="Technology">Technology</option><option value="Blockchain">Blockchain</option><option value="AI">AI</option><option value="Business">Business</option><option value="Research">Research</option><option value="Other">Other</option>
-                    </select>
+                    <select id="knowledge-category" class="form-input"><option value="Education">Education</option><option value="Technology">Technology</option><option value="Blockchain">Blockchain</option><option value="AI">AI</option><option value="Business">Business</option><option value="Research">Research</option><option value="Other">Other</option></select>
                 </div>
                 <div class="form-group"><label>Content</label><textarea id="knowledge-content" class="form-input" rows="6"></textarea></div>
             </div>
-            <div class="modal-footer">
-                <button id="cancel-knowledge-btn" class="btn-secondary">Cancel</button>
-                <button id="submit-knowledge-btn" class="btn-primary">Save Article</button>
-            </div>
+            <div class="modal-footer"><button id="cancel-knowledge-btn" class="btn-secondary">Cancel</button><button id="submit-knowledge-btn" class="btn-primary">Save Article</button></div>
         </div>
     </div>
 
     <div id="communication-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2>Post New Announcement</h2>
-                <button class="modal-close" id="close-communication-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h2>Post New Announcement</h2><button class="modal-close" id="close-communication-modal">&times;</button></div>
             <div class="modal-body">
                 <div class="form-group"><label>Title</label><input type="text" id="communication-title" class="form-input" placeholder="Announcement title"></div>
                 <div class="form-group"><label>Category</label>
-                    <select id="communication-category" class="form-input">
-                        <option value="Announcement">📢 Announcement</option>
-                        <option value="News">📰 News</option>
-                        <option value="Update">🔄 Update</option>
-                        <option value="Event">📅 Event</option>
-                        <option value="Alert">⚠️ Alert</option>
-                    </select>
+                    <select id="communication-category" class="form-input"><option value="Announcement">📢 Announcement</option><option value="News">📰 News</option><option value="Update">🔄 Update</option><option value="Event">📅 Event</option><option value="Alert">⚠️ Alert</option></select>
                 </div>
-                <div class="form-group"><label>Priority</label>
-                    <select id="communication-priority" class="form-input">
-                        <option value="Normal">Normal</option>
-                        <option value="High">High</option>
-                        <option value="Urgent">Urgent</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>Priority</label><select id="communication-priority" class="form-input"><option value="Normal">Normal</option><option value="High">High</option><option value="Urgent">Urgent</option></select></div>
                 <div class="form-group"><label>Content</label><textarea id="communication-content" class="form-input" rows="6" placeholder="Write your announcement..."></textarea></div>
             </div>
-            <div class="modal-footer">
-                <button id="cancel-communication-btn" class="btn-secondary">Cancel</button>
-                <button id="submit-communication-btn" class="btn-primary">Post Announcement</button>
-            </div>
+            <div class="modal-footer"><button id="cancel-communication-btn" class="btn-secondary">Cancel</button><button id="submit-communication-btn" class="btn-primary">Post Announcement</button></div>
         </div>
     </div>
 
     <div id="knowledge-view-modal" class="modal">
         <div class="modal-content view-modal-content">
-            <div class="modal-header">
-                <h2 id="view-article-title">Article Title</h2>
-                <button class="modal-close" id="close-view-modal">&times;</button>
-            </div>
+            <div class="modal-header"><h2 id="view-article-title">Article Title</h2><button class="modal-close" id="close-view-modal">&times;</button></div>
             <div class="modal-body">
-                <div class="article-meta">
-                    <span class="article-category" id="view-article-category">Category</span>
-                    <span class="article-date" id="view-article-date">Date</span>
-                </div>
+                <div class="article-meta"><span class="article-category" id="view-article-category">Category</span><span class="article-date" id="view-article-date">Date</span></div>
                 <div class="article-content" id="view-article-content"></div>
             </div>
-            <div class="modal-footer">
-                <button id="delete-view-article-btn" class="btn-danger">Delete Article</button>
-                <button id="close-view-btn" class="btn-secondary">Close</button>
-            </div>
+            <div class="modal-footer"><button id="delete-view-article-btn" class="btn-danger">Delete Article</button><button id="close-view-btn" class="btn-secondary">Close</button></div>
         </div>
     </div>
 
