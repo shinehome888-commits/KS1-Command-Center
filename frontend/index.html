@@ -116,11 +116,11 @@
                             <p>Knowledge Articles</p>
                         </div>
                     </div>
-                    <div class="stat-card stat-communications">
-                        <div class="stat-icon">📢</div>
+                    <div class="stat-card stat-tasks">
+                        <div class="stat-icon">📋</div>
                         <div class="stat-info">
-                            <h2 id="stat-communications-count">0</h2>
-                            <p>Communications</p>
+                            <h2 id="stat-tasks-count">0</h2>
+                            <p>Tasks Executed</p>
                         </div>
                     </div>
                     <div class="stat-card stat-activity">
@@ -129,6 +129,25 @@
                             <h2 id="stat-activity-count">0</h2>
                             <p>Total Activities</p>
                         </div>
+                    </div>
+                </section>
+
+                <!-- AI WORKFORCE WITH TASK ASSIGNMENT -->
+                <section class="section-card">
+                    <div class="section-header">
+                        <h3>🤖 AI Workforce <span class="ai-badge">Click to Assign Tasks</span></h3>
+                    </div>
+                    <div class="grid-layout" id="agents-grid"></div>
+                </section>
+
+                <!-- TASK QUEUE -->
+                <section class="section-card">
+                    <div class="section-header">
+                        <h3>📋 Task Queue</h3>
+                        <button id="refresh-tasks-btn" class="btn-secondary btn-small">🔄 Refresh</button>
+                    </div>
+                    <div id="task-queue" class="task-queue">
+                        <p class="empty-state">No tasks yet. Assign a task to an agent above!</p>
                     </div>
                 </section>
 
@@ -161,16 +180,6 @@
 
                 <section class="section-card">
                     <div class="section-header">
-                        <h3>AI Workforce</h3>
-                        <button id="add-agent-btn" class="btn-primary">
-                            <span class="btn-icon">+</span> <span class="btn-text">Deploy Agent</span>
-                        </button>
-                    </div>
-                    <div class="grid-layout" id="agents-grid"></div>
-                </section>
-
-                <section class="section-card">
-                    <div class="section-header">
                         <h3>Active Projects</h3>
                         <button id="add-project-btn" class="btn-primary">
                             <span class="btn-icon">+</span> <span class="btn-text">Add Project</span>
@@ -199,21 +208,14 @@
                     <div class="grid-layout" id="communications-grid"></div>
                 </section>
 
-                <!-- ✅ NEW: AI CONVERSATION HISTORY + CHAT -->
                 <section class="section-card ai-chat-section">
                     <div class="chat-header-row">
-                        <h3>KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
+                        <h3>💬 KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
                         <div class="chat-actions">
-                            <button id="new-conversation-btn" class="btn-secondary btn-small" title="Start New Conversation">
-                                ➕ New Chat
-                            </button>
-                            <button id="toggle-history-btn" class="btn-secondary btn-small" title="View History">
-                                📜 History
-                            </button>
+                            <button id="new-conversation-btn" class="btn-secondary btn-small">➕ New Chat</button>
+                            <button id="toggle-history-btn" class="btn-secondary btn-small">📜 History</button>
                         </div>
                     </div>
-
-                    <!-- Conversation History Panel -->
                     <div id="conversation-history" class="conversation-history hidden">
                         <div class="history-header">
                             <h4>💬 Conversation History</h4>
@@ -223,12 +225,9 @@
                             <p class="history-empty">No conversations yet. Start chatting!</p>
                         </div>
                     </div>
-
-                    <!-- Current Conversation Title -->
                     <div id="current-conversation-title" class="current-conversation-title hidden">
                         <span>💬 </span><span id="current-title-text"></span>
                     </div>
-
                     <div class="chat-window" id="chat-window">
                         <div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div>
                     </div>
@@ -246,28 +245,61 @@
         </div>
     </div>
 
-    <div id="agent-modal" class="modal">
-        <div class="modal-content">
+    <!-- TASK ASSIGNMENT MODAL -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content task-modal-content">
             <div class="modal-header">
-                <h2>Deploy New AI Agent</h2>
-                <button class="modal-close" id="close-agent-modal">&times;</button>
+                <h2>🤖 Assign Task to <span id="task-agent-name">Agent</span></h2>
+                <button class="modal-close" id="close-task-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label>Agent Name</label><input type="text" id="agent-name" class="form-input"></div>
-                <div class="form-group"><label>Role</label><input type="text" id="agent-role" class="form-input"></div>
-                <div class="form-group"><label>Status</label>
-                    <select id="agent-status" class="form-input">
-                        <option value="Online">Online</option><option value="Ready">Ready</option><option value="Standby">Standby</option>
+                <div id="task-agent-info" class="task-agent-info"></div>
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="task-title" class="form-input" placeholder="e.g., Schedule dev team meeting">
+                </div>
+                <div class="form-group">
+                    <label>Task Details</label>
+                    <textarea id="task-description" class="form-input" rows="5" placeholder="Describe what you want the agent to do..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="task-priority" class="form-input">
+                        <option value="Low">🟢 Low</option>
+                        <option value="Medium" selected>🟡 Medium</option>
+                        <option value="High">🟠 High</option>
+                        <option value="Urgent">🔴 Urgent</option>
                     </select>
+                </div>
+                <div class="task-examples">
+                    <p class="examples-title">💡 Quick Task Templates:</p>
+                    <div class="example-chips" id="task-examples"></div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="cancel-agent-btn" class="btn-secondary">Cancel</button>
-                <button id="submit-agent-btn" class="btn-primary">Deploy Agent</button>
+                <button id="cancel-task-btn" class="btn-secondary">Cancel</button>
+                <button id="submit-task-btn" class="btn-primary">🚀 Execute Task</button>
             </div>
         </div>
     </div>
 
+    <!-- TASK RESULT MODAL -->
+    <div id="task-result-modal" class="modal">
+        <div class="modal-content task-result-modal-content">
+            <div class="modal-header">
+                <h2>📋 Task Result</h2>
+                <button class="modal-close" id="close-task-result-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="task-result-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-result-btn" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTHER MODALS (Projects, Knowledge, Communications) -->
     <div id="project-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
