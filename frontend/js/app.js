@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentConversationId = null;
     let conversationHistory = [];
-    let agentsData = []; // Store agents for task assignment
+    let agentsData = [];
 
     if (token) {
         authView.classList.add('hidden');
@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_URL}/agents`);
             const result = await response.json();
             if (result.success && result.data.length > 0) {
-                agentsData = result.data; // Store for task assignment
+                agentsData = result.data;
                 const container = document.getElementById('agents-grid');
                 container.innerHTML = '';
                 result.data.forEach(agent => {
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ========================================
-    // TASK ASSIGNMENT SYSTEM 🚀
+    // TASK ASSIGNMENT SYSTEM
     // ========================================
     let currentTaskAgent = null;
 
@@ -560,10 +560,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
 
-        // Load task examples based on agent role
         loadTaskExamples(agent.role);
 
-        // Clear form
         document.getElementById('task-title').value = '';
         document.getElementById('task-description').value = '';
         document.getElementById('task-priority').value = 'Medium';
@@ -585,36 +583,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let examples = [];
 
         if (roleLower.includes('operations') || roleLower.includes('coordinator')) {
-            examples = [
-                'Schedule a dev team meeting',
-                'Coordinate project timeline',
-                'Optimize workflow process',
-                'Allocate resources for ShineGPT',
-                'Plan sprint for KS1 Wallet'
-            ];
+            examples = ['Schedule a dev team meeting', 'Coordinate project timeline', 'Optimize workflow process', 'Allocate resources for ShineGPT', 'Plan sprint for KS1 Wallet'];
         } else if (roleLower.includes('knowledge') || roleLower.includes('librarian')) {
-            examples = [
-                'Research blockchain trends 2026',
-                'Analyze AI market opportunities',
-                'Compile Web3 documentation',
-                'Research African fintech landscape',
-                'Study DeFi protocols'
-            ];
+            examples = ['Research blockchain trends 2026', 'Analyze AI market opportunities', 'Compile Web3 documentation', 'Research African fintech landscape', 'Study DeFi protocols'];
         } else if (roleLower.includes('builder') || roleLower.includes('engineer')) {
-            examples = [
-                'Design wallet smart contract',
-                'Build landing page for ShineGPT',
-                'Implement payment API',
-                'Fix authentication bug',
-                'Create database schema'
-            ];
+            examples = ['Design wallet smart contract', 'Build landing page for ShineGPT', 'Implement payment API', 'Fix authentication bug', 'Create database schema'];
         } else {
-            examples = [
-                'Analyze current project status',
-                'Propose new feature ideas',
-                'Review documentation',
-                'Create action plan'
-            ];
+            examples = ['Analyze current project status', 'Propose new feature ideas', 'Review documentation', 'Create action plan'];
         }
 
         examplesContainer.innerHTML = '';
@@ -630,7 +605,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Task modal controls
     const taskModal = document.getElementById('task-modal');
     document.getElementById('close-task-modal')?.addEventListener('click', () => {
         taskModal.style.display = 'none';
@@ -681,10 +655,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskModal.style.display = 'none';
                 currentTaskAgent = null;
                 
-                // Show success with task result
                 showTaskResult(result.data);
                 
-                // Refresh data
                 loadTasks();
                 loadAgents();
                 loadStats();
@@ -703,7 +675,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Load tasks
     async function loadTasks() {
         const container = document.getElementById('task-queue');
         if (!container) return;
@@ -1095,6 +1066,164 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); await createLog(userName, 'Deleted an announcement', 'Success'); setTimeout(renderCharts, 300); }
         } catch (error) { console.error('❌ Error:', error); }
     };
+
+    // ========================================
+    // EXPORT FUNCTIONS
+    // ========================================
+    async function downloadCSV(endpoint, filename) {
+        try {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Export failed');
+            }
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            await createLog(userName, `Exported ${filename}`, 'Success');
+        } catch (error) {
+            console.error('❌ Export error:', error);
+            alert('❌ Export failed. Please try again.');
+        }
+    }
+
+    document.getElementById('export-projects-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/projects', `ks1-projects-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-agents-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/agents', `ks1-agents-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-knowledge-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/knowledge', `ks1-knowledge-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-communications-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/communications', `ks1-communications-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-tasks-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/tasks', `ks1-tasks-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-logs-btn')?.addEventListener('click', () => {
+        downloadCSV('/export/activity-logs', `ks1-activity-logs-${Date.now()}.csv`);
+    });
+
+    document.getElementById('export-all-csv-btn')?.addEventListener('click', async () => {
+        try {
+            await downloadCSV('/export/projects', `ks1-projects-${Date.now()}.csv`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await downloadCSV('/export/agents', `ks1-agents-${Date.now()}.csv`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await downloadCSV('/export/knowledge', `ks1-knowledge-${Date.now()}.csv`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await downloadCSV('/export/communications', `ks1-communications-${Date.now()}.csv`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await downloadCSV('/export/tasks', `ks1-tasks-${Date.now()}.csv`);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await downloadCSV('/export/activity-logs', `ks1-activity-logs-${Date.now()}.csv`);
+            
+            alert('✅ All data exported successfully!');
+        } catch (error) {
+            console.error('❌ Export all error:', error);
+            alert('❌ Export failed. Please try again.');
+        }
+    });
+
+    document.getElementById('export-all-pdf-btn')?.addEventListener('click', async () => {
+        try {
+            const response = await fetch(`${API_URL}/export/all`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            if (!result.success) {
+                throw new Error('Failed to fetch data');
+            }
+            
+            const data = result.data;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFontSize(20);
+            doc.setTextColor(212, 175, 55);
+            doc.text('KS1 Command Center Report', 105, 20, { align: 'center' });
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated: ${new Date(data.generatedAt).toLocaleString()}`, 105, 30, { align: 'center' });
+            
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Summary', 20, 45);
+            
+            doc.setFontSize(10);
+            doc.text(`Total Projects: ${data.summary.totalProjects}`, 20, 55);
+            doc.text(`Total Agents: ${data.summary.totalAgents}`, 20, 62);
+            doc.text(`Total Knowledge Articles: ${data.summary.totalKnowledge}`, 20, 69);
+            doc.text(`Total Communications: ${data.summary.totalCommunications}`, 20, 76);
+            doc.text(`Total Tasks: ${data.summary.totalTasks}`, 20, 83);
+            doc.text(`Total Activities: ${data.summary.totalActivities}`, 20, 90);
+            
+            let yPos = 105;
+            doc.setFontSize(14);
+            doc.text('Projects', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(9);
+            data.projects.forEach(project => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(`• ${project.name} (${project.status})`, 25, yPos);
+                yPos += 5;
+                const descLines = doc.splitTextToSize(project.description, 160);
+                doc.text(descLines, 30, yPos);
+                yPos += descLines.length * 5 + 3;
+            });
+            
+            yPos += 10;
+            if (yPos > 250) {
+                doc.addPage();
+                yPos = 20;
+            }
+            doc.setFontSize(14);
+            doc.text('AI Agents', 20, yPos);
+            yPos += 10;
+            
+            doc.setFontSize(9);
+            data.agents.forEach(agent => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                doc.text(`• ${agent.name} - ${agent.role} (${agent.status})`, 25, yPos);
+                yPos += 7;
+            });
+            
+            doc.save(`ks1-command-center-report-${Date.now()}.pdf`);
+            
+            await createLog(userName, 'Generated PDF report', 'Success');
+            alert('✅ PDF report generated successfully!');
+        } catch (error) {
+            console.error('❌ PDF export error:', error);
+            alert('❌ PDF generation failed. Please try again.');
+        }
+    });
 
     // ========================================
     // MODAL LOGIC
