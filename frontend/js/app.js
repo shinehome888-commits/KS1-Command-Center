@@ -34,15 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashboardView = document.getElementById('dashboard-view');
     const userNameDisplay = document.getElementById('user-name-display');
 
-    // ✅ CONVERSATION STATE
     let currentConversationId = null;
     let conversationHistory = [];
+    let agentsData = []; // Store agents for task assignment
 
     if (token) {
         authView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userName;
-        loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); loadActivityLog(); loadStats();
+        loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); 
+        loadActivityLog(); loadStats(); loadTasks();
         loadConversationHistory();
         setTimeout(renderCharts, 500);
     } else {
@@ -50,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
         dashboardView.classList.add('hidden');
     }
 
+    // ========================================
+    // AUTHENTICATION
+    // ========================================
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
     
@@ -155,15 +159,19 @@ document.addEventListener('DOMContentLoaded', () => {
         performLogout();
     });
 
+    // ========================================
+    // STATS & CHARTS
+    // ========================================
     async function loadStats() {
         try {
-            const [projectsRes, agentsRes, knowledgeRes, logsRes, commsRes] = await Promise.all([
+            const [projectsRes, agentsRes, knowledgeRes, logsRes, commsRes, tasksRes] = await Promise.all([
                 fetch(`${API_URL}/projects`), fetch(`${API_URL}/agents`),
                 fetch(`${API_URL}/knowledge`), fetch(`${API_URL}/logs`),
-                fetch(`${API_URL}/communications`)
+                fetch(`${API_URL}/communications`),
+                fetch(`${API_URL}/tasks`, { headers: { 'Authorization': `Bearer ${token}` } })
             ]);
-            const [projectsResult, agentsResult, knowledgeResult, logsResult, commsResult] = await Promise.all([
-                projectsRes.json(), agentsRes.json(), knowledgeRes.json(), logsRes.json(), commsRes.json()
+            const [projectsResult, agentsResult, knowledgeResult, logsResult, commsResult, tasksResult] = await Promise.all([
+                projectsRes.json(), agentsRes.json(), knowledgeRes.json(), logsRes.json(), commsRes.json(), tasksRes.json()
             ]);
 
             animateCounter('stat-projects-count', projectsResult.success ? projectsResult.data.length : 0);
@@ -171,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
             animateCounter('stat-agents-count', agentsCount);
             document.getElementById('stat-agents-online').textContent = `${agentsResult.success ? agentsResult.data.filter(a => a.status === 'Online').length : 0} Online`;
             animateCounter('stat-knowledge-count', knowledgeResult.success ? knowledgeResult.data.length : 0);
-            animateCounter('stat-communications-count', commsResult.success ? commsResult.data.length : 0);
+            animateCounter('stat-tasks-count', tasksResult.success ? tasksResult.data.length : 0);
             animateCounter('stat-activity-count', logsResult.success ? logsResult.data.length : 0);
         } catch (error) { console.error('❌ Error loading stats:', error); }
     }
@@ -196,12 +204,9 @@ document.addEventListener('DOMContentLoaded', () => {
     async function renderCharts() {
         try {
             const [projectsRes, agentsRes, logsRes, commsRes] = await Promise.all([
-                fetch(`${API_URL}/projects`),
-                fetch(`${API_URL}/agents`),
-                fetch(`${API_URL}/logs`),
-                fetch(`${API_URL}/communications`)
+                fetch(`${API_URL}/projects`), fetch(`${API_URL}/agents`),
+                fetch(`${API_URL}/logs`), fetch(`${API_URL}/communications`)
             ]);
-
             const [projectsResult, agentsResult, logsResult, commsResult] = await Promise.all([
                 projectsRes.json(), agentsRes.json(), logsRes.json(), commsRes.json()
             ]);
@@ -210,9 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAgentsChart(agentsResult.data || []);
             renderActivityChart(logsResult.data || []);
             renderCommunicationsChart(commsResult.data || []);
-        } catch (error) {
-            console.error('❌ Error rendering charts:', error);
-        }
+        } catch (error) { console.error('❌ Error rendering charts:', error); }
     }
 
     function renderProjectsChart(projects) {
@@ -332,21 +335,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ========================================
+    // DATA LOADING
+    // ========================================
     async function loadAgents() {
         try {
             const response = await fetch(`${API_URL}/agents`);
             const result = await response.json();
             if (result.success && result.data.length > 0) {
+                agentsData = result.data; // Store for task assignment
                 const container = document.getElementById('agents-grid');
                 container.innerHTML = '';
                 result.data.forEach(agent => {
                     const card = document.createElement('div');
                     card.className = 'card agent-card';
                     card.innerHTML = `
-                        <button class="delete-btn" onclick="deleteAgent('${agent._id}')">Delete</button>
                         <div class="status-indicator ${agent.status.toLowerCase()}"></div>
-                        <h4>${agent.name}</h4><p class="role">${agent.role}</p><span class="status-text">${agent.status}</span>
+                        <h4>${agent.name}</h4>
+                        <p class="role">${agent.role}</p>
+                        <span class="status-text">${agent.status}</span>
+                        <span class="assign-task-hint">🎯 Click to assign task</span>
                     `;
+                    card.addEventListener('click', () => openTaskModal(agent));
                     container.appendChild(card);
                 });
             }
@@ -439,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, 100);
                 });
             } else {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">No communications yet. Post your first announcement!</p>';
+                container.innerHTML = '<p class="empty-state">No communications yet. Post your first announcement!</p>';
             }
         } catch (error) { console.error('❌ Error loading communications:', error); }
     }
@@ -515,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     container.appendChild(logItem);
                 });
             } else {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.5);">No activity logs yet.</p>';
+                container.innerHTML = '<p class="empty-state">No activity logs yet.</p>';
             }
         } catch (error) { console.error('❌ Error loading logs:', error); }
     }
@@ -530,123 +540,309 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
-    const setupModal = (modalId, addBtnId, closeBtnId, cancelBtnId, submitBtnId, endpoint, payloadFn, successMsg, reloadFn, btnLabel, clearFn) => {
-        const modal = document.getElementById(modalId);
-        const addBtn = document.getElementById(addBtnId);
-        const closeBtn = document.getElementById(closeBtnId);
-        const cancelBtn = document.getElementById(cancelBtnId);
-        const submitBtn = document.getElementById(submitBtnId);
+    // ========================================
+    // TASK ASSIGNMENT SYSTEM 🚀
+    // ========================================
+    let currentTaskAgent = null;
 
-        addBtn?.addEventListener('click', () => modal.style.display = 'block');
-        closeBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
-        cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
+    function openTaskModal(agent) {
+        currentTaskAgent = agent;
+        const modal = document.getElementById('task-modal');
+        document.getElementById('task-agent-name').textContent = agent.name;
+        
+        const agentInfo = document.getElementById('task-agent-info');
+        const agentEmoji = getAgentEmoji(agent.role);
+        agentInfo.innerHTML = `
+            <div class="agent-avatar">${agentEmoji}</div>
+            <div class="agent-details">
+                <h4>${agent.name}</h4>
+                <p>${agent.role} • Status: ${agent.status}</p>
+            </div>
+        `;
 
-        submitBtn?.addEventListener('click', async () => {
-            const payload = payloadFn();
-            if (!payload) return;
-            submitBtn.textContent = 'Saving...'; submitBtn.disabled = true;
-            try {
-                const res = await fetch(`${API_URL}${endpoint}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
-                    reloadFn(); await createLog(userName, successMsg, 'Success');
-                    setTimeout(renderCharts, 300);
-                } else { alert('❌ ' + result.message); }
-            } catch (error) { alert('❌ Network error.'); }
-            finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
-        });
-    };
+        // Load task examples based on agent role
+        loadTaskExamples(agent.role);
 
-    setupModal('agent-modal', 'add-agent-btn', 'close-agent-modal', 'cancel-agent-btn', 'submit-agent-btn', '/agents',
-        () => {
-            const n = document.getElementById('agent-name').value.trim();
-            const r = document.getElementById('agent-role').value.trim();
-            const s = document.getElementById('agent-status').value;
-            if (!n || !r) { alert('Fill name and role'); return null; }
-            return { name: n, role: r, status: s };
-        }, 'Agent deployed successfully!', loadAgents, 'Deploy Agent',
-        () => { document.getElementById('agent-name').value = ''; document.getElementById('agent-role').value = ''; }
-    );
+        // Clear form
+        document.getElementById('task-title').value = '';
+        document.getElementById('task-description').value = '';
+        document.getElementById('task-priority').value = 'Medium';
 
-    setupModal('project-modal', 'add-project-btn', 'close-modal', 'cancel-project-btn', 'submit-project-btn', '/projects',
-        () => {
-            const n = document.getElementById('project-name').value.trim();
-            const d = document.getElementById('project-description').value.trim();
-            const c = document.getElementById('project-category').value;
-            if (!n || !d) { alert('Fill name and description'); return null; }
-            return { name: n, description: d, category: c, status: 'Planning' };
-        }, 'Project created successfully!', loadProjects, 'Create Project',
-        () => { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
-    );
+        modal.style.display = 'block';
+    }
 
-    setupModal('knowledge-modal', 'add-knowledge-btn', 'close-knowledge-modal', 'cancel-knowledge-btn', 'submit-knowledge-btn', '/knowledge',
-        () => {
-            const t = document.getElementById('knowledge-title').value.trim();
-            const c = document.getElementById('knowledge-category').value;
-            const cnt = document.getElementById('knowledge-content').value.trim();
-            if (!t || !cnt) { alert('Fill title and content'); return null; }
-            return { title: t, category: c, content: cnt };
-        }, 'Knowledge article saved successfully!', loadKnowledge, 'Save Article',
-        () => { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
-    );
+    function getAgentEmoji(role) {
+        const roleLower = role.toLowerCase();
+        if (roleLower.includes('operations') || roleLower.includes('coordinator')) return '⚙️';
+        if (roleLower.includes('knowledge') || roleLower.includes('librarian')) return '📚';
+        if (roleLower.includes('builder') || roleLower.includes('engineer')) return '🔨';
+        return '🤖';
+    }
 
-    setupModal('communication-modal', 'add-communication-btn', 'close-communication-modal', 'cancel-communication-btn', 'submit-communication-btn', '/communications',
-        () => {
-            const t = document.getElementById('communication-title').value.trim();
-            const c = document.getElementById('communication-category').value;
-            const p = document.getElementById('communication-priority').value;
-            const cnt = document.getElementById('communication-content').value.trim();
-            if (!t || !cnt) { alert('Fill title and content'); return null; }
-            return { title: t, category: c, priority: p, content: cnt, author: userName };
-        }, 'Announcement posted successfully!', loadCommunications, 'Post Announcement',
-        () => { 
-            document.getElementById('communication-title').value = ''; 
-            document.getElementById('communication-content').value = '';
-            document.getElementById('communication-category').value = 'Announcement';
-            document.getElementById('communication-priority').value = 'Normal';
+    function loadTaskExamples(role) {
+        const examplesContainer = document.getElementById('task-examples');
+        const roleLower = role.toLowerCase();
+        let examples = [];
+
+        if (roleLower.includes('operations') || roleLower.includes('coordinator')) {
+            examples = [
+                'Schedule a dev team meeting',
+                'Coordinate project timeline',
+                'Optimize workflow process',
+                'Allocate resources for ShineGPT',
+                'Plan sprint for KS1 Wallet'
+            ];
+        } else if (roleLower.includes('knowledge') || roleLower.includes('librarian')) {
+            examples = [
+                'Research blockchain trends 2026',
+                'Analyze AI market opportunities',
+                'Compile Web3 documentation',
+                'Research African fintech landscape',
+                'Study DeFi protocols'
+            ];
+        } else if (roleLower.includes('builder') || roleLower.includes('engineer')) {
+            examples = [
+                'Design wallet smart contract',
+                'Build landing page for ShineGPT',
+                'Implement payment API',
+                'Fix authentication bug',
+                'Create database schema'
+            ];
+        } else {
+            examples = [
+                'Analyze current project status',
+                'Propose new feature ideas',
+                'Review documentation',
+                'Create action plan'
+            ];
         }
-    );
 
-    window.deleteAgent = async (id) => {
-        if (!confirm('Decommission this AI Agent?')) return;
+        examplesContainer.innerHTML = '';
+        examples.forEach(example => {
+            const chip = document.createElement('span');
+            chip.className = 'example-chip';
+            chip.textContent = example;
+            chip.addEventListener('click', () => {
+                document.getElementById('task-title').value = example;
+                document.getElementById('task-description').value = `Please execute this task: ${example}. Provide a detailed report with actionable outcomes.`;
+            });
+            examplesContainer.appendChild(chip);
+        });
+    }
+
+    // Task modal controls
+    const taskModal = document.getElementById('task-modal');
+    document.getElementById('close-task-modal')?.addEventListener('click', () => {
+        taskModal.style.display = 'none';
+        currentTaskAgent = null;
+    });
+    document.getElementById('cancel-task-btn')?.addEventListener('click', () => {
+        taskModal.style.display = 'none';
+        currentTaskAgent = null;
+    });
+
+    document.getElementById('submit-task-btn')?.addEventListener('click', async () => {
+        const title = document.getElementById('task-title').value.trim();
+        const description = document.getElementById('task-description').value.trim();
+        const priority = document.getElementById('task-priority').value;
+        const submitBtn = document.getElementById('submit-task-btn');
+
+        if (!title || !description) {
+            alert('Please fill in task title and description');
+            return;
+        }
+
+        if (!currentTaskAgent) {
+            alert('No agent selected');
+            return;
+        }
+
+        submitBtn.textContent = '🚀 Executing...';
+        submitBtn.disabled = true;
+
         try {
-            const res = await fetch(`${API_URL}/agents/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) { alert('✅ Agent decommissioned!'); loadAgents(); await createLog(userName, 'Decommissioned an AI Agent', 'Success'); setTimeout(renderCharts, 300); }
-        } catch (error) { console.error('❌ Error:', error); }
+            const response = await fetch(`${API_URL}/tasks`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    title,
+                    description,
+                    assignedAgent: currentTaskAgent._id,
+                    priority
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                taskModal.style.display = 'none';
+                currentTaskAgent = null;
+                
+                // Show success with task result
+                showTaskResult(result.data);
+                
+                // Refresh data
+                loadTasks();
+                loadAgents();
+                loadStats();
+                loadActivityLog();
+                
+                alert(`✅ Task assigned to ${result.data.agentName} and executed!`);
+            } else {
+                alert('❌ ' + result.message);
+            }
+        } catch (error) {
+            console.error('❌ Error creating task:', error);
+            alert('❌ Network error. Please try again.');
+        } finally {
+            submitBtn.textContent = '🚀 Execute Task';
+            submitBtn.disabled = false;
+        }
+    });
+
+    // Load tasks
+    async function loadTasks() {
+        const container = document.getElementById('task-queue');
+        if (!container) return;
+
+        container.innerHTML = '<div class="task-loading"><div class="task-loading-spinner"></div><p>Loading tasks...</p></div>';
+
+        try {
+            const response = await fetch(`${API_URL}/tasks`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                container.innerHTML = '';
+                result.data.forEach(task => {
+                    const taskItem = createTaskItem(task);
+                    container.appendChild(taskItem);
+                });
+            } else {
+                container.innerHTML = '<p class="empty-state">No tasks yet. Click on an AI agent above to assign your first task!</p>';
+            }
+        } catch (error) {
+            console.error('❌ Error loading tasks:', error);
+            container.innerHTML = '<p class="empty-state">Error loading tasks. Please refresh.</p>';
+        }
+    }
+
+    function createTaskItem(task) {
+        const item = document.createElement('div');
+        item.className = 'task-item';
+        
+        const statusClass = task.status.toLowerCase().replace(' ', '-');
+        const priorityClass = task.priority.toLowerCase();
+        const createdDate = new Date(task.createdAt).toLocaleString();
+        const agentEmoji = getAgentEmoji(task.agentRole);
+        
+        item.innerHTML = `
+            <div class="task-item-header">
+                <div class="task-item-title">${task.title}</div>
+                <div class="task-item-badges">
+                    <span class="task-status-badge ${statusClass}">${task.status}</span>
+                    <span class="task-priority-badge ${priorityClass}">${task.priority}</span>
+                </div>
+            </div>
+            <div class="task-item-description">${task.description}</div>
+            <div class="task-item-meta">
+                <span>${agentEmoji} <span class="task-agent-name">${task.agentName}</span> • ${createdDate}</span>
+                <div class="task-actions">
+                    ${task.result ? `<button class="task-action-btn" onclick="viewTaskResult('${task._id}')">📋 View Result</button>` : ''}
+                    <button class="task-action-btn delete" onclick="deleteTask('${task._id}')">🗑️ Delete</button>
+                </div>
+            </div>
+        `;
+        
+        return item;
+    }
+
+    window.viewTaskResult = async (taskId) => {
+        try {
+            const response = await fetch(`${API_URL}/tasks`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                const task = result.data.find(t => t._id === taskId);
+                if (task) {
+                    showTaskResult(task);
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error loading task result:', error);
+        }
     };
 
-    window.deleteProject = async (id) => {
-        if (!confirm('Delete this project?')) return;
+    function showTaskResult(task) {
+        const modal = document.getElementById('task-result-modal');
+        const content = document.getElementById('task-result-content');
+        
+        const statusClass = task.status.toLowerCase().replace(' ', '-');
+        const createdDate = new Date(task.createdAt).toLocaleString();
+        const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleString() : 'In progress';
+        
+        content.innerHTML = `
+            <div class="task-result-header">
+                <h4>${task.title}</h4>
+                <p>🤖 ${task.agentName} • ${task.agentRole}</p>
+                <p style="margin-top: 8px; font-size: 0.8rem;">
+                    Created: ${createdDate} | Completed: ${completedDate}
+                </p>
+                <p style="margin-top: 5px;">
+                    <span class="task-status-badge ${statusClass}">${task.status}</span>
+                    <span class="task-priority-badge ${task.priority.toLowerCase()}">${task.priority}</span>
+                </p>
+            </div>
+            <div style="margin-top: 15px;">
+                <h4 style="color: var(--gold); margin-bottom: 10px;">📋 Task Description:</h4>
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">${task.description}</p>
+                
+                <h4 style="color: var(--gold); margin-bottom: 10px;">✅ Agent's Report:</h4>
+                <div style="color: rgba(255,255,255,0.9); line-height: 1.7; white-space: pre-wrap;">${task.result || 'No result yet'}</div>
+            </div>
+        `;
+        
+        modal.style.display = 'block';
+    }
+
+    document.getElementById('close-task-result-modal')?.addEventListener('click', () => {
+        document.getElementById('task-result-modal').style.display = 'none';
+    });
+    document.getElementById('close-result-btn')?.addEventListener('click', () => {
+        document.getElementById('task-result-modal').style.display = 'none';
+    });
+
+    window.deleteTask = async (taskId) => {
+        if (!confirm('Delete this task?')) return;
         try {
-            const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) { alert('✅ Project deleted!'); loadProjects(); await createLog(userName, 'Deleted a project', 'Success'); setTimeout(renderCharts, 300); }
-        } catch (error) { console.error('❌ Error:', error); }
+            const response = await fetch(`${API_URL}/tasks/${taskId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            if (result.success) {
+                loadTasks();
+                loadStats();
+                await createLog(userName, 'Deleted a task', 'Success');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting task:', error);
+        }
     };
 
-    window.deleteKnowledge = async (id) => {
-        if (!confirm('Delete this knowledge article?')) return;
-        try {
-            const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
-        } catch (error) { console.error('❌ Error:', error); }
-    };
+    document.getElementById('refresh-tasks-btn')?.addEventListener('click', () => {
+        loadTasks();
+    });
 
-    window.deleteCommunication = async (id) => {
-        if (!confirm('Delete this announcement?')) return;
-        try {
-            const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); await createLog(userName, 'Deleted an announcement', 'Success'); setTimeout(renderCharts, 300); }
-        } catch (error) { console.error('❌ Error:', error); }
-    };
-
-    // ✅ CONVERSATION HISTORY FUNCTIONS
+    // ========================================
+    // CONVERSATION HISTORY
+    // ========================================
     async function loadConversationHistory() {
         if (!token) return;
         try {
@@ -708,7 +904,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const chatWindow = document.getElementById('chat-window');
                 chatWindow.innerHTML = '';
                 
-                // Show conversation title
                 const titleDisplay = document.getElementById('current-conversation-title');
                 const titleText = document.getElementById('current-title-text');
                 if (titleDisplay && titleText) {
@@ -716,7 +911,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     titleDisplay.classList.remove('hidden');
                 }
                 
-                // Render all messages
                 result.data.messages.forEach(msg => {
                     const msgDiv = document.createElement('div');
                     msgDiv.className = `chat-message ${msg.role === 'user' ? 'user' : 'bot'}`;
@@ -763,7 +957,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderConversationHistory();
     }
 
-    // ✅ CHAT HISTORY & ACTION BUTTONS
     document.getElementById('toggle-history-btn')?.addEventListener('click', () => {
         const history = document.getElementById('conversation-history');
         if (history) history.classList.toggle('hidden');
@@ -791,7 +984,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ✅ AI CHAT WITH CONVERSATION TRACKING
+    // ========================================
+    // AI CHAT
+    // ========================================
     const chatInput = document.getElementById('chat-input');
     const chatSend = document.getElementById('chat-send');
     const chatWindow = document.getElementById('chat-window');
@@ -840,11 +1035,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 botDiv.textContent = result.data.aiResponse;
                 await createLog('KS1 Assistant', `Responded to: "${message.substring(0, 30)}${message.length > 30 ? '...' : ''}"`, 'Success');
                 
-                // ✅ UPDATE CONVERSATION ID IF NEW
                 if (result.data.conversationId && !currentConversationId) {
                     currentConversationId = result.data.conversationId;
                     
-                    // Show conversation title
                     const titleDisplay = document.getElementById('current-conversation-title');
                     const titleText = document.getElementById('current-title-text');
                     if (titleDisplay && titleText && result.data.conversationTitle) {
@@ -852,7 +1045,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         titleDisplay.classList.remove('hidden');
                     }
                     
-                    // Refresh history list
                     await loadConversationHistory();
                 }
             } else {
@@ -874,10 +1066,111 @@ document.addEventListener('DOMContentLoaded', () => {
     chatSend?.addEventListener('click', sendMessage);
     chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
 
+    // ========================================
+    // DELETE FUNCTIONS
+    // ========================================
+    window.deleteProject = async (id) => {
+        if (!confirm('Delete this project?')) return;
+        try {
+            const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) { alert('✅ Project deleted!'); loadProjects(); await createLog(userName, 'Deleted a project', 'Success'); setTimeout(renderCharts, 300); }
+        } catch (error) { console.error('❌ Error:', error); }
+    };
+
+    window.deleteKnowledge = async (id) => {
+        if (!confirm('Delete this knowledge article?')) return;
+        try {
+            const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
+        } catch (error) { console.error('❌ Error:', error); }
+    };
+
+    window.deleteCommunication = async (id) => {
+        if (!confirm('Delete this announcement?')) return;
+        try {
+            const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); await createLog(userName, 'Deleted an announcement', 'Success'); setTimeout(renderCharts, 300); }
+        } catch (error) { console.error('❌ Error:', error); }
+    };
+
+    // ========================================
+    // MODAL LOGIC
+    // ========================================
+    const setupModal = (modalId, addBtnId, closeBtnId, cancelBtnId, submitBtnId, endpoint, payloadFn, successMsg, reloadFn, btnLabel, clearFn) => {
+        const modal = document.getElementById(modalId);
+        const addBtn = document.getElementById(addBtnId);
+        const closeBtn = document.getElementById(closeBtnId);
+        const cancelBtn = document.getElementById(cancelBtnId);
+        const submitBtn = document.getElementById(submitBtnId);
+
+        addBtn?.addEventListener('click', () => modal.style.display = 'block');
+        closeBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
+        cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
+
+        submitBtn?.addEventListener('click', async () => {
+            const payload = payloadFn();
+            if (!payload) return;
+            submitBtn.textContent = 'Saving...'; submitBtn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
+                    reloadFn(); await createLog(userName, successMsg, 'Success');
+                    setTimeout(renderCharts, 300);
+                } else { alert('❌ ' + result.message); }
+            } catch (error) { alert('❌ Network error.'); }
+            finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
+        });
+    };
+
+    setupModal('project-modal', 'add-project-btn', 'close-modal', 'cancel-project-btn', 'submit-project-btn', '/projects',
+        () => {
+            const n = document.getElementById('project-name').value.trim();
+            const d = document.getElementById('project-description').value.trim();
+            const c = document.getElementById('project-category').value;
+            if (!n || !d) { alert('Fill name and description'); return null; }
+            return { name: n, description: d, category: c, status: 'Planning' };
+        }, 'Project created successfully!', loadProjects, 'Create Project',
+        () => { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
+    );
+
+    setupModal('knowledge-modal', 'add-knowledge-btn', 'close-knowledge-modal', 'cancel-knowledge-btn', 'submit-knowledge-btn', '/knowledge',
+        () => {
+            const t = document.getElementById('knowledge-title').value.trim();
+            const c = document.getElementById('knowledge-category').value;
+            const cnt = document.getElementById('knowledge-content').value.trim();
+            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            return { title: t, category: c, content: cnt };
+        }, 'Knowledge article saved successfully!', loadKnowledge, 'Save Article',
+        () => { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
+    );
+
+    setupModal('communication-modal', 'add-communication-btn', 'close-communication-modal', 'cancel-communication-btn', 'submit-communication-btn', '/communications',
+        () => {
+            const t = document.getElementById('communication-title').value.trim();
+            const c = document.getElementById('communication-category').value;
+            const p = document.getElementById('communication-priority').value;
+            const cnt = document.getElementById('communication-content').value.trim();
+            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            return { title: t, category: c, priority: p, content: cnt, author: userName };
+        }, 'Announcement posted successfully!', loadCommunications, 'Post Announcement',
+        () => { 
+            document.getElementById('communication-title').value = ''; 
+            document.getElementById('communication-content').value = '';
+            document.getElementById('communication-category').value = 'Announcement';
+            document.getElementById('communication-priority').value = 'Normal';
+        }
+    );
+
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
-            if (e.target.id === 'agent-modal') { document.getElementById('agent-name').value = ''; document.getElementById('agent-role').value = ''; }
             if (e.target.id === 'project-modal') { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
             if (e.target.id === 'knowledge-modal') { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
             if (e.target.id === 'communication-modal') { 
@@ -887,6 +1180,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('communication-priority').value = 'Normal';
             }
             if (e.target.id === 'knowledge-view-modal') { currentViewArticleId = null; }
+            if (e.target.id === 'task-modal') { currentTaskAgent = null; }
         }
     });
 
