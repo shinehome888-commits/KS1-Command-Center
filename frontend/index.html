@@ -100,11 +100,10 @@
                     </div>
                 </section>
 
-                <!-- AGENTS -->
+                <!-- AGENTS WITH MEMORY INDICATORS -->
                 <section class="section-card">
                     <div class="section-header">
                         <h3>🤖 AI Workforce <span class="ai-badge">Click to Assign Tasks</span></h3>
-                        <button id="export-agents-btn" class="btn-secondary btn-small">📥 Export</button>
                     </div>
                     <div class="grid-layout" id="agents-grid"></div>
                 </section>
@@ -207,12 +206,13 @@
         </div>
     </div>
 
-    <!-- MODALS -->
+    <!-- TASK MODAL -->
     <div id="task-modal" class="modal">
         <div class="modal-content task-modal-content">
             <div class="modal-header"><h2>🤖 Assign Task to <span id="task-agent-name">Agent</span></h2><button class="modal-close" id="close-task-modal">&times;</button></div>
             <div class="modal-body">
                 <div id="task-agent-info" class="task-agent-info"></div>
+                <div id="agent-memory-preview" class="agent-memory-preview"></div>
                 <div class="form-group"><label>Task Title</label><input type="text" id="task-title" class="form-input" placeholder="e.g., Schedule dev team meeting"></div>
                 <div class="form-group"><label>Task Details</label><textarea id="task-description" class="form-input" rows="5" placeholder="Describe what you want the agent to do..."></textarea></div>
                 <div class="form-group"><label>Priority</label>
@@ -226,6 +226,7 @@
         </div>
     </div>
 
+    <!-- TASK RESULT MODAL -->
     <div id="task-result-modal" class="modal">
         <div class="modal-content task-result-modal-content">
             <div class="modal-header"><h2>📋 Task Result</h2><button class="modal-close" id="close-task-result-modal">&times;</button></div>
@@ -234,6 +235,25 @@
         </div>
     </div>
 
+    <!-- AGENT MEMORY MODAL -->
+    <div id="agent-memory-modal" class="modal">
+        <div class="modal-content memory-modal-content">
+            <div class="modal-header">
+                <h2>🧠 <span id="memory-agent-name">Agent</span> Memory</h2>
+                <button class="modal-close" id="close-memory-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="memory-agent-stats" class="memory-agent-stats"></div>
+                <div id="memory-list" class="memory-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="clear-agent-memories-btn" class="btn-danger">🗑️ Clear All Memories</button>
+                <button id="close-memory-btn" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTHER MODALS -->
     <div id="project-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h2>Create New Project</h2><button class="modal-close" id="close-modal">&times;</button></div>
