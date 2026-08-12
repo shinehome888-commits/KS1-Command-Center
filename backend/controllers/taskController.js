@@ -2,6 +2,8 @@ const Task = require('../models/Task');
 const Agent = require('../models/Agent');
 const { callDeepSeek } = require('../services/aiService');
 const ActivityLog = require('../models/ActivityLog');
+const { saveMemory, getSimilarMemories } = require('./memoryController');
+const AgentMemory = require('../models/AgentMemory');
 
 const getUserTasks = async (req, res) => {
     try {
@@ -28,7 +30,25 @@ const getAgentTasks = async (req, res) => {
     }
 };
 
-const buildSpecializedPrompt = (agent, title, description) => {
+const buildSpecializedPrompt = (agent, title, description, similarMemories) => {
+    let memoryContext = '';
+    
+    if (similarMemories && similarMemories.length > 0) {
+        memoryContext = `\n\n=== RELEVANT PAST MEMORIES (${similarMemories.length} found) ===\n`;
+        memoryContext += `You have memory of similar past tasks. Reference them to provide better, more informed responses:\n\n`;
+        
+        similarMemories.forEach((memory, index) => {
+            memoryContext += `Memory ${index + 1} (${memory.status} on ${new Date(memory.createdAt).toLocaleDateString()}):\n`;
+            memoryContext += `Task: "${memory.taskTitle}"\n`;
+            memoryContext += `Previous Result: ${memory.taskResult.substring(0, 400)}${memory.taskResult.length > 400 ? '...' : ''}\n`;
+            memoryContext += `---\n`;
+        });
+        
+        memoryContext += `\nINSTRUCTION: Build upon your past work. Reference previous results when relevant. Improve upon past approaches. Avoid repeating mistakes.\n`;
+    } else {
+        memoryContext = `\n\n=== MEMORY STATUS ===\nThis is a new type of task for you. No relevant past memories found. Approach this task with fresh perspective.\n`;
+    }
+    
     const baseContext = `You are ${agent.name}, serving as ${agent.role} at KS1 Empire Global Foundation (KS1EGF).
 
 KS1EGF Mission: To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.
@@ -41,6 +61,7 @@ Active Projects:
 YOUR TASK:
 Title: ${title}
 Details: ${description}
+${memoryContext}
 
 `;
 
@@ -95,7 +116,26 @@ const createAndExecuteTask = async (req, res) => {
 
         console.log(`🤖 Executing task with ${agent.name} (${agent.role})`);
         
-        const specializedPrompt = buildSpecializedPrompt(agent, title, description);
+        // ✅ FIND SIMILAR MEMORIES
+        let similarMemories = [];
+        try {
+            const keywords = extractKeywords(title + ' ' + description);
+            if (keywords.length > 0) {
+                similarMemories = await AgentMemory.find({
+                    agentId: agent._id,
+                    status: 'Completed',
+                    $or: [
+                        { keywords: { $in: keywords } },
+                        { taskTitle: { $regex: keywords.join('|'), $options: 'i' } }
+                    ]
+                }).sort({ createdAt: -1 }).limit(5);
+            }
+            console.log(`💾 Found ${similarMemories.length} relevant memories for this task`);
+        } catch (memError) {
+            console.error('Memory lookup error:', memError);
+        }
+        
+        const specializedPrompt = buildSpecializedPrompt(agent, title, description, similarMemories);
         const aiResult = await callDeepSeek(specializedPrompt);
 
         let taskResult;
@@ -121,21 +161,45 @@ const createAndExecuteTask = async (req, res) => {
             { new: true }
         );
 
+        // ✅ SAVE TO AGENT MEMORY
+        await saveMemory(
+            agent._id,
+            agent.name,
+            title,
+            description,
+            taskResult,
+            taskStatus,
+            req.user.id
+        );
+
         await ActivityLog.create({
             actor: agent.name,
-            action: `Completed task: "${title}"`,
+            action: `Completed task: "${title}"${similarMemories.length > 0 ? ` (referenced ${similarMemories.length} past memories)` : ''}`,
             status: taskStatus === 'Completed' ? 'Success' : 'Failed'
         });
 
         res.status(201).json({ 
             success: true, 
             message: 'Task executed successfully',
-            data: updatedTask 
+            data: updatedTask,
+            memoryUsed: similarMemories.length
         });
     } catch (error) {
         console.error('Create task error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
+};
+
+// Helper function (duplicated here to avoid circular dependency)
+const extractKeywords = (text) => {
+    const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very']);
+    
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 3 && !stopWords.has(word))
+        .slice(0, 15);
 };
 
 const deleteTask = async (req, res) => {
