@@ -29,7 +29,8 @@ app.use('/api/knowledge', require('./routes/knowledgeRoutes'));
 app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/communications', require('./routes/communicationRoutes'));
 app.use('/api/conversations', require('./routes/conversationRoutes'));
-app.use('/api/tasks', require('./routes/taskRoutes')); // NEW: Task System
+app.use('/api/tasks', require('./routes/taskRoutes'));
+app.use('/api/export', require('./routes/exportRoutes')); // NEW: Export System
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // AI Chat Route with Optional Authentication
