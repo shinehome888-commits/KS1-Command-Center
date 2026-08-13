@@ -676,7 +676,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error:', error); }
     });
 
-    // ✅ FIXED: Article verification toggle
     document.getElementById('toggle-verify-btn')?.addEventListener('click', async () => {
         if (!currentViewArticleId) return;
         
@@ -699,8 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const newVerifiedState = !article.isVerified;
             
-            console.log('🔄 Toggling verification:', article.title, 'to', newVerifiedState);
-            
             const res = await fetch(`${API_URL}/knowledge/${currentViewArticleId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -708,7 +705,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             const result = await res.json();
-            console.log('✅ Update response:', result);
             
             if (result.success) {
                 const statusText = newVerifiedState 
@@ -1664,7 +1660,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ========================================
-    // MODAL LOGIC
+    // MODAL LOGIC (FIXED - Defensive Coding)
     // ========================================
     const setupModal = (modalId, addBtnId, closeBtnId, cancelBtnId, submitBtnId, endpoint, payloadFn, successMsg, reloadFn, btnLabel, clearFn) => {
         const modal = document.getElementById(modalId);
@@ -1673,15 +1669,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const cancelBtn = document.getElementById(cancelBtnId);
         const submitBtn = document.getElementById(submitBtnId);
 
-        addBtn?.addEventListener('click', () => modal.style.display = 'block');
-        closeBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
-        cancelBtn?.addEventListener('click', () => { modal.style.display = 'none'; clearFn(); });
+        if (!modal || !addBtn || !submitBtn) {
+            console.warn('⚠️ Modal elements not found for:', modalId);
+            return;
+        }
 
-        submitBtn?.addEventListener('click', async () => {
-            const payload = payloadFn();
+        addBtn.addEventListener('click', () => modal.style.display = 'block');
+        if (closeBtn) closeBtn.addEventListener('click', () => { modal.style.display = 'none'; if (clearFn) clearFn(); });
+        if (cancelBtn) cancelBtn.addEventListener('click', () => { modal.style.display = 'none'; if (clearFn) clearFn(); });
+
+        submitBtn.addEventListener('click', async () => {
+            let payload = null;
+            try {
+                payload = payloadFn();
+            } catch (err) {
+                console.error('❌ Payload error:', err);
+                alert('❌ Form error. Please refresh the page and try again.');
+                return;
+            }
             if (!payload) return;
             const originalText = submitBtn.textContent;
-            submitBtn.textContent = '✨ Enriching...';
+            submitBtn.textContent = '⏳ Saving...';
             submitBtn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, {
@@ -1691,16 +1699,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.success) {
                     alert(`✅ ${successMsg}`); 
                     modal.style.display = 'none'; 
-                    clearFn();
+                    if (clearFn) clearFn();
                     reloadFn(); 
                     loadKnowledgeInsights();
                     loadStats();
-                    await createLog(userName, `Added knowledge: "${payload.title}"`, 'Success');
+                    await createLog(userName, `${successMsg}`, 'Success');
                 } else { 
                     alert('❌ ' + result.message); 
                 }
             } catch (error) { 
-                alert('❌ Network error.'); 
+                console.error('❌ Network error:', error);
+                alert('❌ Network error. Please try again.'); 
             } finally { 
                 submitBtn.textContent = originalText || btnLabel;
                 submitBtn.disabled = false; 
@@ -1710,53 +1719,109 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setupModal('project-modal', 'add-project-btn', 'close-modal', 'cancel-project-btn', 'submit-project-btn', '/projects',
         () => {
-            const n = document.getElementById('project-name').value.trim();
-            const d = document.getElementById('project-description').value.trim();
-            const c = document.getElementById('project-category').value;
-            if (!n || !d) { alert('Fill name and description'); return null; }
+            const nameEl = document.getElementById('project-name');
+            const descEl = document.getElementById('project-description');
+            const catEl = document.getElementById('project-category');
+            
+            if (!nameEl || !descEl || !catEl) {
+                alert('❌ Form not ready. Please refresh the page.');
+                return null;
+            }
+            
+            const n = nameEl.value.trim();
+            const d = descEl.value.trim();
+            const c = catEl.value;
+            if (!n || !d) { alert('Please fill in name and description'); return null; }
             return { name: n, description: d, category: c, status: 'Planning' };
         }, 'Project created successfully!', loadProjects, 'Create Project',
-        () => { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
+        () => { 
+            const n = document.getElementById('project-name');
+            const d = document.getElementById('project-description');
+            if (n) n.value = '';
+            if (d) d.value = '';
+        }
     );
 
     setupModal('knowledge-modal', 'add-knowledge-btn', 'close-knowledge-modal', 'cancel-knowledge-btn', 'submit-knowledge-btn', '/knowledge',
         () => {
-            const t = document.getElementById('knowledge-title').value.trim();
-            const c = document.getElementById('knowledge-category').value;
-            const cnt = document.getElementById('knowledge-content').value.trim();
-            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            const titleEl = document.getElementById('knowledge-title');
+            const catEl = document.getElementById('knowledge-category');
+            const contentEl = document.getElementById('knowledge-content');
+            
+            if (!titleEl || !catEl || !contentEl) {
+                alert('❌ Form not ready. Please refresh the page.');
+                return null;
+            }
+            
+            const t = titleEl.value.trim();
+            const c = catEl.value;
+            const cnt = contentEl.value.trim();
+            if (!t || !cnt) { alert('Please fill in title and content'); return null; }
             return { title: t, category: c, content: cnt };
         }, 'Knowledge article saved and enriched by AI!', loadKnowledge, '✨ Save & Enrich',
-        () => { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
+        () => { 
+            const t = document.getElementById('knowledge-title');
+            const c = document.getElementById('knowledge-content');
+            if (t) t.value = '';
+            if (c) c.value = '';
+        }
     );
 
     setupModal('communication-modal', 'add-communication-btn', 'close-communication-modal', 'cancel-communication-btn', 'submit-communication-btn', '/communications',
         () => {
-            const t = document.getElementById('communication-title').value.trim();
-            const c = document.getElementById('communication-category').value;
-            const p = document.getElementById('communication-priority').value;
-            const cnt = document.getElementById('communication-content').value.trim();
-            if (!t || !cnt) { alert('Fill title and content'); return null; }
+            const titleEl = document.getElementById('communication-title');
+            const catEl = document.getElementById('communication-category');
+            const priEl = document.getElementById('communication-priority');
+            const cntEl = document.getElementById('communication-content');
+            
+            if (!titleEl || !catEl || !priEl || !cntEl) {
+                alert('❌ Form not ready. Please refresh the page.');
+                return null;
+            }
+            
+            const t = titleEl.value.trim();
+            const c = catEl.value;
+            const p = priEl.value;
+            const cnt = cntEl.value.trim();
+            if (!t || !cnt) { alert('Please fill in title and content'); return null; }
             return { title: t, category: c, priority: p, content: cnt, author: userName };
         }, 'Announcement posted successfully!', loadCommunications, 'Post Announcement',
         () => { 
-            document.getElementById('communication-title').value = ''; 
-            document.getElementById('communication-content').value = '';
-            document.getElementById('communication-category').value = 'Announcement';
-            document.getElementById('communication-priority').value = 'Normal';
+            const t = document.getElementById('communication-title');
+            const c = document.getElementById('communication-content');
+            const cat = document.getElementById('communication-category');
+            const p = document.getElementById('communication-priority');
+            if (t) t.value = '';
+            if (c) c.value = '';
+            if (cat) cat.value = 'Announcement';
+            if (p) p.value = 'Normal';
         }
     );
 
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             e.target.style.display = 'none';
-            if (e.target.id === 'project-modal') { document.getElementById('project-name').value = ''; document.getElementById('project-description').value = ''; }
-            if (e.target.id === 'knowledge-modal') { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
+            if (e.target.id === 'project-modal') { 
+                const n = document.getElementById('project-name');
+                const d = document.getElementById('project-description');
+                if (n) n.value = '';
+                if (d) d.value = '';
+            }
+            if (e.target.id === 'knowledge-modal') { 
+                const t = document.getElementById('knowledge-title');
+                const c = document.getElementById('knowledge-content');
+                if (t) t.value = '';
+                if (c) c.value = '';
+            }
             if (e.target.id === 'communication-modal') { 
-                document.getElementById('communication-title').value = ''; 
-                document.getElementById('communication-content').value = '';
-                document.getElementById('communication-category').value = 'Announcement';
-                document.getElementById('communication-priority').value = 'Normal';
+                const t = document.getElementById('communication-title');
+                const c = document.getElementById('communication-content');
+                const cat = document.getElementById('communication-category');
+                const p = document.getElementById('communication-priority');
+                if (t) t.value = '';
+                if (c) c.value = '';
+                if (cat) cat.value = 'Announcement';
+                if (p) p.value = 'Normal';
             }
             if (e.target.id === 'knowledge-view-modal') { currentViewArticleId = null; }
             if (e.target.id === 'task-modal') { currentTaskAgent = null; }
