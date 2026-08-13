@@ -1,26 +1,37 @@
 const ActivityLog = require('../models/ActivityLog');
 
-// @desc    Get all activity logs (newest first)
-// @route   GET /api/logs
-const getLogs = async (req, res) => {
+const getAllLogs = async (req, res) => {
     try {
-        const logs = await ActivityLog.find().sort({ createdAt: -1 }).limit(20);
-        res.status(200).json({ success: true, data: logs });
+        const logs = await ActivityLog.find().sort({ createdAt: -1 });
+        res.json({ success: true, data: logs });
     } catch (error) {
+        console.error('Get logs error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// @desc    Create a new activity log
-// @route   POST /api/logs
 const createLog = async (req, res) => {
     try {
         const { actor, action, status } = req.body;
-        const log = await ActivityLog.create({ actor, action, status });
+        
+        if (!actor || !action) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please provide actor and action'
+            });
+        }
+
+        const log = await ActivityLog.create({
+            actor,
+            action,
+            status: status || 'Success'
+        });
+
         res.status(201).json({ success: true, data: log });
     } catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        console.error('Create log error:', error);
+        res.status(500).json({ success: false, message: error.message });
     }
 };
 
-module.exports = { getLogs, createLog };
+module.exports = { getAllLogs, createLog };
