@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KS1 Command Center</title>
-    <link rel="stylesheet" href="css/style.css?v=3">
+    <link rel="stylesheet" href="css/style.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -67,6 +67,7 @@
                     </div>
                 </header>
 
+                <!-- STATS (Always visible) -->
                 <section class="stats-grid" id="stats-grid">
                     <div class="stat-card stat-projects"><div class="stat-icon">📊</div><div class="stat-info"><h2 id="stat-projects-count">0</h2><p>Total Projects</p></div></div>
                     <div class="stat-card stat-agents"><div class="stat-icon">🤖</div><div class="stat-info"><h2 id="stat-agents-count">0</h2><p>AI Agents</p><span class="stat-sub" id="stat-agents-online">0 Online</span></div></div>
@@ -75,132 +76,225 @@
                     <div class="stat-card stat-activity"><div class="stat-icon">📝</div><div class="stat-info"><h2 id="stat-activity-count">0</h2><p>Total Activities</p></div></div>
                 </section>
 
-                <section class="section-card export-section">
-                    <div class="section-header"><h3>📊 Export Dashboard <span class="ai-badge">Generate Reports</span></h3></div>
-                    <div class="export-options">
-                        <button id="export-all-csv-btn" class="export-btn"><span class="export-icon">📥</span><span class="export-text">Export All Data (CSV)</span><span class="export-desc">Download comprehensive CSV files</span></button>
-                        <button id="export-all-pdf-btn" class="export-btn"><span class="export-icon">📄</span><span class="export-text">Generate PDF Report</span><span class="export-desc">Professional PDF with charts</span></button>
+                <!-- KNOWLEDGE INSIGHTS -->
+                <section class="section-card knowledge-insights-section collapsible-section">
+                    <div class="section-header">
+                        <h3>🧠 Knowledge Brain Insights</h3>
+                        <button class="toggle-btn 3d-btn" data-target="insights-content">
+                            <span class="btn-text">View Insights</span>
+                            <span class="btn-icon">▼</span>
+                        </button>
+                    </div>
+                    <div id="insights-content" class="collapsible-content hidden">
+                        <div class="insights-grid" id="knowledge-insights">
+                            <div class="insight-card"><div class="insight-icon">📚</div><div class="insight-value" id="insight-total">0</div><div class="insight-label">Total Articles</div></div>
+                            <div class="insight-card"><div class="insight-icon">✅</div><div class="insight-value" id="insight-verified">0</div><div class="insight-label">Verified Truths</div></div>
+                            <div class="insight-card"><div class="insight-icon">🔥</div><div class="insight-value" id="insight-usage">0</div><div class="insight-label">AI References</div></div>
+                        </div>
                     </div>
                 </section>
 
-                <section class="section-card">
-                    <div class="section-header"><h3>🤖 AI Workforce <span class="ai-badge">Click to Assign Tasks</span></h3></div>
-                    <div class="grid-layout" id="agents-grid"></div>
+                <!-- AI WORKFORCE -->
+                <section class="section-card collapsible-section">
+                    <div class="section-header">
+                        <h3>🤖 AI Workforce</h3>
+                        <button class="toggle-btn 3d-btn" data-target="agents-content">
+                            <span class="btn-text">View AI Agents</span>
+                            <span class="btn-icon">▼</span>
+                        </button>
+                    </div>
+                    <div id="agents-content" class="collapsible-content hidden">
+                        <div class="grid-layout" id="agents-grid"></div>
+                    </div>
                 </section>
 
-                <section class="section-card">
+                <!-- TASK QUEUE -->
+                <section class="section-card collapsible-section">
                     <div class="section-header">
                         <h3>📋 Task Queue</h3>
                         <div class="section-actions">
                             <button id="export-tasks-btn" class="btn-secondary btn-small">📥 Export</button>
-                            <button id="refresh-tasks-btn" class="btn-secondary btn-small">🔄 Refresh</button>
+                            <button class="toggle-btn 3d-btn" data-target="tasks-content">
+                                <span class="btn-text">View Tasks</span>
+                                <span class="btn-icon">▼</span>
+                            </button>
                         </div>
                     </div>
-                    <div id="task-queue" class="task-queue"><p class="empty-state">No tasks yet. Assign a task to an agent above!</p></div>
-                </section>
-
-                <section class="section-card charts-section">
-                    <h3>📊 Analytics Dashboard <span class="ai-badge">Live Data</span></h3>
-                    <div class="charts-grid">
-                        <div class="chart-card"><h4>Projects Status</h4><div class="chart-container"><canvas id="projectsChart"></canvas></div></div>
-                        <div class="chart-card"><h4>AI Agent Status</h4><div class="chart-container"><canvas id="agentsChart"></canvas></div></div>
-                        <div class="chart-card"><h4>Recent Activity</h4><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
-                        <div class="chart-card"><h4>Communications by Category</h4><div class="chart-container"><canvas id="communicationsChart"></canvas></div></div>
+                    <div id="tasks-content" class="collapsible-content hidden">
+                        <div id="task-queue" class="task-queue"><p class="empty-state">No tasks yet. Assign a task to an agent above!</p></div>
+                        <button id="refresh-tasks-btn" class="btn-secondary btn-small" style="margin-top: 10px;">🔄 Refresh</button>
                     </div>
                 </section>
 
-                <section class="section-card mission-section">
-                    <h3>Our Mission</h3>
-                    <p>To empower humanity through technology, education, artificial intelligence, blockchain, Web3, and digital transformation.</p>
+                <!-- ANALYTICS -->
+                <section class="section-card collapsible-section">
+                    <div class="section-header">
+                        <h3>📊 Analytics Dashboard</h3>
+                        <button class="toggle-btn 3d-btn" data-target="charts-content">
+                            <span class="btn-text">View Charts</span>
+                            <span class="btn-icon">▼</span>
+                        </button>
+                    </div>
+                    <div id="charts-content" class="collapsible-content hidden">
+                        <div class="charts-grid">
+                            <div class="chart-card"><h4>Projects Status</h4><div class="chart-container"><canvas id="projectsChart"></canvas></div></div>
+                            <div class="chart-card"><h4>AI Agent Status</h4><div class="chart-container"><canvas id="agentsChart"></canvas></div></div>
+                            <div class="chart-card"><h4>Recent Activity</h4><div class="chart-container"><canvas id="activityChart"></canvas></div></div>
+                            <div class="chart-card"><h4>Communications by Category</h4><div class="chart-container"><canvas id="communicationsChart"></canvas></div></div>
+                        </div>
+                    </div>
                 </section>
 
-                <section class="section-card">
+                <!-- EXPORT DASHBOARD -->
+                <section class="section-card export-section collapsible-section">
+                    <div class="section-header">
+                        <h3>📊 Export Dashboard</h3>
+                        <button class="toggle-btn 3d-btn" data-target="export-content">
+                            <span class="btn-text">View Export</span>
+                            <span class="btn-icon">▼</span>
+                        </button>
+                    </div>
+                    <div id="export-content" class="collapsible-content hidden">
+                        <div class="export-options">
+                            <button id="export-all-csv-btn" class="export-btn"><span class="export-icon">📥</span><span class="export-text">Export All Data (CSV)</span><span class="export-desc">Download comprehensive CSV files</span></button>
+                            <button id="export-all-pdf-btn" class="export-btn"><span class="export-icon">📄</span><span class="export-text">Generate PDF Report</span><span class="export-desc">Professional PDF with charts</span></button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- PROJECTS -->
+                <section class="section-card collapsible-section">
                     <div class="section-header">
                         <h3>Active Projects</h3>
                         <div class="section-actions">
                             <button id="export-projects-btn" class="btn-secondary btn-small">📥 Export</button>
-                            <button id="add-project-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Add Project</span></button>
+                            <button class="toggle-btn 3d-btn" data-target="projects-content">
+                                <span class="btn-text">View Projects</span>
+                                <span class="btn-icon">▼</span>
+                            </button>
                         </div>
                     </div>
-                    <div class="grid-layout" id="projects-grid"></div>
-                </section>
-
-                <!-- ✅ KNOWLEDGE INSIGHTS (NEW) -->
-                <section class="section-card knowledge-insights-section">
-                    <div class="section-header"><h3>🧠 Knowledge Brain Insights</h3></div>
-                    <div class="insights-grid" id="knowledge-insights">
-                        <div class="insight-card">
-                            <div class="insight-icon">📚</div>
-                            <div class="insight-value" id="insight-total">0</div>
-                            <div class="insight-label">Total Articles</div>
-                        </div>
-                        <div class="insight-card">
-                            <div class="insight-icon">✅</div>
-                            <div class="insight-value" id="insight-verified">0</div>
-                            <div class="insight-label">Verified Truths</div>
-                        </div>
-                        <div class="insight-card">
-                            <div class="insight-icon">🔥</div>
-                            <div class="insight-value" id="insight-usage">0</div>
-                            <div class="insight-label">AI References</div>
-                        </div>
+                    <div id="projects-content" class="collapsible-content hidden">
+                        <div class="grid-layout" id="projects-grid"></div>
+                        <button id="add-project-btn" class="btn-primary" style="margin-top: 15px;"><span class="btn-icon">+</span> <span class="btn-text">Add Project</span></button>
                     </div>
                 </section>
 
-                <section class="section-card">
+                <!-- KNOWLEDGE WITH SEARCH -->
+                <section class="section-card collapsible-section">
                     <div class="section-header">
-                        <h3>Knowledge Base <span class="ai-badge">🧠 AI-Enriched</span></h3>
+                        <h3>🧠 Knowledge Base</h3>
                         <div class="section-actions">
                             <button id="export-knowledge-btn" class="btn-secondary btn-small">📥 Export</button>
-                            <button id="add-knowledge-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Add Article</span></button>
+                            <button class="toggle-btn 3d-btn" data-target="knowledge-content">
+                                <span class="btn-text">View Knowledge</span>
+                                <span class="btn-icon">▼</span>
+                            </button>
                         </div>
                     </div>
-                    <div class="grid-layout" id="knowledge-grid"></div>
+                    <div id="knowledge-content" class="collapsible-content hidden">
+                        <div class="search-filter-container">
+                            <div class="search-box">
+                                <input type="text" id="knowledge-search" class="search-input" placeholder="🔍 Search articles by title, tags, or content...">
+                            </div>
+                            <div class="filter-box">
+                                <select id="knowledge-category-filter" class="filter-select">
+                                    <option value="">All Categories</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Blockchain">Blockchain</option>
+                                    <option value="AI">AI</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Research">Research</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <select id="knowledge-verified-filter" class="filter-select">
+                                    <option value="">All Status</option>
+                                    <option value="verified">✅ Verified Only</option>
+                                    <option value="unverified">Unverified Only</option>
+                                </select>
+                                <select id="knowledge-sort" class="filter-select">
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                    <option value="most-used">Most Used</option>
+                                    <option value="title">Alphabetical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-layout" id="knowledge-grid"></div>
+                        <button id="add-knowledge-btn" class="btn-primary" style="margin-top: 15px;"><span class="btn-icon">+</span> <span class="btn-text">Add Article</span></button>
+                    </div>
                 </section>
 
-                <section class="section-card">
+                <!-- COMMUNICATIONS -->
+                <section class="section-card collapsible-section">
                     <div class="section-header">
-                        <h3>Communications Hub 📢</h3>
+                        <h3>📢 Communications Hub</h3>
                         <div class="section-actions">
                             <button id="export-communications-btn" class="btn-secondary btn-small">📥 Export</button>
-                            <button id="add-communication-btn" class="btn-primary"><span class="btn-icon">+</span> <span class="btn-text">Post Announcement</span></button>
+                            <button class="toggle-btn 3d-btn" data-target="communications-content">
+                                <span class="btn-text">View Communications</span>
+                                <span class="btn-icon">▼</span>
+                            </button>
                         </div>
                     </div>
-                    <div class="grid-layout" id="communications-grid"></div>
-                </section>
-
-                <section class="section-card ai-chat-section">
-                    <div class="chat-header-row">
-                        <h3>💬 KS1 Assistant <span class="ai-badge">🧠 AI Powered</span></h3>
-                        <div class="chat-actions">
-                            <button id="new-conversation-btn" class="btn-secondary btn-small">➕ New Chat</button>
-                            <button id="toggle-history-btn" class="btn-secondary btn-small">📜 History</button>
-                        </div>
-                    </div>
-                    <div id="conversation-history" class="conversation-history hidden">
-                        <div class="history-header"><h4>💬 Conversation History</h4><button id="clear-all-history-btn" class="btn-danger btn-small">Clear All</button></div>
-                        <div id="history-list" class="history-list"><p class="history-empty">No conversations yet. Start chatting!</p></div>
-                    </div>
-                    <div id="current-conversation-title" class="current-conversation-title hidden"><span>💬 </span><span id="current-title-text"></span></div>
-                    <div class="chat-window" id="chat-window"><div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div></div>
-                    <div class="chat-input-area">
-                        <input type="text" id="chat-input" class="chat-input" placeholder="Ask the KS1 Assistant...">
-                        <button id="chat-send" class="btn-primary">Send</button>
+                    <div id="communications-content" class="collapsible-content hidden">
+                        <div class="grid-layout" id="communications-grid"></div>
+                        <button id="add-communication-btn" class="btn-primary" style="margin-top: 15px;"><span class="btn-icon">+</span> <span class="btn-text">Post Announcement</span></button>
                     </div>
                 </section>
 
-                <section class="section-card">
+                <!-- AI CHAT -->
+                <section class="section-card collapsible-section">
                     <div class="section-header">
-                        <h3>Recent Activity</h3>
-                        <button id="export-logs-btn" class="btn-secondary btn-small">📥 Export</button>
+                        <h3>💬 KS1 Assistant</h3>
+                        <button class="toggle-btn 3d-btn" data-target="chat-content">
+                            <span class="btn-text">View Chat</span>
+                            <span class="btn-icon">▼</span>
+                        </button>
                     </div>
-                    <div class="log-container" id="activity-log"></div>
+                    <div id="chat-content" class="collapsible-content hidden">
+                        <div class="chat-header-row">
+                            <div class="chat-actions">
+                                <button id="new-conversation-btn" class="btn-secondary btn-small">➕ New Chat</button>
+                                <button id="toggle-history-btn" class="btn-secondary btn-small">📜 History</button>
+                            </div>
+                        </div>
+                        <div id="conversation-history" class="conversation-history hidden">
+                            <div class="history-header"><h4>💬 Conversation History</h4><button id="clear-all-history-btn" class="btn-danger btn-small">Clear All</button></div>
+                            <div id="history-list" class="history-list"><p class="history-empty">No conversations yet. Start chatting!</p></div>
+                        </div>
+                        <div id="current-conversation-title" class="current-conversation-title hidden"><span>💬 </span><span id="current-title-text"></span></div>
+                        <div class="chat-window" id="chat-window"><div class="chat-message bot">System initialized. Awaiting your command, King Solomon.</div></div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" class="chat-input" placeholder="Ask the KS1 Assistant...">
+                            <button id="chat-send" class="btn-primary">Send</button>
+                        </div>
+                    </div>
                 </section>
+
+                <!-- ACTIVITY LOG -->
+                <section class="section-card collapsible-section">
+                    <div class="section-header">
+                        <h3>📝 Recent Activity</h3>
+                        <div class="section-actions">
+                            <button id="export-logs-btn" class="btn-secondary btn-small">📥 Export</button>
+                            <button class="toggle-btn 3d-btn" data-target="logs-content">
+                                <span class="btn-text">View Activity</span>
+                                <span class="btn-icon">▼</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="logs-content" class="collapsible-content hidden">
+                        <div class="log-container" id="activity-log"></div>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
 
-    <!-- TASK MODAL -->
+    <!-- MODALS -->
     <div id="task-modal" class="modal">
         <div class="modal-content task-modal-content">
             <div class="modal-header"><h2>🤖 Assign Task to <span id="task-agent-name">Agent</span></h2><button class="modal-close" id="close-task-modal">&times;</button></div>
@@ -256,7 +350,6 @@
         </div>
     </div>
 
-    <!-- ✅ ENHANCED KNOWLEDGE MODAL -->
     <div id="knowledge-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h2>Add Knowledge Article</h2><button class="modal-close" id="close-knowledge-modal">&times;</button></div>
@@ -287,7 +380,6 @@
         </div>
     </div>
 
-    <!-- ✅ ENHANCED KNOWLEDGE VIEW MODAL -->
     <div id="knowledge-view-modal" class="modal">
         <div class="modal-content view-modal-content">
             <div class="modal-header">
@@ -313,6 +405,6 @@
         </div>
     </div>
 
-    <script src="js/app.js?v=3"></script>
+    <script src="js/app.js?v=5"></script>
 </body>
 </html>
