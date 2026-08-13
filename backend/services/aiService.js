@@ -5,20 +5,24 @@ const Agent = require('../models/Agent');
 
 const buildKnowledgeContext = async () => {
     try {
+        // ✅ OPTIMIZED: Fetch top 5 most relevant/used items to prevent payload overload
         const [articles, projects, agents] = await Promise.all([
-            Knowledge.find().sort({ createdAt: -1 }).limit(10),
-            Project.find().sort({ createdAt: -1 }).limit(10),
-            Agent.find().sort({ createdAt: -1 }).limit(10)
+            Knowledge.find().sort({ usageCount: -1, isVerified: -1, createdAt: -1 }).limit(5),
+            Project.find().sort({ createdAt: -1 }).limit(5),
+            Agent.find().sort({ createdAt: -1 }).limit(5)
         ]);
 
         let context = '';
 
         if (articles.length > 0) {
-            context += '\n\n=== KS1EGF KNOWLEDGE BASE ARTICLES ===\n';
+            context += '\n\n=== KS1EGF KNOWLEDGE BASE (Optimized Context) ===\n';
             articles.forEach((article, index) => {
-                context += `\nArticle ${index + 1}: "${article.title}"\n`;
+                context += `\n[Article ${index + 1}] "${article.title}" ${article.isVerified ? '(✅ VERIFIED TRUTH)' : ''}\n`;
                 context += `Category: ${article.category}\n`;
-                context += `Content: ${article.content}\n`;
+                context += `Tags: ${article.tags.join(', ')}\n`;
+                context += `Summary: ${article.summary}\n`;
+                // ✅ Only send first 400 characters of content to save payload size
+                context += `Content Snippet: ${article.content.substring(0, 400)}...\n`;
                 context += '---\n';
             });
         }
@@ -26,10 +30,9 @@ const buildKnowledgeContext = async () => {
         if (projects.length > 0) {
             context += '\n\n=== KS1EGF ACTIVE PROJECTS ===\n';
             projects.forEach((project, index) => {
-                context += `\nProject ${index + 1}: ${project.name}\n`;
-                context += `Description: ${project.description}\n`;
+                context += `\n[Project ${index + 1}] ${project.name} (${project.status})\n`;
                 context += `Category: ${project.category}\n`;
-                context += `Status: ${project.status}\n`;
+                context += `Description: ${project.description}\n`;
                 context += '---\n';
             });
         }
@@ -37,7 +40,7 @@ const buildKnowledgeContext = async () => {
         if (agents.length > 0) {
             context += '\n\n=== KS1EGF AI WORKFORCE ===\n';
             agents.forEach((agent, index) => {
-                context += `\nAgent ${index + 1}: ${agent.name}\n`;
+                context += `\n[Agent ${index + 1}] ${agent.name}\n`;
                 context += `Role: ${agent.role}\n`;
                 context += `Status: ${agent.status}\n`;
                 context += '---\n';
@@ -63,9 +66,9 @@ const callGroq = async (message) => {
     }
 
     try {
-        console.log('🧠 Building knowledge context from database...');
+        console.log('🧠 Building optimized knowledge context from database...');
         const knowledgeContext = await buildKnowledgeContext();
-        console.log('✅ Knowledge context built successfully');
+        console.log('✅ Knowledge context built successfully (Payload optimized)');
 
         const systemPrompt = `You are the KS1 Assistant, the official AI-powered digital colleague of KS1 Empire Global Foundation (KS1EGF).
 
@@ -80,17 +83,15 @@ Your Personality:
 - Be proud of KS1EGF's mission and achievements
 
 IMPORTANT INSTRUCTIONS:
-- You have access to the KS1EGF Knowledge Base, Projects, and AI Workforce data below
-- When answering questions about KS1EGF, ALWAYS use the provided data
-- If someone asks about a specific project, reference the actual project details
-- If someone asks about AI agents, reference the actual agent roster
-- If someone asks a knowledge question, reference the actual articles
-- If the answer is NOT in the provided data, you may use your general knowledge but clearly state that it's general information
-- Always be helpful and encouraging
+- You have access to the KS1EGF Knowledge Base, Projects, and AI Workforce data below.
+- When answering questions about KS1EGF, ALWAYS use the provided data (Titles, Summaries, Tags, and Snippets).
+- If someone asks about a specific project or topic, reference the actual details provided.
+- If the answer is NOT in the provided data, you may use your general knowledge but clearly state that it's general information.
+- Always be helpful, accurate, and encouraging.
 
 ${knowledgeContext}`;
 
-        console.log('🧠 Calling Groq AI API with knowledge context...');
+        console.log('🧠 Calling Groq AI API with optimized context...');
         
         const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
@@ -127,7 +128,7 @@ ${knowledgeContext}`;
         const data = await response.json();
         
         if (data.choices && data.choices[0] && data.choices[0].message) {
-            console.log('✅ Groq AI response received with knowledge context');
+            console.log('✅ Groq AI response received successfully');
             return {
                 success: true,
                 response: data.choices[0].message.content
