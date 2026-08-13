@@ -10,13 +10,15 @@ connectDB();
 
 const app = express();
 
+// ✅ INCREASED PAYLOAD LIMIT TO PREVENT 413 ERRORS
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.get('/', (req, res) => {
     res.json({ message: 'KS1 Command Center API is Operational', status: 'success' });
@@ -30,7 +32,7 @@ app.use('/api/logs', require('./routes/activityRoutes'));
 app.use('/api/communications', require('./routes/communicationRoutes'));
 app.use('/api/conversations', require('./routes/conversationRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
-app.use('/api/memories', require('./routes/memoryRoutes')); // NEW: Agent Memory System
+app.use('/api/memories', require('./routes/memoryRoutes'));
 app.use('/api/export', require('./routes/exportRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
 
