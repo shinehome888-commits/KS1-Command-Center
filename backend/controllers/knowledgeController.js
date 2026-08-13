@@ -76,12 +76,16 @@ const createKnowledge = async (req, res) => {
 
 const updateKnowledge = async (req, res) => {
     try {
-        const { title, content, category, isVerified } = req.body;
+        const { title, content, category, isVerified, summary, tags, usageCount } = req.body;
+        
         const updateData = {};
-
+        
         if (title !== undefined) updateData.title = title;
         if (category !== undefined) updateData.category = category;
         if (isVerified !== undefined) updateData.isVerified = isVerified;
+        if (summary !== undefined) updateData.summary = summary;
+        if (tags !== undefined) updateData.tags = tags;
+        if (usageCount !== undefined) updateData.usageCount = usageCount;
 
         if (content !== undefined) {
             updateData.content = content;
@@ -92,8 +96,8 @@ const updateKnowledge = async (req, res) => {
 
         const knowledge = await Knowledge.findByIdAndUpdate(
             req.params.id,
-            updateData,
-            { new: true, runValidators: true }
+            { $set: updateData },
+            { new: true }
         );
 
         if (!knowledge) {
