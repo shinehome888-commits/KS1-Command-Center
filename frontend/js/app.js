@@ -423,7 +423,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading projects:', error); }
     }
 
-    // ✅ KNOWLEDGE WITH SEARCH & FILTERS
     async function loadKnowledge() {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
@@ -677,8 +676,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error:', error); }
     });
 
+    // ✅ FIXED: Article verification toggle
     document.getElementById('toggle-verify-btn')?.addEventListener('click', async () => {
         if (!currentViewArticleId) return;
+        
+        const toggleBtn = document.getElementById('toggle-verify-btn');
+        const originalText = toggleBtn.textContent;
+        toggleBtn.textContent = '⏳ Updating...';
+        toggleBtn.disabled = true;
         
         try {
             const getRes = await fetch(`${API_URL}/knowledge`);
@@ -687,31 +692,49 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!article) {
                 alert('❌ Article not found');
+                toggleBtn.textContent = originalText;
+                toggleBtn.disabled = false;
                 return;
             }
             
             const newVerifiedState = !article.isVerified;
+            
+            console.log('🔄 Toggling verification:', article.title, 'to', newVerifiedState);
             
             const res = await fetch(`${API_URL}/knowledge/${currentViewArticleId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ isVerified: newVerifiedState })
             });
+            
             const result = await res.json();
+            console.log('✅ Update response:', result);
             
             if (result.success) {
-                const statusText = newVerifiedState ? '✅ Verified as Absolute Truth' : '❌ Unverified';
+                const statusText = newVerifiedState 
+                    ? '✅ Verified as Absolute Truth' 
+                    : '❌ Unverified';
                 alert(statusText);
+                
                 openArticleView(result.data);
                 loadKnowledge();
                 loadKnowledgeInsights();
-                await createLog(userName, `${newVerifiedState ? 'Verified' : 'Unverified'} knowledge article: "${article.title}"`, 'Success');
+                loadStats();
+                await createLog(
+                    userName, 
+                    `${newVerifiedState ? '✅ Verified' : '❌ Unverified'} knowledge article: "${article.title}"`, 
+                    'Success'
+                );
             } else {
                 alert('❌ ' + result.message);
+                toggleBtn.textContent = originalText;
             }
         } catch (error) { 
             console.error('❌ Error:', error); 
-            alert('❌ Network error');
+            alert('❌ Network error: ' + error.message);
+            toggleBtn.textContent = originalText;
+        } finally {
+            toggleBtn.disabled = false;
         }
     });
 
@@ -744,6 +767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ actor, action, status })
             });
             loadActivityLog();
+            loadStats();
         } catch (error) { console.error('❌ Error creating log:', error); }
     }
 
@@ -1215,7 +1239,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('refresh-tasks-btn')?.addEventListener('click', () => {
         loadTasks();
     });
-        // ========================================
+
+    // ========================================
     // CONVERSATION HISTORY
     // ========================================
     async function loadConversationHistory() {
