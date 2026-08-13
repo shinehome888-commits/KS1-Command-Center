@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let agentsData = [];
     let memoryStats = {};
     let currentViewArticleId = null;
+    let allKnowledgeArticles = [];
 
     if (token) {
         authView.classList.add('hidden');
@@ -54,6 +55,35 @@ document.addEventListener('DOMContentLoaded', () => {
         authView.classList.remove('hidden');
         dashboardView.classList.add('hidden');
     }
+
+    // ========================================
+    // COLLAPSIBLE SECTIONS
+    // ========================================
+    document.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+            
+            if (targetContent) {
+                targetContent.classList.toggle('hidden');
+                btn.classList.toggle('active');
+                
+                const btnText = btn.querySelector('.btn-text');
+                if (btnText) {
+                    const currentText = btnText.textContent;
+                    if (currentText.startsWith('View')) {
+                        btnText.textContent = currentText.replace('View', 'Hide');
+                    } else {
+                        btnText.textContent = currentText.replace('Hide', 'View');
+                    }
+                }
+                
+                if (targetId === 'charts-content' && !targetContent.classList.contains('hidden')) {
+                    setTimeout(renderCharts, 100);
+                }
+            }
+        });
+    });
 
     // ========================================
     // AUTHENTICATION
@@ -393,52 +423,103 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading projects:', error); }
     }
 
-    // ✅ SUPERPOWER: ENRICHED KNOWLEDGE LOADING
+    // ✅ KNOWLEDGE WITH SEARCH & FILTERS
     async function loadKnowledge() {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
             const result = await response.json();
-            const container = document.getElementById('knowledge-grid');
             
-            if (result.success && result.data.length > 0) {
-                container.innerHTML = '';
-                result.data.forEach(article => {
-                    const date = new Date(article.createdAt).toLocaleDateString();
-                    const tags = article.tags || [];
-                    const tagsHtml = tags.length > 0 
-                        ? `<div class="knowledge-tags">${tags.map(tag => `<span class="knowledge-tag">#${tag}</span>`).join('')}</div>` 
-                        : '';
-                    const summaryHtml = article.summary 
-                        ? `<p class="knowledge-summary">${article.summary}</p>` 
-                        : '';
-                    const verifiedBadge = article.isVerified 
-                        ? `<div class="verified-badge">✅ Verified</div>` 
-                        : '';
-                    const usageBadge = article.usageCount > 0 
-                        ? `<div class="knowledge-usage-badge">🔥 Used ${article.usageCount}x by AI</div>` 
-                        : '';
-                    
-                    const card = document.createElement('div');
-                    card.className = 'card knowledge-card';
-                    card.innerHTML = `
-                        ${verifiedBadge}
-                        <button class="delete-btn" onclick="event.stopPropagation(); deleteKnowledge('${article._id}')">Delete</button>
-                        <h4>${article.title}</h4>
-                        <p class="meta">${article.category} • ${date}</p>
-                        ${tagsHtml}
-                        ${summaryHtml}
-                        ${usageBadge}
-                    `;
-                    card.addEventListener('click', () => openArticleView(article));
-                    container.appendChild(card);
-                });
-            } else {
-                container.innerHTML = '<p class="empty-state">No knowledge articles yet. Add your first one!</p>';
+            if (result.success) {
+                allKnowledgeArticles = result.data;
+                renderFilteredKnowledge();
             }
         } catch (error) { console.error('❌ Error loading knowledge:', error); }
     }
 
-    // ✅ NEW: KNOWLEDGE INSIGHTS DASHBOARD
+    function renderFilteredKnowledge() {
+        const searchTerm = document.getElementById('knowledge-search')?.value.toLowerCase() || '';
+        const categoryFilter = document.getElementById('knowledge-category-filter')?.value || '';
+        const verifiedFilter = document.getElementById('knowledge-verified-filter')?.value || '';
+        const sortBy = document.getElementById('knowledge-sort')?.value || 'newest';
+
+        let filtered = allKnowledgeArticles.filter(article => {
+            const matchesSearch = searchTerm === '' || 
+                article.title.toLowerCase().includes(searchTerm) ||
+                article.content.toLowerCase().includes(searchTerm) ||
+                (article.tags && article.tags.some(tag => tag.toLowerCase().includes(searchTerm))) ||
+                (article.summary && article.summary.toLowerCase().includes(searchTerm));
+
+            const matchesCategory = categoryFilter === '' || article.category === categoryFilter;
+
+            const matchesVerified = verifiedFilter === '' ||
+                (verifiedFilter === 'verified' && article.isVerified) ||
+                (verifiedFilter === 'unverified' && !article.isVerified);
+
+            return matchesSearch && matchesCategory && matchesVerified;
+        });
+
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'oldest': return new Date(a.createdAt) - new Date(b.createdAt);
+                case 'most-used': return (b.usageCount || 0) - (a.usageCount || 0);
+                case 'title': return a.title.localeCompare(b.title);
+                case 'newest':
+                default: return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+        });
+
+        const container = document.getElementById('knowledge-grid');
+        if (!container) return;
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="no-results">🔍 No articles match your search criteria</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        filtered.forEach(article => {
+            const date = new Date(article.createdAt).toLocaleDateString();
+            const tags = article.tags || [];
+            const tagsHtml = tags.length > 0 
+                ? `<div class="knowledge-tags">${tags.map(tag => `<span class="knowledge-tag">#${tag}</span>`).join('')}</div>` 
+                : '';
+            const summaryHtml = article.summary 
+                ? `<p class="knowledge-summary">${highlightText(article.summary, searchTerm)}</p>` 
+                : '';
+            const verifiedBadge = article.isVerified 
+                ? `<div class="verified-badge">✅ Verified</div>` 
+                : '';
+            const usageBadge = article.usageCount > 0 
+                ? `<div class="knowledge-usage-badge">🔥 Used ${article.usageCount}x by AI</div>` 
+                : '';
+            
+            const card = document.createElement('div');
+            card.className = 'card knowledge-card';
+            card.innerHTML = `
+                ${verifiedBadge}
+                <button class="delete-btn" onclick="event.stopPropagation(); deleteKnowledge('${article._id}')">Delete</button>
+                <h4>${highlightText(article.title, searchTerm)}</h4>
+                <p class="meta">${article.category} • ${date}</p>
+                ${tagsHtml}
+                ${summaryHtml}
+                ${usageBadge}
+            `;
+            card.addEventListener('click', () => openArticleView(article));
+            container.appendChild(card);
+        });
+    }
+
+    function highlightText(text, searchTerm) {
+        if (!searchTerm || !text) return text;
+        const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<span class="search-highlight">$1</span>');
+    }
+
+    document.getElementById('knowledge-search')?.addEventListener('input', renderFilteredKnowledge);
+    document.getElementById('knowledge-category-filter')?.addEventListener('change', renderFilteredKnowledge);
+    document.getElementById('knowledge-verified-filter')?.addEventListener('change', renderFilteredKnowledge);
+    document.getElementById('knowledge-sort')?.addEventListener('change', renderFilteredKnowledge);
+
     async function loadKnowledgeInsights() {
         try {
             const response = await fetch(`${API_URL}/knowledge/insights`);
@@ -448,9 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 animateCounter('insight-verified', result.data.verifiedArticles);
                 animateCounter('insight-usage', result.data.totalUsage);
             }
-        } catch (error) { 
-            console.error('❌ Error loading insights:', error); 
-        }
+        } catch (error) { console.error('❌ Error loading insights:', error); }
     }
 
     async function loadCommunications() {
@@ -528,7 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ✅ SUPERPOWER: ENHANCED ARTICLE VIEW
     function openArticleView(article) {
         currentViewArticleId = article._id;
         const date = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -538,7 +616,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('view-article-date').textContent = `Published: ${date}`;
         document.getElementById('view-article-content').textContent = article.content;
         
-        // Summary
         const summaryBox = document.getElementById('view-article-summary');
         if (article.summary) {
             summaryBox.textContent = article.summary;
@@ -547,7 +624,6 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryBox.style.display = 'none';
         }
         
-        // Tags
         const tagsBox = document.getElementById('view-article-tags');
         const tags = article.tags || [];
         if (tags.length > 0) {
@@ -557,7 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tagsBox.style.display = 'none';
         }
         
-        // Usage
         const usageBox = document.getElementById('view-article-usage');
         if (article.usageCount > 0) {
             usageBox.textContent = `🔥 Referenced ${article.usageCount} times by AI`;
@@ -566,7 +641,6 @@ document.addEventListener('DOMContentLoaded', () => {
             usageBox.style.display = 'none';
         }
         
-        // Verified badge
         const verifiedBox = document.getElementById('view-article-verified-badge');
         if (article.isVerified) {
             verifiedBox.innerHTML = '<div class="article-verified-box">✅ Verified by King Solomon — Absolute Truth</div>';
@@ -574,7 +648,6 @@ document.addEventListener('DOMContentLoaded', () => {
             verifiedBox.innerHTML = '';
         }
         
-        // Update toggle verify button text
         const toggleBtn = document.getElementById('toggle-verify-btn');
         if (toggleBtn) {
             toggleBtn.textContent = article.isVerified ? '❌ Unverify' : '✅ Mark as Verified';
@@ -604,12 +677,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error:', error); }
     });
 
-    // ✅ NEW: TOGGLE VERIFIED BUTTON
     document.getElementById('toggle-verify-btn')?.addEventListener('click', async () => {
         if (!currentViewArticleId) return;
         
         try {
-            // First get current article state
             const getRes = await fetch(`${API_URL}/knowledge`);
             const getResult = await getRes.json();
             const article = getResult.data.find(a => a._id === currentViewArticleId);
@@ -631,8 +702,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 const statusText = newVerifiedState ? '✅ Verified as Absolute Truth' : '❌ Unverified';
                 alert(statusText);
-                
-                // Refresh UI
                 openArticleView(result.data);
                 loadKnowledge();
                 loadKnowledgeInsights();
@@ -1146,8 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('refresh-tasks-btn')?.addEventListener('click', () => {
         loadTasks();
     });
-
-    // ========================================
+        // ========================================
     // CONVERSATION HISTORY
     // ========================================
     async function loadConversationHistory() {
