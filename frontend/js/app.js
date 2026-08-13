@@ -37,14 +37,18 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentConversationId = null;
     let conversationHistory = [];
     let agentsData = [];
+    let memoryStats = {};
+    let currentViewArticleId = null;
 
     if (token) {
         authView.classList.add('hidden');
         dashboardView.classList.remove('hidden');
         if (userNameDisplay) userNameDisplay.textContent = userName;
+        loadMemoryStats();
         loadAgents(); loadProjects(); loadKnowledge(); loadCommunications(); 
         loadActivityLog(); loadStats(); loadTasks();
         loadConversationHistory();
+        loadKnowledgeInsights();
         setTimeout(renderCharts, 500);
     } else {
         authView.classList.remove('hidden');
@@ -354,9 +358,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h4>${agent.name}</h4>
                         <p class="role">${agent.role}</p>
                         <span class="status-text">${agent.status}</span>
+                        ${renderMemoryIndicator(agent)}
                         <span class="assign-task-hint">🎯 Click to assign task</span>
                     `;
-                    card.addEventListener('click', () => openTaskModal(agent));
+                    card.addEventListener('click', (e) => {
+                        if (!e.target.closest('.memory-indicator')) {
+                            openTaskModal(agent);
+                        }
+                    });
                     container.appendChild(card);
                 });
             }
@@ -384,27 +393,64 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { console.error('❌ Error loading projects:', error); }
     }
 
+    // ✅ SUPERPOWER: ENRICHED KNOWLEDGE LOADING
     async function loadKnowledge() {
         try {
             const response = await fetch(`${API_URL}/knowledge`);
             const result = await response.json();
             const container = document.getElementById('knowledge-grid');
+            
             if (result.success && result.data.length > 0) {
                 container.innerHTML = '';
                 result.data.forEach(article => {
                     const date = new Date(article.createdAt).toLocaleDateString();
-                    const snippet = article.content.substring(0, 120) + (article.content.length > 120 ? '...' : '');
+                    const tags = article.tags || [];
+                    const tagsHtml = tags.length > 0 
+                        ? `<div class="knowledge-tags">${tags.map(tag => `<span class="knowledge-tag">#${tag}</span>`).join('')}</div>` 
+                        : '';
+                    const summaryHtml = article.summary 
+                        ? `<p class="knowledge-summary">${article.summary}</p>` 
+                        : '';
+                    const verifiedBadge = article.isVerified 
+                        ? `<div class="verified-badge">✅ Verified</div>` 
+                        : '';
+                    const usageBadge = article.usageCount > 0 
+                        ? `<div class="knowledge-usage-badge">🔥 Used ${article.usageCount}x by AI</div>` 
+                        : '';
+                    
                     const card = document.createElement('div');
                     card.className = 'card knowledge-card';
                     card.innerHTML = `
+                        ${verifiedBadge}
                         <button class="delete-btn" onclick="event.stopPropagation(); deleteKnowledge('${article._id}')">Delete</button>
-                        <h4>${article.title}</h4><p class="meta">${article.category} • ${date}</p><p class="snippet">${snippet}</p>
+                        <h4>${article.title}</h4>
+                        <p class="meta">${article.category} • ${date}</p>
+                        ${tagsHtml}
+                        ${summaryHtml}
+                        ${usageBadge}
                     `;
                     card.addEventListener('click', () => openArticleView(article));
                     container.appendChild(card);
                 });
+            } else {
+                container.innerHTML = '<p class="empty-state">No knowledge articles yet. Add your first one!</p>';
             }
         } catch (error) { console.error('❌ Error loading knowledge:', error); }
+    }
+
+    // ✅ NEW: KNOWLEDGE INSIGHTS DASHBOARD
+    async function loadKnowledgeInsights() {
+        try {
+            const response = await fetch(`${API_URL}/knowledge/insights`);
+            const result = await response.json();
+            if (result.success) {
+                animateCounter('insight-total', result.data.totalArticles);
+                animateCounter('insight-verified', result.data.verifiedArticles);
+                animateCounter('insight-usage', result.data.totalUsage);
+            }
+        } catch (error) { 
+            console.error('❌ Error loading insights:', error); 
+        }
     }
 
     async function loadCommunications() {
@@ -482,30 +528,122 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    let currentViewArticleId = null;
+    // ✅ SUPERPOWER: ENHANCED ARTICLE VIEW
     function openArticleView(article) {
         currentViewArticleId = article._id;
         const date = new Date(article.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        
         document.getElementById('view-article-title').textContent = article.title;
         document.getElementById('view-article-category').textContent = article.category;
         document.getElementById('view-article-date').textContent = `Published: ${date}`;
         document.getElementById('view-article-content').textContent = article.content;
+        
+        // Summary
+        const summaryBox = document.getElementById('view-article-summary');
+        if (article.summary) {
+            summaryBox.textContent = article.summary;
+            summaryBox.style.display = 'block';
+        } else {
+            summaryBox.style.display = 'none';
+        }
+        
+        // Tags
+        const tagsBox = document.getElementById('view-article-tags');
+        const tags = article.tags || [];
+        if (tags.length > 0) {
+            tagsBox.innerHTML = tags.map(tag => `<span class="knowledge-tag">#${tag}</span>`).join('');
+            tagsBox.style.display = 'flex';
+        } else {
+            tagsBox.style.display = 'none';
+        }
+        
+        // Usage
+        const usageBox = document.getElementById('view-article-usage');
+        if (article.usageCount > 0) {
+            usageBox.textContent = `🔥 Referenced ${article.usageCount} times by AI`;
+            usageBox.style.display = 'inline-flex';
+        } else {
+            usageBox.style.display = 'none';
+        }
+        
+        // Verified badge
+        const verifiedBox = document.getElementById('view-article-verified-badge');
+        if (article.isVerified) {
+            verifiedBox.innerHTML = '<div class="article-verified-box">✅ Verified by King Solomon — Absolute Truth</div>';
+        } else {
+            verifiedBox.innerHTML = '';
+        }
+        
+        // Update toggle verify button text
+        const toggleBtn = document.getElementById('toggle-verify-btn');
+        if (toggleBtn) {
+            toggleBtn.textContent = article.isVerified ? '❌ Unverify' : '✅ Mark as Verified';
+        }
+        
         document.getElementById('knowledge-view-modal').style.display = 'block';
     }
     
     const viewModal = document.getElementById('knowledge-view-modal');
     document.getElementById('close-view-modal')?.addEventListener('click', () => { viewModal.style.display = 'none'; currentViewArticleId = null; });
     document.getElementById('close-view-btn')?.addEventListener('click', () => { viewModal.style.display = 'none'; currentViewArticleId = null; });
+    
     document.getElementById('delete-view-article-btn')?.addEventListener('click', async () => {
         if (!currentViewArticleId || !confirm('Delete this article?')) return;
         try {
             const res = await fetch(`${API_URL}/knowledge/${currentViewArticleId}`, { method: 'DELETE' });
             const result = await res.json();
             if (result.success) {
-                alert('✅ Deleted!'); viewModal.style.display = 'none'; currentViewArticleId = null;
-                loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success');
+                alert('✅ Deleted!'); 
+                viewModal.style.display = 'none'; 
+                currentViewArticleId = null;
+                loadKnowledge(); 
+                loadKnowledgeInsights();
+                loadStats();
+                await createLog(userName, 'Deleted a knowledge article', 'Success');
             }
         } catch (error) { console.error('❌ Error:', error); }
+    });
+
+    // ✅ NEW: TOGGLE VERIFIED BUTTON
+    document.getElementById('toggle-verify-btn')?.addEventListener('click', async () => {
+        if (!currentViewArticleId) return;
+        
+        try {
+            // First get current article state
+            const getRes = await fetch(`${API_URL}/knowledge`);
+            const getResult = await getRes.json();
+            const article = getResult.data.find(a => a._id === currentViewArticleId);
+            
+            if (!article) {
+                alert('❌ Article not found');
+                return;
+            }
+            
+            const newVerifiedState = !article.isVerified;
+            
+            const res = await fetch(`${API_URL}/knowledge/${currentViewArticleId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isVerified: newVerifiedState })
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                const statusText = newVerifiedState ? '✅ Verified as Absolute Truth' : '❌ Unverified';
+                alert(statusText);
+                
+                // Refresh UI
+                openArticleView(result.data);
+                loadKnowledge();
+                loadKnowledgeInsights();
+                await createLog(userName, `${newVerifiedState ? 'Verified' : 'Unverified'} knowledge article: "${article.title}"`, 'Success');
+            } else {
+                alert('❌ ' + result.message);
+            }
+        } catch (error) { 
+            console.error('❌ Error:', error); 
+            alert('❌ Network error');
+        }
     });
 
     async function loadActivityLog() {
@@ -541,11 +679,169 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ========================================
+    // AGENT MEMORY SYSTEM
+    // ========================================
+    async function loadMemoryStats() {
+        try {
+            const response = await fetch(`${API_URL}/memories/stats`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                memoryStats = {};
+                result.data.forEach(stat => {
+                    memoryStats[stat._id] = stat;
+                });
+            }
+        } catch (error) {
+            console.error('❌ Error loading memory stats:', error);
+        }
+    }
+
+    async function loadAgentMemories(agentId) {
+        try {
+            const response = await fetch(`${API_URL}/memories/agent/${agentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            return result.success ? result.data : [];
+        } catch (error) {
+            console.error('❌ Error loading agent memories:', error);
+            return [];
+        }
+    }
+
+    function getMemoryLevel(totalMemories) {
+        if (totalMemories >= 30) return { level: 'Expert', class: 'expert' };
+        if (totalMemories >= 16) return { level: 'Advanced', class: 'advanced' };
+        if (totalMemories >= 6) return { level: 'Experienced', class: 'experienced' };
+        return { level: 'Novice', class: 'novice' };
+    }
+
+    function renderMemoryIndicator(agent) {
+        const stats = memoryStats[agent._id];
+        const totalMemories = stats ? stats.totalMemories : 0;
+        const { level, class: levelClass } = getMemoryLevel(totalMemories);
+        
+        return `
+            <div class="memory-indicator" onclick="openAgentMemory('${agent._id}', '${agent.name}', event)">
+                <span class="memory-icon">🧠</span>
+                <span class="memory-count">${totalMemories} memories</span>
+                <span class="memory-level ${levelClass}">${level}</span>
+            </div>
+        `;
+    }
+
+    window.openAgentMemory = async (agentId, agentName, event) => {
+        if (event) event.stopPropagation();
+        
+        const modal = document.getElementById('agent-memory-modal');
+        document.getElementById('memory-agent-name').textContent = agentName;
+        
+        const statsContainer = document.getElementById('memory-agent-stats');
+        const listContainer = document.getElementById('memory-list');
+        
+        statsContainer.innerHTML = '<div class="task-loading"><div class="task-loading-spinner"></div></div>';
+        listContainer.innerHTML = '<div class="task-loading"><div class="task-loading-spinner"></div></div>';
+        
+        modal.style.display = 'block';
+        
+        const stats = memoryStats[agentId];
+        if (stats) {
+            const { level, class: levelClass } = getMemoryLevel(stats.totalMemories);
+            const successRate = stats.totalMemories > 0 
+                ? Math.round((stats.completedTasks / stats.totalMemories) * 100) 
+                : 0;
+            
+            statsContainer.innerHTML = `
+                <div class="memory-stat"><div class="memory-stat-value">${stats.totalMemories}</div><div class="memory-stat-label">Total Memories</div></div>
+                <div class="memory-stat"><div class="memory-stat-value">${successRate}%</div><div class="memory-stat-label">Success Rate</div></div>
+                <div class="memory-stat"><div class="memory-stat-value memory-level ${levelClass}" style="padding: 8px 12px; font-size: 1rem;">${level}</div><div class="memory-stat-label">Experience Level</div></div>
+            `;
+        } else {
+            statsContainer.innerHTML = `
+                <div class="memory-stat"><div class="memory-stat-value">0</div><div class="memory-stat-label">Total Memories</div></div>
+                <div class="memory-stat"><div class="memory-stat-value">0%</div><div class="memory-stat-label">Success Rate</div></div>
+                <div class="memory-stat"><div class="memory-stat-value memory-level novice" style="padding: 8px 12px; font-size: 1rem;">Novice</div><div class="memory-stat-label">Experience Level</div></div>
+            `;
+        }
+        
+        const memories = await loadAgentMemories(agentId);
+        
+        if (memories.length > 0) {
+            listContainer.innerHTML = '';
+            memories.forEach(memory => {
+                const item = document.createElement('div');
+                item.className = 'memory-item';
+                const date = new Date(memory.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                item.innerHTML = `
+                    <div class="memory-item-header">
+                        <div class="memory-item-title">${memory.taskTitle}</div>
+                        <div class="memory-item-badges">
+                            <span class="memory-status-badge ${memory.status.toLowerCase()}">${memory.status}</span>
+                            <span class="memory-category-badge">${memory.category}</span>
+                        </div>
+                    </div>
+                    <div class="memory-item-description">${memory.taskDescription}</div>
+                    <div class="memory-item-footer">
+                        <div class="memory-keywords">
+                            ${memory.keywords.slice(0, 5).map(k => `<span class="memory-keyword">${k}</span>`).join('')}
+                        </div>
+                        <div class="memory-date">${date}</div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        } else {
+            listContainer.innerHTML = `<div class="memory-empty"><div class="memory-empty-icon">🧠</div><p>No memories yet. Assign tasks to build experience!</p></div>`;
+        }
+        
+        modal.dataset.currentAgentId = agentId;
+    };
+
+    document.getElementById('close-memory-modal')?.addEventListener('click', () => {
+        document.getElementById('agent-memory-modal').style.display = 'none';
+    });
+
+    document.getElementById('close-memory-btn')?.addEventListener('click', () => {
+        document.getElementById('agent-memory-modal').style.display = 'none';
+    });
+
+    document.getElementById('clear-agent-memories-btn')?.addEventListener('click', async () => {
+        const modal = document.getElementById('agent-memory-modal');
+        const agentId = modal.dataset.currentAgentId;
+        const agentName = document.getElementById('memory-agent-name').textContent;
+        
+        if (!confirm(`Clear ALL memories for ${agentName}? This cannot be undone!`)) return;
+        
+        try {
+            const response = await fetch(`${API_URL}/memories/agent/${agentId}/clear`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`✅ Cleared ${result.data.deletedCount} memories for ${agentName}`);
+                modal.style.display = 'none';
+                await loadMemoryStats();
+                loadAgents();
+                await createLog(userName, `Cleared memories for ${agentName}`, 'Success');
+            }
+        } catch (error) {
+            console.error('❌ Error clearing memories:', error);
+            alert('❌ Failed to clear memories');
+        }
+    });
+
+    // ========================================
     // TASK ASSIGNMENT SYSTEM
     // ========================================
     let currentTaskAgent = null;
 
-    function openTaskModal(agent) {
+    async function openTaskModal(agent) {
         currentTaskAgent = agent;
         const modal = document.getElementById('task-modal');
         document.getElementById('task-agent-name').textContent = agent.name;
@@ -559,6 +855,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${agent.role} • Status: ${agent.status}</p>
             </div>
         `;
+
+        const memoryPreview = document.getElementById('agent-memory-preview');
+        const stats = memoryStats[agent._id];
+        const totalMemories = stats ? stats.totalMemories : 0;
+        const { level, class: levelClass } = getMemoryLevel(totalMemories);
+        
+        memoryPreview.innerHTML = `
+            <div class="memory-preview-header">
+                <h5>🧠 Agent Memory</h5>
+                <span class="memory-preview-count">${totalMemories} memories • <span class="memory-level ${levelClass}" style="padding: 2px 8px;">${level}</span></span>
+            </div>
+            <div class="memory-preview-list" id="memory-preview-list">
+                <div class="memory-preview-item"><div class="memory-title">Loading recent memories...</div></div>
+            </div>
+        `;
+
+        const memories = await loadAgentMemories(agent._id);
+        const previewList = document.getElementById('memory-preview-list');
+        
+        if (memories.length > 0) {
+            previewList.innerHTML = '';
+            memories.slice(0, 3).forEach(memory => {
+                const item = document.createElement('div');
+                item.className = 'memory-preview-item';
+                const date = new Date(memory.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                item.innerHTML = `
+                    <div class="memory-title">${memory.status === 'Completed' ? '✅' : '❌'} ${memory.taskTitle}</div>
+                    <div class="memory-date">${date} • ${memory.category}</div>
+                `;
+                previewList.appendChild(item);
+            });
+        } else {
+            previewList.innerHTML = '<div class="memory-preview-item"><div class="memory-title">No memories yet - fresh agent!</div></div>';
+        }
 
         loadTaskExamples(agent.role);
 
@@ -655,14 +985,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 taskModal.style.display = 'none';
                 currentTaskAgent = null;
                 
-                showTaskResult(result.data);
+                showTaskResult(result.data, result.memoryUsed || 0);
                 
+                await loadMemoryStats();
                 loadTasks();
                 loadAgents();
                 loadStats();
                 loadActivityLog();
                 
-                alert(`✅ Task assigned to ${result.data.agentName} and executed!`);
+                const memoryMsg = result.memoryUsed > 0 
+                    ? ` (referenced ${result.memoryUsed} past memories!)` 
+                    : '';
+                alert(`✅ Task assigned to ${result.data.agentName} and executed${memoryMsg}`);
             } else {
                 alert('❌ ' + result.message);
             }
@@ -742,7 +1076,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 const task = result.data.find(t => t._id === taskId);
                 if (task) {
-                    showTaskResult(task);
+                    showTaskResult(task, 0);
                 }
             }
         } catch (error) {
@@ -750,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    function showTaskResult(task) {
+    function showTaskResult(task, memoryUsed = 0) {
         const modal = document.getElementById('task-result-modal');
         const content = document.getElementById('task-result-content');
         
@@ -758,22 +1092,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const createdDate = new Date(task.createdAt).toLocaleString();
         const completedDate = task.completedAt ? new Date(task.completedAt).toLocaleString() : 'In progress';
         
+        const memoryIndicator = memoryUsed > 0 
+            ? `<div class="memory-used-indicator"><span class="memory-used-icon">🧠</span><span>Agent referenced <strong>${memoryUsed}</strong> past memories</span></div>`
+            : '';
+        
         content.innerHTML = `
             <div class="task-result-header">
                 <h4>${task.title}</h4>
                 <p>🤖 ${task.agentName} • ${task.agentRole}</p>
-                <p style="margin-top: 8px; font-size: 0.8rem;">
-                    Created: ${createdDate} | Completed: ${completedDate}
-                </p>
+                <p style="margin-top: 8px; font-size: 0.8rem;">Created: ${createdDate} | Completed: ${completedDate}</p>
                 <p style="margin-top: 5px;">
                     <span class="task-status-badge ${statusClass}">${task.status}</span>
                     <span class="task-priority-badge ${task.priority.toLowerCase()}">${task.priority}</span>
                 </p>
             </div>
+            ${memoryIndicator}
             <div style="margin-top: 15px;">
                 <h4 style="color: var(--gold); margin-bottom: 10px;">📋 Task Description:</h4>
                 <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">${task.description}</p>
-                
                 <h4 style="color: var(--gold); margin-bottom: 10px;">✅ Agent's Report:</h4>
                 <div style="color: rgba(255,255,255,0.9); line-height: 1.7; white-space: pre-wrap;">${task.result || 'No result yet'}</div>
             </div>
@@ -1045,7 +1381,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Project deleted!'); loadProjects(); await createLog(userName, 'Deleted a project', 'Success'); setTimeout(renderCharts, 300); }
+            if (result.success) { 
+                alert('✅ Project deleted!'); 
+                loadProjects(); 
+                loadStats();
+                await createLog(userName, 'Deleted a project', 'Success'); 
+                setTimeout(renderCharts, 300); 
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -1054,7 +1396,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/knowledge/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Article deleted!'); loadKnowledge(); await createLog(userName, 'Deleted a knowledge article', 'Success'); }
+            if (result.success) { 
+                alert('✅ Article deleted!'); 
+                loadKnowledge(); 
+                loadKnowledgeInsights();
+                loadStats();
+                await createLog(userName, 'Deleted a knowledge article', 'Success'); 
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -1063,7 +1411,13 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`${API_URL}/communications/${id}`, { method: 'DELETE' });
             const result = await res.json();
-            if (result.success) { alert('✅ Announcement deleted!'); loadCommunications(); await createLog(userName, 'Deleted an announcement', 'Success'); setTimeout(renderCharts, 300); }
+            if (result.success) { 
+                alert('✅ Announcement deleted!'); 
+                loadCommunications(); 
+                loadStats();
+                await createLog(userName, 'Deleted an announcement', 'Success'); 
+                setTimeout(renderCharts, 300); 
+            }
         } catch (error) { console.error('❌ Error:', error); }
     };
 
@@ -1185,10 +1539,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             doc.setFontSize(9);
             data.projects.forEach(project => {
-                if (yPos > 270) {
-                    doc.addPage();
-                    yPos = 20;
-                }
+                if (yPos > 270) { doc.addPage(); yPos = 20; }
                 doc.text(`• ${project.name} (${project.status})`, 25, yPos);
                 yPos += 5;
                 const descLines = doc.splitTextToSize(project.description, 160);
@@ -1197,20 +1548,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             yPos += 10;
-            if (yPos > 250) {
-                doc.addPage();
-                yPos = 20;
-            }
+            if (yPos > 250) { doc.addPage(); yPos = 20; }
             doc.setFontSize(14);
             doc.text('AI Agents', 20, yPos);
             yPos += 10;
             
             doc.setFontSize(9);
             data.agents.forEach(agent => {
-                if (yPos > 270) {
-                    doc.addPage();
-                    yPos = 20;
-                }
+                if (yPos > 270) { doc.addPage(); yPos = 20; }
                 doc.text(`• ${agent.name} - ${agent.role} (${agent.status})`, 25, yPos);
                 yPos += 7;
             });
@@ -1242,19 +1587,31 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn?.addEventListener('click', async () => {
             const payload = payloadFn();
             if (!payload) return;
-            submitBtn.textContent = 'Saving...'; submitBtn.disabled = true;
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '✨ Enriching...';
+            submitBtn.disabled = true;
             try {
                 const res = await fetch(`${API_URL}${endpoint}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                 });
                 const result = await res.json();
                 if (result.success) {
-                    alert(`✅ ${successMsg}`); modal.style.display = 'none'; clearFn();
-                    reloadFn(); await createLog(userName, successMsg, 'Success');
-                    setTimeout(renderCharts, 300);
-                } else { alert('❌ ' + result.message); }
-            } catch (error) { alert('❌ Network error.'); }
-            finally { submitBtn.textContent = btnLabel; submitBtn.disabled = false; }
+                    alert(`✅ ${successMsg}`); 
+                    modal.style.display = 'none'; 
+                    clearFn();
+                    reloadFn(); 
+                    loadKnowledgeInsights();
+                    loadStats();
+                    await createLog(userName, `Added knowledge: "${payload.title}"`, 'Success');
+                } else { 
+                    alert('❌ ' + result.message); 
+                }
+            } catch (error) { 
+                alert('❌ Network error.'); 
+            } finally { 
+                submitBtn.textContent = originalText || btnLabel;
+                submitBtn.disabled = false; 
+            }
         });
     };
 
@@ -1276,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cnt = document.getElementById('knowledge-content').value.trim();
             if (!t || !cnt) { alert('Fill title and content'); return null; }
             return { title: t, category: c, content: cnt };
-        }, 'Knowledge article saved successfully!', loadKnowledge, 'Save Article',
+        }, 'Knowledge article saved and enriched by AI!', loadKnowledge, '✨ Save & Enrich',
         () => { document.getElementById('knowledge-title').value = ''; document.getElementById('knowledge-content').value = ''; }
     );
 
